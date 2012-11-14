@@ -1,0 +1,30 @@
+/* http://projects.opengeo.org/geosilk */
+
+.icon-zoomin { background: url('zoom_in.png') no-repeat !important; }
+.icon-zoomout { background: url('zoom_out.png') no-repeat !important; }
+.icon-zoombox { background: url('zoom.png') no-repeat !important; }
+.icon-maxextent { background: url('arrow_out.png') no-repeat !important; }
+.icon-graticule { background: url('graticule.png') no-repeat !important; }
+.icon-vector { background: url('vector.png') no-repeat !important; }
+.icon-raster { background: url('raster.png') no-repeat !important; }
+.icon-serverraster { background: url('server_raster.png') no-repeat !important; }
+.icon-servermap { background: url('server_map.png') no-repeat !important; }
+.icon-barchart { background: url('chart_bar.png') no-repeat !important; }
+.icon-piechart { background: url('chart_pie.png') no-repeat !important; }
+.icon-sort { background: url('sort.png') no-repeat !important; }
+.icon-refresh { background: url('arrow_refresh.png') no-repeat !important; }
+.icon-timeforward { background: url('time_forward.png') no-repeat !important; }
+.icon-timebackward { background: url('time_backward.png') no-repeat !important; }
+.icon-selectbox { background: url('select_box.png') no-repeat !important; }
+.icon-database { background: url('database.png') no-repeat !important; }
+.icon-addmap { background: url('map_add.png') no-repeat !important; }
+.icon-deletemap { background: url('map_delete.png') no-repeat !important; }
+
+.legend-loading {
+    background-image:url('../libs/ExtJs/resources/images/default/tree/loading.gif');
+    width: 15px;
+ 	height: 15px;
+ 	right: 5px;
+ 	position: absolute;
+ 	background-color: white;
+}
