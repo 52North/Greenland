@@ -981,12 +981,18 @@ function checkForPermalink() {
 		// Check if perma is parsed as array
 		parameters.perma = parameters.perma.join(',');
 
-	OpenLayers.VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result) {
+	var msgBox = Ext.Msg.progress("Restoring Layers",
+			"Please wait while Greenland restores visualizations from permalink");
+	OpenLayers.VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result,
+			currentNumber, length) {
 		if (result instanceof Error) {
 			Ext.Msg.alert('Error loading permalink', Ext.util.Format.htmlEncode(result.message));
 			return;
 		}
 		mapComponents[0].mapPanel.map.addLayers([ result ]);
+		if(currentNumber>=length) {
+			msgBox.hide();
+		}
 	});
 
 }

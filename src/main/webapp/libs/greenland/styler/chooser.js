@@ -35,12 +35,12 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		OpenLayers.Util.extend(this, this.stylers);
 		var stylerData = [];
 		for ( var i = 0; i < this.stylers.length; i++) {
-			for(var key in this.stylers) {
-				if(typeof this.stylers[key] != 'function') {
+			for ( var key in this.stylers) {
+				if (typeof this.stylers[key] != 'function') {
 					this.stylers[i][key] = this.stylers[key];
 				}
 			}
-			//OpenLayers.Util.extend(this.stylers[i], this.stylers);
+			// OpenLayers.Util.extend(this.stylers[i], this.stylers);
 			stylerData.push([ i, this.stylers[i].title || '<No Title>' ]);
 		}
 
@@ -55,7 +55,7 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 	getValue : function(value) {
 		return this.stylers[this.currentStylerIndex].getValue(value);
 	},
-	
+
 	getValueObject : function(value) {
 		return this.stylers[this.currentStylerIndex].getValueObject(value);
 	},
@@ -155,5 +155,15 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		// this.stylers[this.currentStylerIndex].createParameters());
 
 		return options;
+	},
+
+	restore : function(parcel) {
+		this.currentStylerIndex = parcel.readInt();
+		this.stylers[this.currentStylerIndex].restore(parcel);
+	},
+
+	store : function(parcel) {
+		parcel.writeInt(this.currentStylerIndex);
+		this.stylers[this.currentStylerIndex].store(parcel);
 	}
 });

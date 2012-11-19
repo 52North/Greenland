@@ -50,8 +50,7 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 						[ [ 359, 100, 100 ], [ 0, 100, 100 ] ] // All
 						];
 
-						OpenLayers.VIS.Styler.Base.prototype.initialize.apply(this,
-								arguments);
+						OpenLayers.VIS.Styler.Base.prototype.initialize.apply(this, arguments);
 
 						if (this.startColor == null || this.endColor == null) {
 							this.startColor = this.predefinedColors[0][0];
@@ -88,8 +87,8 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 						}
 
 						return this.getColorObject((interval[0] + interval[1]) / 2,
-								this.symbology.styler.bounds.getMinValue(),
-								this.symbology.styler.bounds.getMaxValue(), null);
+								this.symbology.styler.bounds.getMinValue(), this.symbology.styler.bounds
+										.getMaxValue(), null);
 
 					},
 
@@ -112,8 +111,7 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 
 						var diff = new Array(3);
 						for ( var i = 0; i < diff.length; i++)
-							diff[i] = (this.endColor[i] - this.startColor[i])
-									/ (ints ? ints : 1);
+							diff[i] = (this.endColor[i] - this.startColor[i]) / (ints ? ints : 1);
 
 						var valueIntervalSize = (maxValue - minValue) / (ints ? ints : 1);
 
@@ -128,8 +126,7 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 					},
 
 					getColor : function(value, minValue, maxValue, ints) {
-						return this.getColorObject(value, minValue, maxValue, ints).toRGB()
-								.toHex();
+						return this.getColorObject(value, minValue, maxValue, ints).toRGB().toHex();
 					},
 
 					getSld : function() {
@@ -202,12 +199,10 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 							for ( var i = 0; i < steps; i++) {
 								for ( var j = 0; j < diff.length; j++)
 									hsv[j] = start[j] + i * diff[j];
-								grad += ', '
-										+ new OpenLayers.VIS.Color.HSV(hsv[0], hsv[1], hsv[2])
-												.toRGB().toHex();
+								grad += ', ' + new OpenLayers.VIS.Color.HSV(hsv[0], hsv[1], hsv[2]).toRGB().toHex();
 							}
-							var pre = [ '-webkit-linear-gradient', '-o-linear-gradient',
-									'-moz-linear-gradient', '-ms-linear-gradient' ];
+							var pre = [ '-webkit-linear-gradient', '-o-linear-gradient', '-moz-linear-gradient',
+									'-ms-linear-gradient' ];
 							for ( var i = 0; i < pre.length; i++)
 								pre[i] = pre[i] + '(' + grad + ')';
 
@@ -231,10 +226,8 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 											}),
 									listeners : {
 										select : function(combo, record, index) {
-											this.startColor = this.swap ? record.data.end
-													: record.data.start;
-											this.endColor = this.swap ? record.data.start
-													: record.data.end;
+											this.startColor = this.swap ? record.data.end : record.data.start;
+											this.endColor = this.swap ? record.data.start : record.data.end;
 
 											this.triggerChangeEvent('symbology');
 											combo.setColorBackground(this.startColor, this.endColor);
@@ -280,6 +273,18 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 							}
 						};
 						return options;
+					},
+
+					restore : function(parcel) {
+						this.startColor = parcel.readIntArray();
+						this.endColor = parcel.readIntArray();
+						this.swap = parcel.readBoolean();
+					},
+
+					store : function(parcel) {
+						parcel.writeIntArray(this.startColor);
+						parcel.writeIntArray(this.endColor);
+						parcel.writeBoolean(this.swap);
 					}
 
 				});

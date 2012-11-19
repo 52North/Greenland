@@ -69,11 +69,11 @@ OpenLayers.VIS.Styler.Shape = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		return options;
 	},
 
-	restore : function(value) {
-		this.graphicName = value;
+	restore : function(parcel) {
+		this.graphicName = parcel.readString();
 	},
 
-	store : function() {
-		return this.graphicName;
+	store : function(parcel) {
+		return parcel.writeString(this.graphicName);
 	}
 });

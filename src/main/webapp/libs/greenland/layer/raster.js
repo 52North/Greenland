@@ -181,6 +181,11 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 	 * backing VISS resources and redraws itself
 	 */
 	updateVisualization : function() {
+		if(this.visualization.options.time && !this.timeExtents) {
+			// Layer needs time, but has no time information yet -> do not request visualization
+			return;
+		}
+		
 		var visualizationUpdated = function(info) {
 
 			if (info instanceof Error) {
@@ -255,5 +260,15 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 			return OpenLayers.Layer.WMS.prototype.calculateInRange.call(this);
 		}
 	},
+
+	restore : function(parcel) {
+		this.visualization.restore(parcel);
+
+		this.updateVisualization();
+	},
+
+	store : function(parcel) {
+		this.visualization.store(parcel);
+	}
 
 });

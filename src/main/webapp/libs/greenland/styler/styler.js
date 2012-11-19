@@ -58,12 +58,13 @@ OpenLayers.VIS.Styler.Base = OpenLayers.Class({
 			property : property
 		});
 	},
-	
-	restore : function(value) {
-		
+
+	restore : function(parcel) {
+
 	},
-	
-	store: function() {
-		
+
+	store : function(parcel) {
+
 	}
 });
+

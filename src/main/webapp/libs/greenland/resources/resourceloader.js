@@ -126,6 +126,11 @@ OpenLayers.VIS.ResourceLoader = {
 			o.r.requiredLayersType = layer.visualization.requiredLayersType;
 		}
 
+		if (layer.store) {
+			var settingsParcel = new VIS.SettingsParcel();
+			layer.store(settingsParcel);
+			o.s = settingsParcel.toString();
+		}
 		return o;
 	},
 
@@ -153,11 +158,21 @@ OpenLayers.VIS.ResourceLoader = {
 	 */
 	loadResourcesFromPermalink : function(param, callback) {
 		param = param.replace(/!/g, '{').replace(/\*/g, '}').replace(/'/g, '"');
+		var count = 0;
+
+		var callbackIntercept = function(result) {
+			count++;
+			if (result instanceof OpenLayers.Layer && this.s) {
+				result.restore(new VIS.SettingsParcel(this.s));
+			}
+			callback.call(this, result, count, perma.length);
+		};
 
 		var perma = new OpenLayers.Format.JSON().read(param);
 		for ( var i = 0; i < perma.length; i++) {
 			o = perma[i];
-			OpenLayers.VIS.ResourceLoader.loadResourcePath(o.r, o.p, callback);
+			OpenLayers.VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function.bind(
+					callbackIntercept, o));
 		}
 
 	},

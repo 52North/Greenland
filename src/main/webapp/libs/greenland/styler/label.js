@@ -43,7 +43,7 @@ OpenLayers.VIS.Styler.Label = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		return {};
 	},
 
-	restore : function(value) {
+	restore : function(parcel) {
 		// TODO
 	},
 

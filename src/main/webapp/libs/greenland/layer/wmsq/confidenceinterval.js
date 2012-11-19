@@ -125,7 +125,7 @@ OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMS
 						minimum : 1,
 						maximum : 100,
 						type : 'integer',
-						description : 'Confidence'
+						description : 'Confidence',
 					}
 				};
 
@@ -178,7 +178,7 @@ OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMS
 			 */
 			fillCanvas : function(canvas, merger, ctx, tile) {
 				var ctx = canvas.getContext('2d');
-
+				ctx.strokeWidth = 0.5;
 				var w = canvas.width, height = canvas.height;
 				var reqLayers = this.requiredLayers[this.requiredLayersType];
 				var distribution = new reqLayers.distributionClass();
@@ -199,7 +199,7 @@ OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMS
 						// lower boundary
 						color = this.styler.fillColor.getValueObject(value[0]);
 						if (color != null) {
-							ctx.fillStyle = color.toRGB().toHex();
+							ctx.fillStyle = ctx.strokeStyle = color.toRGB().toHex();
 							ctx.beginPath();
 
 							ctx.moveTo(x, y);
@@ -207,7 +207,10 @@ OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMS
 							ctx.lineTo(x, y + sy);
 
 							ctx.closePath();
+
+							ctx.stroke();
 							ctx.fill();
+
 						}
 
 						// upper boundary

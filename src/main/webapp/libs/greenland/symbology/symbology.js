@@ -144,5 +144,33 @@ OpenLayers.VIS.Symbology.Base = OpenLayers.Class({
 
 	destroy : function() {
 		this.events = this.events.destroy();
+	},
+
+	restore : function(parcel) {
+		// visualization-specific styling parameters
+		for ( var key in this.styler || {}) {
+			if (this.styler[key].restore) {
+				this.styler[key].restore(parcel);
+			}
+		}
+
+		// visualization-specific parameters
+		for ( var key in this.options || {}) {
+			parcel.readParameter(this.options[key]);
+		}
+	},
+
+	store : function(parcel) {
+		// visualization-specific styling parameters
+		for ( var key in this.styler || {}) {
+			if (this.styler[key].store) {
+				this.styler[key].store(parcel);
+			}
+		}
+
+		// visualization-specific parameters
+		for ( var key in this.options || {}) {
+			parcel.writeParameter(this.options[key]);
+		}
 	}
 });

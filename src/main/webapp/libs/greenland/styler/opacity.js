@@ -62,12 +62,12 @@ OpenLayers.VIS.Styler.Opacity = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		return options;
 	},
 
-	restore : function(value) {
-		this.opacity = parseFloat(value);
+	restore : function(parcel) {
+		this.opacity = parcel.readFloat();
 		// TODO set layer opacity?
 	},
 
-	store : function() {
-		return this.opacity;
+	store : function(parcel) {
+		return parcel.writeFloat(this.opacity);
 	}
 });

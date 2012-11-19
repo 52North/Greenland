@@ -64,8 +64,8 @@ OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		OpenLayers.Util.applyDefaults(options, {
 			// Set class to use for this layer's tiles
 			tileClass : OpenLayers.Tile.Image.MultiImage,
-			maxZoom : 10
-		// TODO make layer parameter
+			maxZoom : 10	// maximum zoom level to request
+		// TODO make maxZoom a layer parameter
 		});
 
 		// Options to use for tile construction
@@ -301,7 +301,17 @@ OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 		return result;
 
+	},
+	
+	restore : function(parcel) {
+		this.visualization.restore(parcel);
+		this.updateVisualization();
+	},
+	
+	store : function(parcel) {
+		this.visualization.store(parcel);
 	}
+	
 });
 
 /**

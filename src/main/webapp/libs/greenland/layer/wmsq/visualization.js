@@ -269,5 +269,63 @@ OpenLayers.Layer.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.
 
 	isValid : function() {
 		return true;
+	},
+
+	restore : function(parcel) {
+		// wms-layer-specific styling parameters
+		for ( var i = 0; i < this.layerOptions.length; i++) {
+			stylers = this.layerOptions[i].styler;
+			for ( var key in stylers) {
+				if (stylers[key].restore) {
+					stylers[key].restore(parcel);
+				}
+			}
+		}
+
+		// visualization-specific styling parameters
+		for ( var key in this.styler || {}) {
+			if (this.styler[key].restore) {
+				this.styler[key].restore(parcel);
+			}
+		}
+
+		// additional visualization-specific styling parameters
+		for ( var key in this.parameters || {}) {
+			parcel.readParameter(this.parameters[key]);
+		}
+		
+		// visualization-specific parameters
+		for ( var key in this.options || {}) {
+			parcel.readParameter(this.options[key]);
+		}
+	},
+
+	store : function(parcel) {
+		// wms-layer-specific styling parameters
+		for ( var i = 0; i < this.layerOptions.length; i++) {
+			stylers = this.layerOptions[i].styler;
+			for ( var key in stylers) {
+				if (stylers[key].store) {
+					stylers[key].store(parcel);
+				}
+			}
+		}
+
+		// visualization-specific styling parameters
+		for ( var key in this.styler || {}) {
+			if (this.styler[key].store) {
+				this.styler[key].store(parcel);
+			}
+		}
+
+		// additional visualization-specific styling parameters
+		for ( var key in this.parameters || {}) {
+			parcel.writeParameter(this.parameters[key]);
+		}
+
+		// visualization-specific parameters
+		for ( var key in this.options || {}) {
+			parcel.writeParameter(this.options[key]);
+		}
 	}
 });

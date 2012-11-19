@@ -74,9 +74,9 @@
 					<includes>
 						<include>src/main/webapp/libs/greenland/**/*.js</include>
 					</includes>
-					<exlcudes>
-						<exclude>src/main/webapp/libs/greenland/ext/**/*.js</exclude>
-					</exlcudes>
+					<excludes>
+						<exclude>src/main/webapp/libs/greenland/ext/**</exclude>
+					</excludes>
 					<strictCheck>true</strictCheck>
 					<properties>
 						<year>${project.inceptionYear}</year>
@@ -101,11 +101,11 @@
 				<version>1.9.0</version>
 				<configuration>
 					<header>license_header_ext.txt</header>
-					<exlcudes>
-						<exlcude>src/main/webapp/libs/greenland/**/*.js</exlcude>
-					</exlcudes>
+					<excludes>
+						<exlcude>src/main/webapp/libs/greenland/**.js</exlcude>
+					</excludes>
 					<includes>
-						<include>src/main/webapp/libs/greenland/ext/**/*.js</include>
+						<include>src/main/webapp/libs/greenland/ext/*.js</include>
 					</includes>
 					<strictCheck>true</strictCheck>
 					<properties>

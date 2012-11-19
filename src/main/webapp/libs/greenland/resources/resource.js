@@ -241,7 +241,7 @@ OpenLayers.VIS.DataSet = OpenLayers.Class({
 				}
 			}
 		};
-	
+
 		OpenLayers.Request.POST({
 			headers : {
 				'Content-Type' : 'application/vnd.org.uncertweb.viss.value-request+json'
@@ -482,7 +482,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 			var equalParams = true;
 
 			for ( var key in options) {
-				if (options[key].valueOf() != refParams[key].valueOf()) {
+				if (refParams[key] == null || options[key].valueOf() != refParams[key].valueOf()) {
 					equalParams = false;
 					break;
 				}

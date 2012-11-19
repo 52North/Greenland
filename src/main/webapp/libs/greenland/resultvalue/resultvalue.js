@@ -22,7 +22,7 @@ OpenLayers.VIS = OpenLayers.VIS || {};
 OpenLayers.VIS.ResultValue = OpenLayers.Class({
 
 	layer : null,
-	title: null,
+	title : null,
 
 	styleDefaults : {
 		fillColor : 'gray',
@@ -32,7 +32,7 @@ OpenLayers.VIS.ResultValue = OpenLayers.Class({
 	initialize : function(options) {
 		OpenLayers.Util.extend(this, options);
 	},
-	
+
 	getTitle : function() {
 		return this.title || '';
 	},
@@ -107,6 +107,18 @@ OpenLayers.VIS.ResultValue = OpenLayers.Class({
 			return this.layer.visualization.styler[param].getValue(value);
 		} else {
 			return this.styleDefaults[param];
+		}
+	},
+
+	restore : function(parcel) {
+		for ( var key in this.options || {}) {
+			parcel.readParameter(this.options[key]);
+		}
+	},
+
+	store : function(parcel) {
+		for ( var key in this.options || {}) {
+			parcel.writeParameter(this.options[key]);
 		}
 	}
 });

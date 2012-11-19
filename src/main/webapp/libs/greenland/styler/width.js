@@ -50,12 +50,12 @@ OpenLayers.VIS.Styler.StrokeWidth = OpenLayers.Class(OpenLayers.VIS.Styler.Base,
 
 		return options;
 	},
-	
-	restore : function(value) {
-		this.strokeWidth = parseInt(value);
+
+	restore : function(parcel) {
+		this.strokeWidth = parcel.readInt();
 	},
-	
-	store: function() {
-		return this.strokeWidth;
+
+	store : function(parcel) {
+		return parcel.writeInt(this.strokeWidth);
 	}
 });

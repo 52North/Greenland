@@ -95,16 +95,15 @@ OpenLayers.VIS.Styler.EqualIntervals = OpenLayers.Class(OpenLayers.VIS.Styler.Co
 		};
 		return options;
 	},
-	
-	restore : function(value) {
-		OpenLayers.VIS.Styler.Continuous.prototype.restore.call(this, value);
-		this.intCount = value.split(';')[4];
-		// TODO updateInts?
+
+	restore : function(parcel) {
+		OpenLayers.VIS.Styler.Continuous.prototype.restore.call(this, parcel);
+		this.intCount = parcel.readInt();
+		this.updateInts();
 	},
-	
-	store: function() {
-		var value = OpenLayers.VIS.Styler.Continuous.prototype.store.call(this);
-		value += ';'+this.intCount;
-		return value;
+
+	store : function(parcel) {
+		OpenLayers.VIS.Styler.Continuous.prototype.store.call(this, parcel);
+		parcel.writeInt(this.intCount);
 	}
 });

@@ -28,7 +28,7 @@ OpenLayers.VIS.Symbology.NumericVector = OpenLayers.Class(OpenLayers.VIS.Symbolo
 			maxValue : null,
 			minValue : null,
 
-			changed : false, // Used while adding features do track changes
+			changed : false, // Used while adding features to track changes
 
 			initialize : function(options) {
 				this.maxValue = Number.MIN_VALUE;

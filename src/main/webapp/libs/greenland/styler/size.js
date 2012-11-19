@@ -52,11 +52,11 @@ OpenLayers.VIS.Styler.Size = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		return options;
 	},
 	
-	restore : function(value) {
-		this.pointRadius = parseInt(value);
+	restore : function(parcel) {
+		this.pointRadius = parcel.readInt();
 	},
 	
-	store: function() {
-		return this.pointRadius;
+	store: function(parcel) {
+		return parcel.writeInt(this.pointRadius);
 	}
 });

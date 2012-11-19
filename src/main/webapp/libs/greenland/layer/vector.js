@@ -70,7 +70,8 @@ OpenLayers.Layer.VIS.Vector = OpenLayers.Class(OpenLayers.Layer.Vector, {
 			action : function(value) {
 				this.setProcedures(value);
 			},
-			scope : this
+			scope : this,
+			store : false 	// do not include in permalink
 		};
 
 		this.visualization.setLayer(this);
@@ -343,6 +344,23 @@ OpenLayers.Layer.VIS.Vector = OpenLayers.Class(OpenLayers.Layer.Vector, {
 		}
 
 		return true;
+	},
+
+	restore : function(parcel) {
+		this.visualization.restore(parcel);
+		this.resultValue.restore(parcel);
+		for ( var key in this.parameterOptions) {
+			parcel.readParameter(this.parameterOptions[key]);
+		}
+		this.updateVisualization();
+	},
+
+	store : function(parcel) {
+		this.visualization.store(parcel);
+		this.resultValue.store(parcel);
+		for ( var key in this.parameterOptions) {
+			parcel.writeParameter(this.parameterOptions[key]);
+		}
 	}
 });
 

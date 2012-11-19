@@ -108,16 +108,17 @@ OpenLayers.VIS.Styler.Continuous = OpenLayers.Class(OpenLayers.VIS.Styler.Base, 
 		return options;
 	},
 
-	restore : function(value) {
-		value = value.split(';');
-		// TODO parse number and null
-		this.minVlaue = value[0];
-		this.maxValue = value[1];
-		this.fixedMinValue = value[2];
-		this.fixedMaxValue = value[3];
+	restore : function(parcel) {
+		this.minValue = parcel.readFloat();
+		this.maxValue = parcel.readFloat();
+		this.fixedMinValue = parcel.readFloat();
+		this.fixedMaxValue = parcel.readFloat();
 	},
 
-	store : function() {
-		return [ this.minValue, this.maxValue, this.fixedMinValue, this.fixedMaxValue ].join(';');
+	store : function(parcel) {
+		parcel.writeFloat(this.minValue);
+		parcel.writeFloat(this.maxValue);
+		parcel.writeFloat(this.fixedMinValue);
+		parcel.writeFloat(this.fixedMaxValue);
 	}
 });

@@ -63,12 +63,14 @@ OpenLayers.VIS.Styler.ExceedanceIntervals = OpenLayers.Class(OpenLayers.VIS.Styl
 
 				return options;
 			},
-			
+
 			restore : function(value) {
-				// TODO
+				OpenLayers.VIS.Styler.Continuous.prototype.restore.call(this, parcel);
+				this.confidence = parcel.readInt();
 			},
-			
-			store: function() {
-				// TODO
+
+			store : function() {
+				OpenLayers.VIS.Styler.Continuous.prototype.store.call(this, parcel);
+				parcel.writeInt(this.confidence);
 			}
 		});
