@@ -449,7 +449,7 @@ function showResourceWindow(map, resources, requestParam) {
 				items.push(new Ext.form.FieldSet({
 					title : requiredLayersForType.layers[key].title || key,
 					items : layerItems,
-					labelWidth : 90
+					labelWidth : 100
 				}));
 			}
 

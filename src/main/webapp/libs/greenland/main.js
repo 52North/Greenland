@@ -1071,11 +1071,11 @@ function showHTMLWindow(title, url) {
 		layout : 'fit',
 		constrainHeader : true,
 		title : title,
-		autoScroll : true,
 		width : 500,
 		height : 500,
 		items : [ {
 			xtype : 'panel',
+			autoScroll : true,
 			autoLoad : {
 				url : url
 			},

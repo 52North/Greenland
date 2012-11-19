@@ -54,11 +54,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<warSourceDirectory>WebContent</warSourceDirectory>
-					<webXml>WebContent\WEB-INF\web.xml</webXml>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 					<webResources>
 						<resource>
-							<directory>WebContent</directory>
+							<directory>src/main/webapp</directory>
 						</resource>
 					</webResources>
 				</configuration>
@@ -73,10 +72,10 @@
 				<configuration>
 					<header>license_header.txt</header>
 					<includes>
-						<include>WebContent/libs/greenland/**/*.js</include>
+						<include>src/main/webapp/libs/greenland/**/*.js</include>
 					</includes>
 					<exlcudes>
-						<exclude>WebContent/libs/greenland/ext/**/*.js</exclude>
+						<exclude>src/main/webapp/libs/greenland/ext/**/*.js</exclude>
 					</exlcudes>
 					<strictCheck>true</strictCheck>
 					<properties>
@@ -103,10 +102,10 @@
 				<configuration>
 					<header>license_header_ext.txt</header>
 					<exlcudes>
-						<exlcude>WebContent/libs/greenland/**/*.js</exlcude>
+						<exlcude>src/main/webapp/libs/greenland/**/*.js</exlcude>
 					</exlcudes>
 					<includes>
-						<include>WebContent/libs/greenland/ext/**/*.js</include>
+						<include>src/main/webapp/libs/greenland/ext/**/*.js</include>
 					</includes>
 					<strictCheck>true</strictCheck>
 					<properties>
