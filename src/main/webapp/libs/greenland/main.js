@@ -994,15 +994,14 @@ function checkForPermalink() {
 
 	var msgBox = Ext.Msg.progress("Restoring Layers",
 			"Please wait while Greenland restores visualizations from permalink");
-	VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result,
-			mapIndex, currentNumber, length) {
+	VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result, mapIndex,
+			currentNumber, length) {
 		if (result instanceof Error) {
-			msgBox.hide();
 			Ext.Msg.alert('Error loading permalink', Ext.util.Format.htmlEncode(result.message));
-			return;
-		}
-		if (mapIndex < mapComponents.length) {
-			mapComponents[Math.max(0, mapIndex)].mapPanel.map.addLayers([ result ]);
+		} else {
+			if (mapIndex < mapComponents.length) {
+				mapComponents[Math.max(0, mapIndex)].mapPanel.map.addLayers([ result ]);
+			}
 		}
 		if (currentNumber >= length) {
 			msgBox.hide();
