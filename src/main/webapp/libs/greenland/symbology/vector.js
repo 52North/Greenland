@@ -214,9 +214,9 @@ OpenLayers.VIS.Symbology.Vector = OpenLayers.Class(OpenLayers.VIS.Symbology.Base
 			var styler = this.styler[key];
 			if (styler.isFeatureStyler !== false) {
 				style[key] = '${get' + key + '}';
-				context['get' + key] = function(feature) {
+				context['get' + key] = OpenLayers.Function.bind(function(feature) {
 					return this.getValue.call(this, feature.attributes.resultValue);
-				}.bind(styler);
+				}, styler);
 			}
 		}
 

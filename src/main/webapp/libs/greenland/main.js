@@ -994,9 +994,10 @@ function checkForPermalink() {
 
 	var msgBox = Ext.Msg.progress("Restoring Layers",
 			"Please wait while Greenland restores visualizations from permalink");
-	VIS.ResourceLoader .loadResourcesFromPermalink(parameters.perma, function(result,
+	VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result,
 			mapIndex, currentNumber, length) {
 		if (result instanceof Error) {
+			msgBox.hide();
 			Ext.Msg.alert('Error loading permalink', Ext.util.Format.htmlEncode(result.message));
 			return;
 		}

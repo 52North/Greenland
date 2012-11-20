@@ -633,7 +633,7 @@ function showResourceWindow(map, resources, requestParam) {
 			labelWidth : 50,
 			padding : 5,
 			items : [ textFieldURL, comboBoxType ],
-			bbar : [ buttonAdvancedResource, '->', buttonNewResource, ]
+			bbar : [ buttonAdvancedResource, '->', buttonNewResource ]
 		});
 
 		windowItems.push({
@@ -692,7 +692,7 @@ function createInputTypeComboBox() {
 					[ 'O&M2 Vector(*.xml)', 'application/x-om-u+xml' ],
 					[ 'JSOM (*.json)', 'application/jsom' ],
 					[ 'Uncertainty Collection',
-							'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ], ]
+							'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ] ]
 		}),
 		valueField : 'mime',
 		displayField : 'name',
