@@ -967,6 +967,17 @@ function getAllLayers() {
 	return res;
 }
 
+function getMapIndex(layer) {
+	var map = layer.map;
+	for ( var i = 0; i < mapComponents.length; i++) {
+		if (map == mapComponents[i].mapPanel.map) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 /**
  * Processes "permalink" url parameters and adds resulting layers to first map
  */
@@ -983,14 +994,16 @@ function checkForPermalink() {
 
 	var msgBox = Ext.Msg.progress("Restoring Layers",
 			"Please wait while Greenland restores visualizations from permalink");
-	OpenLayers.VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result,
-			currentNumber, length) {
+	VIS.ResourceLoader .loadResourcesFromPermalink(parameters.perma, function(result,
+			mapIndex, currentNumber, length) {
 		if (result instanceof Error) {
 			Ext.Msg.alert('Error loading permalink', Ext.util.Format.htmlEncode(result.message));
 			return;
 		}
-		mapComponents[0].mapPanel.map.addLayers([ result ]);
-		if(currentNumber>=length) {
+		if (mapIndex < mapComponents.length) {
+			mapComponents[Math.max(0, mapIndex)].mapPanel.map.addLayers([ result ]);
+		}
+		if (currentNumber >= length) {
 			msgBox.hide();
 		}
 	});

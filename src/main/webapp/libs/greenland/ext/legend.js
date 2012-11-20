@@ -163,7 +163,7 @@ Ext.ux.VIS.Legend = Ext.extend(Ext.Panel, {
 				text : 'Permalink',
 				layer : layer,
 				handler : function(button) {
-					window.open(OpenLayers.VIS.ResourceLoader.getPermalink(this.layer));
+					window.open(VIS.ResourceLoader.getPermalink(this.layer));
 				}
 			}));
 

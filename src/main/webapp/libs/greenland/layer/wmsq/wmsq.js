@@ -97,7 +97,7 @@ OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		for ( var i = 0; i < this.visualization.layerOptions.length; i++) {
 			layer = getLayer.call(this, this.visualization.layerOptions[i].name);
 			if (layer && layer.dimensions && layer.dimensions.time) {
-				instances = OpenLayers.VIS.ResourceLoader.parseIntervals(layer.dimensions.time.values);
+				instances = VIS.ResourceLoader.parseIntervals(layer.dimensions.time.values);
 				for ( var j = 0; j < instances.length; j++) {
 					this.timeExtents.push([ instances[j].getTime(), instances[j].getTime() ]);
 				}

@@ -76,7 +76,7 @@ function showResourceWindow(map, resources, requestParam) {
 		}
 
 		// Loading result options should return a layer instance
-		OpenLayers.VIS.ResourceLoader.loadResourceOptions(attributes, function(result) {
+		VIS.ResourceLoader.loadResourceOptions(attributes, function(result) {
 
 			if (loadingMask != null) {
 				loadingMask.hide();

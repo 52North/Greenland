@@ -16,7 +16,7 @@
 /**
  * Offers methods to retrieve layers from resource descriptions.
  */
-OpenLayers.VIS.ResourceLoader = {
+VIS.ResourceLoader = {
 
 	/**
 	 * Transforms object with attributes at least url, mime (and vissUrl) stepwise
@@ -24,26 +24,7 @@ OpenLayers.VIS.ResourceLoader = {
 	 * config options for Ext.tree.TreeNode.
 	 */
 	loadResourceOptions : function(resourceOptions, callback) {
-		OpenLayers.VIS.ResourceLoader.loadResourcePath(resourceOptions, [], callback);
-
-		// var resourceLoader = resourceOptions.resourceLoader || 'root';
-		// try {
-		// OpenLayers.VIS.ResourceLoader.resourceLoader[resourceLoader](resourceOptions,
-		// function(result) {
-		// r = result.length ? result : [ result ];
-		// for ( var i = 0; i < r.length; i++) {
-		// if (resourceOptions.loaderIdPath && resourceOptions.loaderId) {
-		// r[i].loaderIdPath =
-		// resourceOptions.loaderIdPath.concat(resourceOptions.loaderId);
-		// } else {
-		// r[i].loaderIdPath = [];
-		// }
-		// }
-		// callback(result);
-		// });
-		// } catch (e) {
-		// callback(new Error(e));
-		// }
+		VIS.ResourceLoader .loadResourcePath(resourceOptions, [], callback);
 	},
 
 	/**
@@ -53,7 +34,7 @@ OpenLayers.VIS.ResourceLoader = {
 	loadResourcePath : function(resourceOptions, path, callback) {
 		var resourceLoader = resourceOptions.resourceLoader || 'root';
 		try {
-			OpenLayers.VIS.ResourceLoader.resourceLoader[resourceLoader](resourceOptions,
+			VIS.ResourceLoader .resourceLoader[resourceLoader](resourceOptions,
 					function(result) {
 						r = result.length ? result : [ result ];
 						// Set loader path
@@ -73,13 +54,13 @@ OpenLayers.VIS.ResourceLoader = {
 							if (r.length == 1 && !r[0].loaderId) {
 								// Skip levels without loaderId if they have only a single
 								// element
-								OpenLayers.VIS.ResourceLoader.loadResourcePath(r[0], path, callback);
+								VIS.ResourceLoader .loadResourcePath(r[0], path, callback);
 							} else {
 								// Search for element with specific loaderId corresponding to
 								// path
 								for ( var i = 0; i < r.length; i++) {
 									if (r[i].loaderId == path[0]) {
-										OpenLayers.VIS.ResourceLoader.loadResourcePath(r[i], path.slice(1), callback);
+										VIS.ResourceLoader .loadResourcePath(r[i], path.slice(1), callback);
 										return;
 									}
 								}
@@ -126,21 +107,41 @@ OpenLayers.VIS.ResourceLoader = {
 			o.r.requiredLayersType = layer.visualization.requiredLayersType;
 		}
 
+		var settingsParcel = new VIS.SettingsParcel();
+		settingsParcel.writeInt(getMapIndex(layer)); // map index
+
 		if (layer.store) {
-			var settingsParcel = new VIS.SettingsParcel();
+			// Store layer information if it has store function
 			layer.store(settingsParcel);
-			o.s = settingsParcel.toString();
 		}
+
+		o.s = settingsParcel.toString();
 		return o;
 	},
 
 	/**
-	 * Converts permalink object of layer into special JSON notation and appends
+	 * Converts permalink object of layers into special JSON notation and appends
 	 * it as "perma" parameter to document.location.href
 	 */
-	getPermalink : function(layer) {
-		var o = OpenLayers.VIS.ResourceLoader.getPermalinkObject(layer);
-		var json = new OpenLayers.Format.JSON().write([ o ]);
+	getPermalink : function(layers) {
+		if (!OpenLayers.Util.isArray(layers)) {
+			layers = [ layers ];
+		}
+
+		var permaObjects = [];
+		for ( var i = 0, layer; i < layers.length; i++) {
+			layer = layers[i];
+			if (layer instanceof OpenLayers.Layer.VIS.Vector
+					|| layer instanceof OpenLayers.Layer.VIS.Raster
+					|| layer instanceof OpenLayers.Layer.WMSQ) {
+				permaObjects.push(VIS.ResourceLoader.getPermalinkObject(layer));
+			}
+		}
+
+		// pack as JSON
+		var json = new OpenLayers.Format.JSON().write(permaObjects);
+
+		// make url shorter by replacing {, } and " with unencoded chars
 		json = json.replace(/{/g, '!').replace(/}/g, '*').replace(/"/g, "'");
 		var param = OpenLayers.Util.getParameterString({
 			perma : json
@@ -149,6 +150,7 @@ OpenLayers.VIS.ResourceLoader = {
 		if (url.indexOf('?') != 0) {
 			url = url.split('?')[0];
 		}
+
 		return OpenLayers.Util.urlAppend(url, param);
 	},
 
@@ -162,16 +164,19 @@ OpenLayers.VIS.ResourceLoader = {
 
 		var callbackIntercept = function(result) {
 			count++;
-			if (result instanceof OpenLayers.Layer && this.s) {
-				result.restore(new VIS.SettingsParcel(this.s));
+			var settingsParcel = new VIS.SettingsParcel(this.s ? this.s : '');
+			var mapIndex = settingsParcel.readInt();
+
+			if (result instanceof OpenLayers.Layer && result.restore) {
+				result.restore(settingsParcel);
 			}
-			callback.call(this, result, count, perma.length);
+			callback.call(this, result, mapIndex, count, perma.length);
 		};
 
 		var perma = new OpenLayers.Format.JSON().read(param);
 		for ( var i = 0; i < perma.length; i++) {
 			o = perma[i];
-			OpenLayers.VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function.bind(
+			VIS.ResourceLoader .loadResourcePath(o.r, o.p, OpenLayers.Function.bind(
 					callbackIntercept, o));
 		}
 
@@ -266,7 +271,7 @@ OpenLayers.VIS.ResourceLoader = {
 				rootOptions = {
 					resourceLoader : 'wms_root',
 					text : 'WMS ' + resourceOptions.url,
-					iconCls : 'icon-serverraster' // WCS, becuse its usd like an WCS
+					iconCls : 'icon-serverraster' // WCS, because its used like a WCS
 				};
 				break;
 			default:

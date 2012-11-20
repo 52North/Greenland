@@ -42,7 +42,7 @@ Ext.ux.VIS.ResourceNodesContainer = Ext.extend(Ext.tree.AsyncTreeNode, {
 	 * definition object with at least mime and url as attributes
 	 */
 	addResource : function(options) {
-		OpenLayers.VIS.ResourceLoader.loadResourceOptions(options, function(resourceOptions) {
+		VIS.ResourceLoader.loadResourceOptions(options, function(resourceOptions) {
 			this.appendChild(this.loader.createNode(resourceOptions));
 		}.createDelegate(this));
 	},
@@ -84,7 +84,7 @@ Ext.ux.VIS.ResourceLoader = Ext.extend(Ext.tree.TreeLoader, {
 			delete attributes.id;
 			delete attributes.loader;
 
-			OpenLayers.VIS.ResourceLoader.loadResourceOptions(attributes, function(resourceOptions) {
+			VIS.ResourceLoader.loadResourceOptions(attributes, function(resourceOptions) {
 
 				if (resourceOptions instanceof Error) {
 					// Error handling
