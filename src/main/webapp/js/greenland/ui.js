@@ -611,7 +611,7 @@ function showResourceWindow(map, resources, requestParam) {
 					};
 					layerList.addResource(newResource);
 					defaultResources.push(newResource);
-					
+
 					comboBoxType.reset();
 					textFieldURL.reset();
 				}
@@ -1199,7 +1199,7 @@ function showSelectManyWindow(optionHandler) {
 
 	var selector = new Ext.ux.form.ItemSelector({
 		fieldLabel : 'Procedures',
-		imagePath : 'libs/ExtUx/images/',
+		imagePath : 'js/ExtUx/images/',
 		multiselects : [ {
 			width : 250,
 			height : 320,

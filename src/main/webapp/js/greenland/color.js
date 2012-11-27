@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO Source?
+
+
 OpenLayers.VIS = OpenLayers.VIS || {};
 OpenLayers.VIS.Color = {
 	RGB : OpenLayers.Class({
@@ -100,10 +101,10 @@ OpenLayers.VIS.Color = {
 	HSI : OpenLayers.Class({
 		CLASS_NAME : 'OpenLayers.VIS.Color.HSI',
 
-		initialize : function(hue, sat, int) {
+		initialize : function(hue, sat, inte) {
 			this.h = hue;
 			this.s = sat;
-			this.i = int;
+			this.i = inte;
 		},
 
 		// see

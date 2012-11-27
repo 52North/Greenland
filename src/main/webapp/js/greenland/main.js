@@ -76,7 +76,7 @@ VIS.convertUserDefinedFunction = function(funcString, allowedVariables) {
 	return funcString;
 };
 
-Ext.BLANK_IMAGE_URL = 'libs/ExtJs/resources/images/default/s.gif';
+Ext.BLANK_IMAGE_URL = 'js/ExtJs/resources/images/default/s.gif';
 
 // represents the two map views
 var mapComponents = [];
@@ -940,11 +940,25 @@ Ext.onReady(function() {
 	addMap(createMapComponents());
 
 	// The complete ui layout
-	viewport = new Ext.Viewport({
-		layout : 'border',
-		items : [ centerPanel, toolbar, bottomPanel ]
-	});
-
+	var greenlandDiv = Ext.Element.get('greenlandDiv');
+	if (greenlandDiv != null) {
+		// If there is a div element with id greenlandDiv, render to that
+		viewport = new Ext.Panel({
+			renderTo : greenlandDiv,
+			width : 100,
+			height : 100,
+			layout : 'border',
+			items : [ centerPanel, toolbar, bottomPanel ],
+			plugins : [ 'fittoparent' ]
+		});
+	} else {
+		// If not, use the full body viewport
+		viewport = new Ext.Viewport({
+			layout : 'border',
+			items : [ centerPanel, toolbar, bottomPanel ]
+		});
+	}
+	
 	// Check for get parameters
 	checkForResourceRequest(function(newResource) {
 		// Add new resource info at te beginning of default resources

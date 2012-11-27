@@ -21,7 +21,7 @@
 .icon-deletemap { background: url('map_delete.png') no-repeat !important; }
 
 .legend-loading {
-    background-image:url('../libs/ExtJs/resources/images/default/tree/loading.gif');
+    background-image:url('../js/ExtJs/resources/images/default/tree/loading.gif');
     width: 15px;
  	height: 15px;
  	right: 5px;

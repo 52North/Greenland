@@ -29,7 +29,10 @@
 			<timezone>GMT+1</timezone>
 		</developer>
 	</developers>
-	
+	<scm>
+		<connection>scm:svn:https://svn.52north.org/svn/geostatistics/main/greenland/trunk</connection>
+	</scm>
+
 	<licenses>
 		<license>
 			<name>Apache 2</name>
@@ -38,10 +41,29 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
+
+	<properties>
+		<!-- Goal for license plugin -->
+		<license.goal>check</license.goal>
+	</properties>
+
+	<profiles>
+		<profile>
+			<!-- Profile for updating license headers -->
+			<id>format</id>
+			<properties>
+				<license.goal>format</license.goal>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
+
+
 			<plugin>
+				<!-- Although there is no java to compile, it makes some IDEs happy -->
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
@@ -50,79 +72,274 @@
 				</configuration>
 			</plugin>
 
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<version>2.3</version>
 				<configuration>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+
 					<webResources>
 						<resource>
 							<directory>src/main/webapp</directory>
+							<includes>
+								<include>*.html</include>
+							</includes>
+							<filtering>true</filtering>
 						</resource>
 					</webResources>
+
+					<warSourceExcludes>**/greenland/**/*.js, **/js/flot/**/*.js, *.html</warSourceExcludes>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+						<manifestEntries>
+							<Implementation-Build>${buildNumber}</Implementation-Build>
+						</manifestEntries>
+					</archive>
 				</configuration>
 
 			</plugin>
 
+
+
 			<plugin>
-				<!-- Apache -->
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<version>1.9.0</version>
-				<configuration>
-					<header>license_header.txt</header>
-					<includes>
-						<include>src/main/webapp/libs/greenland/**/*.js</include>
-					</includes>
-					<excludes>
-						<exclude>src/main/webapp/libs/greenland/ext/**</exclude>
-					</excludes>
-					<strictCheck>true</strictCheck>
-					<properties>
-						<year>${project.inceptionYear}</year>
-					</properties>
-				</configuration>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
+				<version>1.5.2</version>
 				<executions>
 					<execution>
-						<phase>test</phase>
-						<!-- test will fail if license headers are not correct -->
+						<id>greenland</id>
+						<phase>process-resources</phase>
+						<configuration>
+							<jsSourceDir>js/greenland</jsSourceDir>
+							<jsSourceFiles>
+								<!-- Greenland -->
+
+								<jsSourceFile>settings.js</jsSourceFile>
+
+								<!-- Parser -->
+								<jsSourceFile>parser/jsom.js</jsSourceFile>
+								<jsSourceFile>parser/om.js</jsSourceFile>
+								<!-- <jsSourceFile>parser/om2.js</jsSourceFile> No longer needed -->
+								<jsSourceFile>parser/statisticsvalue.js</jsSourceFile>
+
+								<!-- Layer -->
+								<jsSourceFile>layer/raster.js</jsSourceFile>
+								<jsSourceFile>layer/vector.js</jsSourceFile>
+								<jsSourceFile>layer/multivector.js</jsSourceFile>
+								<jsSourceFile>layer/observation.js</jsSourceFile>
+
+								<!-- Styler -->
+								<jsSourceFile>styler/styler.js</jsSourceFile>
+								<jsSourceFile>styler/color.js</jsSourceFile>
+								<jsSourceFile>styler/shape.js</jsSourceFile>
+								<jsSourceFile>styler/size.js</jsSourceFile>
+								<jsSourceFile>styler/width.js</jsSourceFile>
+								<jsSourceFile>styler/opacity.js</jsSourceFile>
+								<jsSourceFile>styler/continuousBounds.js</jsSourceFile>
+								<jsSourceFile>styler/equalIntervalBounds.js</jsSourceFile>
+								<jsSourceFile>styler/exceedanceIntervalBounds.js</jsSourceFile>
+								<jsSourceFile>styler/label.js</jsSourceFile>
+								<jsSourceFile>styler/chooser.js</jsSourceFile>
+
+								<!-- Symbology -->
+								<jsSourceFile>symbology/symbology.js</jsSourceFile>
+								<jsSourceFile>symbology/vector.js</jsSourceFile>
+								<jsSourceFile>symbology/numericvector.js</jsSourceFile>
+								<jsSourceFile>symbology/categoricalvector.js</jsSourceFile>
+
+
+								<!-- WMSQ -->
+								<jsSourceFile>parser/v1_3_0_ncWMS.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/wmsq.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/visualization.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/vector.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/whitening.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/contour.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/glyphs.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/colorrange.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/exceedance.js</jsSourceFile>
+								<jsSourceFile>layer/wmsq/confidenceinterval.js</jsSourceFile>
+
+								<!-- ResultValue -->
+								<jsSourceFile>resultvalue/resultvalue.js</jsSourceFile>
+								<jsSourceFile>resultvalue/mean.js</jsSourceFile>
+								<jsSourceFile>resultvalue/mode.js</jsSourceFile>
+								<jsSourceFile>resultvalue/modeprobability.js</jsSourceFile>
+								<jsSourceFile>resultvalue/exceedanceprobability.js</jsSourceFile>
+								<jsSourceFile>resultvalue/statistics.js</jsSourceFile>
+								<jsSourceFile>resultvalue/custom.js</jsSourceFile>
+
+
+								<jsSourceFile>color.js</jsSourceFile>
+								<!-- Extended OpenLayers.Map class for temporal data -->
+								<jsSourceFile>map.js</jsSourceFile>
+								<!-- Extension of OpenLayers SLD functionalities to use GeoServer 
+									extensions and fix browser incompatibilities -->
+								<jsSourceFile>sld.js</jsSourceFile>
+								<!-- Most UI functions -->
+								<jsSourceFile>ui.js</jsSourceFile>
+								<!-- Custom OpenLayers control to allow layer swipe -->
+								<jsSourceFile>swipe.js</jsSourceFile>
+
+								<jsSourceFile>resources/settingsparcel.js</jsSourceFile>
+								<jsSourceFile>resources/resourceloader.js</jsSourceFile>
+								<!-- Wrapping VISS functionalities and web resources -->
+								<jsSourceFile>resources/resource.js</jsSourceFile>
+
+								<!-- Entry point -->
+								<jsSourceFile>main.js</jsSourceFile>
+							</jsSourceFiles>
+
+							<jsTargetDir>js/greenland</jsTargetDir>
+							<jsFinalFile>greenland.js</jsFinalFile>
+						</configuration>
 						<goals>
-							<goal>check</goal>
-							<!-- <goal>format</goal> -->
+							<goal>minify</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>greenland-ext</id>
+						<phase>process-resources</phase>
+						<configuration>
+							<jsSourceDir>js/greenland/ext</jsSourceDir>
+							<jsSourceFiles>
+								<!-- Greenland Ext Extensions -->
+								<jsSourceFile>flotpanel.js</jsSourceFile>
+								<!-- Control to visually connect a window and a map feature -->
+								<jsSourceFile>featurearrow.js</jsSourceFile>
+								<!-- Custom MultiSlider allowing irregular snapping values -->
+								<jsSourceFile>slider.js</jsSourceFile>
+								<!-- TreeNode and TreeLoader implementation for handling resources -->
+								<jsSourceFile>resourcetree.js</jsSourceFile>
+								<!-- Component for depiction of VIS-layer value extents and symbology -->
+								<jsSourceFile>legendscalebar.js</jsSourceFile>
+								<!-- Component handling the legends and settings of a map and its 
+									layers -->
+								<jsSourceFile>legend.js</jsSourceFile>
+
+							</jsSourceFiles>
+
+							<jsTargetDir>js/greenland</jsTargetDir>
+							<jsFinalFile>greenland-ext.js</jsFinalFile>
+						</configuration>
+						<goals>
+							<goal>minify</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>jquery-flot</id>
+						<phase>process-resources</phase>
+						<configuration>
+							<jsSourceDir>js/flot</jsSourceDir>
+							<jsSourceFiles>
+								<!-- Flot/JQuery -->
+								<jsSourceFile>jquery.js</jsSourceFile>
+								<jsSourceFile>jquery.flot.js</jsSourceFile>
+								<jsSourceFile>jquery.flot.pie.js</jsSourceFile>
+								<jsSourceFile>jquery.flot.navigate.min.js</jsSourceFile>
+								<jsSourceFile>jquery.flot.stack.min.js</jsSourceFile>
+								<jsSourceFile>jquery.flot.selection.min.js</jsSourceFile>
+							</jsSourceFiles>
+							<skipMinify>true</skipMinify>
+							<jsTargetDir>js/flot</jsTargetDir>
+							<jsFinalFile>jquery-flot.js</jsFinalFile>
+						</configuration>
+						<goals>
+							<goal>minify</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
-				<!-- Ext -->
 				<groupId>com.mycila.maven-license-plugin</groupId>
 				<artifactId>maven-license-plugin</artifactId>
 				<version>1.9.0</version>
-				<configuration>
-					<header>license_header_ext.txt</header>
-					<excludes>
-						<exlcude>src/main/webapp/libs/greenland/**.js</exlcude>
-					</excludes>
-					<includes>
-						<include>src/main/webapp/libs/greenland/ext/*.js</include>
-					</includes>
-					<strictCheck>true</strictCheck>
-					<properties>
-						<year>${project.inceptionYear}</year>
-					</properties>
-				</configuration>
+
 				<executions>
 					<execution>
+						<id>extlicense</id>
+						<!-- Ext -->
 						<phase>test</phase>
-						<!-- test will fail if license headers are not correct -->
 						<goals>
-							<goal>check</goal>
-							<!-- <goal>format</goal> -->
+							<goal>${license.goal}</goal>
+						</goals>
+
+						<configuration>
+							<header>src/main/resources/license_header_ext.txt</header>
+							<excludes>
+								<exlcude>src/main/webapp/js/greenland/**.js</exlcude>
+							</excludes>
+							<includes>
+								<include>src/main/webapp/js/greenland/ext/*.js</include>
+							</includes>
+							<strictCheck>true</strictCheck>
+							<properties>
+								<year>${project.inceptionYear}</year>
+							</properties>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>apachelicense</id>
+
+						<!-- Apache -->
+						<phase>test</phase>
+						<goals>
+							<goal>${license.goal}</goal>
+						</goals>
+
+						<configuration>
+							<header>src/main/resources/license_header.txt</header>
+							<includes>
+								<include>src/main/webapp/js/greenland/**/*.js</include>
+							</includes>
+							<excludes>
+								<exclude>src/main/webapp/js/greenland/ext/**</exclude>
+							</excludes>
+							<strictCheck>true</strictCheck>
+							<properties>
+								<year>${project.inceptionYear}</year>
+							</properties>
+						</configuration>
+					</execution>
+
+				</executions>
+
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<providerImplementations>
+						<svn>javasvn</svn>
+					</providerImplementations>
+					<revisionOnScmFailure>?</revisionOnScmFailure>
+					<format>{0,number}, {1,date,yyyy-MM-dd HH:mm:ss}</format>
+					<items>
+						<item>buildNumber</item>
+						<item>timestamp</item>
+					</items>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
