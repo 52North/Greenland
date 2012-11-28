@@ -338,8 +338,6 @@ Ext.onReady(function() {
 		// Base layers
 		var baseLayers = [ new OpenLayers.Layer.OSM.Mapnik('OpenStreetMap Mapnik', {
 			transitionEffect : 'resize'
-		}), new OpenLayers.Layer.OSM.Osmarender('OpenStreetMap Osmarender', {
-			transitionEffect : 'resize'
 		}), new OpenLayers.Layer.OSM.CycleMap('OpenStreetMap CycleMap', {
 			transitionEffect : 'resize'
 		}), new OpenLayers.Layer.Google('Google Streets', {
@@ -353,6 +351,8 @@ Ext.onReady(function() {
 		}), new OpenLayers.Layer.Google('Google Physical', {
 			type : google.maps.MapTypeId.TERRAIN,
 			transitionEffect : 'resize'
+		}), new OpenLayers.Layer('None', {
+			isBaseLayer : true
 		}) ];
 		// Map itself
 		var map = new OpenLayers.VIS.Map({
@@ -911,28 +911,28 @@ Ext.onReady(function() {
 		}, '->',
 		// About and help links, directly from html
 		{
-			xtype : 'box',
-			autoEl : {
-				tag : 'div',
-				cn : [ {
-					tag : 'a',
-					href : 'javascript:showHTMLWindow(\'About\', \'about.html\')',
-					cn : 'About',
-					style : {
-						'margin-right' : '10px'
-					}
-				}, '<br/>', {
-					tag : 'a',
-					href : 'javascript:showHTMLWindow(\'Help\', \'help.html\')',
-					cn : 'Help',
-					style : {
-						'margin-right' : '10px'
-					}
-				} ]
-			}
-		}
+			xtype : 'panel',
+			layout : {
+				type : 'table',
+				columns : 1
+			},
+			border : false,
+			bodyStyle : 'background:transparent;',
+			items : [ {
+				xtype : 'button',
+				text : 'About',
+				handler : function() {
+					showHTMLWindow('About', 'about.html');
+				}
+			}, {
+				xtype : 'button',
+				text : 'Help',
+				handler : function() {
+					showHTMLWindow('Help', 'help.html');
+				}
+			} ]
 
-		]
+		} ]
 	});
 
 	// Initialize 2 map component sets
@@ -958,7 +958,7 @@ Ext.onReady(function() {
 			items : [ centerPanel, toolbar, bottomPanel ]
 		});
 	}
-	
+
 	// Check for get parameters
 	checkForResourceRequest(function(newResource) {
 		// Add new resource info at te beginning of default resources
@@ -1008,10 +1008,13 @@ function checkForPermalink() {
 
 	var msgBox = Ext.Msg.progress("Restoring Layers",
 			"Please wait while Greenland restores visualizations from permalink");
+	var messages = "";
 	VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result, mapIndex,
 			currentNumber, length) {
 		if (result instanceof Error) {
-			Ext.Msg.alert('Error loading permalink', Ext.util.Format.htmlEncode(result.message));
+			if (messages != '')
+				messages += '<br/>';
+			messages += Ext.util.Format.htmlEncode(result.message);
 		} else {
 			if (mapIndex < mapComponents.length) {
 				mapComponents[Math.max(0, mapIndex)].mapPanel.map.addLayers([ result ]);
@@ -1019,6 +1022,10 @@ function checkForPermalink() {
 		}
 		if (currentNumber >= length) {
 			msgBox.hide();
+			if (messages != '') {
+				Ext.Msg.alert('Error loading permalink',
+						'Restoring of permalink genereated the following error: <br/>' + messages);
+			}
 		}
 	});
 
@@ -1068,7 +1075,7 @@ function checkForResourceRequest(callback) {
 		newResource.mime = 'application/xml';
 	} else if (parameters.json) {
 		newResource.url = parameters.json;
-		newResource.mime = 'application/jsom';
+		newResource.mime = 'application/x-om-u+json';
 	} else if (parameters.tiff) {
 		newResource.url = parameters.tiff;
 		newResource.mime = 'image/geotiff';
@@ -1081,9 +1088,12 @@ function checkForResourceRequest(callback) {
 	} else if (parameters.om2) {
 		newResource.url = parameters.om2;
 		newResource.mime = 'application/x-om-u+xml';
+	} else if (parameters.ncwms) {
+		newResource.url = parameters.ncwms;
+		newResource.mime = 'ncwms';
 	} else if (parameters.wms) {
 		newResource.url = parameters.wms;
-		newResource.mime = 'application/vnd.ogc.wms';
+		newResource.mime = 'wms';
 	}
 
 	if (newResource.url) {

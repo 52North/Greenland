@@ -24,7 +24,7 @@ VIS.ResourceLoader = {
 	 * config options for Ext.tree.TreeNode.
 	 */
 	loadResourceOptions : function(resourceOptions, callback) {
-		VIS.ResourceLoader .loadResourcePath(resourceOptions, [], callback);
+		VIS.ResourceLoader.loadResourcePath(resourceOptions, [], callback);
 	},
 
 	/**
@@ -34,41 +34,40 @@ VIS.ResourceLoader = {
 	loadResourcePath : function(resourceOptions, path, callback) {
 		var resourceLoader = resourceOptions.resourceLoader || 'root';
 		try {
-			VIS.ResourceLoader .resourceLoader[resourceLoader](resourceOptions,
-					function(result) {
-						r = result.length ? result : [ result ];
-						// Set loader path
+			VIS.ResourceLoader.resourceLoader[resourceLoader](resourceOptions, function(result) {
+				r = result.length ? result : [ result ];
+				// Set loader path
+				for ( var i = 0; i < r.length; i++) {
+					if (resourceOptions.loaderIdPath && resourceOptions.loaderId) {
+						r[i].loaderIdPath = resourceOptions.loaderIdPath.concat(resourceOptions.loaderId);
+					} else {
+						r[i].loaderIdPath = [];
+					}
+				}
+
+				if (path.length == 0 || result instanceof Error) {
+					// Final result or error
+					callback(result);
+				} else {
+					// Follow path
+					if (r.length == 1 && !r[0].loaderId) {
+						// Skip levels without loaderId if they have only a single
+						// element
+						VIS.ResourceLoader.loadResourcePath(r[0], path, callback);
+					} else {
+						// Search for element with specific loaderId corresponding to
+						// path
 						for ( var i = 0; i < r.length; i++) {
-							if (resourceOptions.loaderIdPath && resourceOptions.loaderId) {
-								r[i].loaderIdPath = resourceOptions.loaderIdPath.concat(resourceOptions.loaderId);
-							} else {
-								r[i].loaderIdPath = [];
+							if (r[i].loaderId == path[0]) {
+								VIS.ResourceLoader.loadResourcePath(r[i], path.slice(1), callback);
+								return;
 							}
 						}
 
-						if (path.length == 0 || result instanceof Error) {
-							// Final result or error
-							callback(result);
-						} else {
-							// Follow path
-							if (r.length == 1 && !r[0].loaderId) {
-								// Skip levels without loaderId if they have only a single
-								// element
-								VIS.ResourceLoader .loadResourcePath(r[0], path, callback);
-							} else {
-								// Search for element with specific loaderId corresponding to
-								// path
-								for ( var i = 0; i < r.length; i++) {
-									if (r[i].loaderId == path[0]) {
-										VIS.ResourceLoader .loadResourcePath(r[i], path.slice(1), callback);
-										return;
-									}
-								}
-
-								callback(new Error('Could not find specified resource'));
-							}
-						}
-					});
+						callback(new Error('Could not find specified resource'));
+					}
+				}
+			});
 
 		} catch (e) {
 			callback(new Error(e));
@@ -132,8 +131,8 @@ VIS.ResourceLoader = {
 		for ( var i = 0, layer; i < layers.length; i++) {
 			layer = layers[i];
 			if (layer instanceof OpenLayers.Layer.VIS.Vector
-					|| layer instanceof OpenLayers.Layer.VIS.Raster
-					|| layer instanceof OpenLayers.Layer.WMSQ) {
+					|| layer instanceof OpenLayers.Layer.VIS.Raster || layer instanceof OpenLayers.Layer.WMSQ
+					|| layer instanceof OpenLayers.Layer.VIS.WMS) {
 				permaObjects.push(VIS.ResourceLoader.getPermalinkObject(layer));
 			}
 		}
@@ -176,8 +175,7 @@ VIS.ResourceLoader = {
 		var perma = new OpenLayers.Format.JSON().read(param);
 		for ( var i = 0; i < perma.length; i++) {
 			o = perma[i];
-			VIS.ResourceLoader .loadResourcePath(o.r, o.p, OpenLayers.Function.bind(
-					callbackIntercept, o));
+			VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function.bind(callbackIntercept, o));
 		}
 
 	},
@@ -244,7 +242,7 @@ VIS.ResourceLoader = {
 			var rootOptions;
 
 			switch (resourceOptions.mime) {
-			case 'application/jsom':
+			case 'application/x-om-u+json':
 			case 'application/xml':
 			case 'application/x-om-u+xml':
 				// Vector data
@@ -262,16 +260,25 @@ VIS.ResourceLoader = {
 				rootOptions = {
 					resource : resource,
 					resourceLoader : 'viss_root',
-					text : resourceOptions.url + (resourceOptions.request ? ' Custom Request' : ''),
+					text : 'VISS ' + resourceOptions.url + (resourceOptions.request ? ' Custom Request' : ''),
 					iconCls : 'icon-servermap' // WMS
 				};
 				break;
-			case 'application/vnd.ogc.wms':
+			case 'ncwms':
+				// WMS data
+				rootOptions = {
+					resourceLoader : 'ncwms_root',
+					text : 'ncWMS ' + resourceOptions.url,
+					iconCls : 'icon-serverraster' // WCS, because its used like a WCS
+				};
+				break;
+
+			case 'wms':
 				// WMS data
 				rootOptions = {
 					resourceLoader : 'wms_root',
 					text : 'WMS ' + resourceOptions.url,
-					iconCls : 'icon-serverraster' // WCS, because its used like a WCS
+					iconCls : 'icon-servermap' // WMS
 				};
 				break;
 			default:
@@ -292,7 +299,7 @@ VIS.ResourceLoader = {
 			// Get format class to handle resource data based on its
 			// mime type
 			switch (resourceOptions.mime) {
-			case 'application/jsom':
+			case 'application/x-om-u+json':
 				formatClass = OpenLayers.SOS.Format.JSOM;
 				break;
 			case 'application/xml':
@@ -690,7 +697,7 @@ VIS.ResourceLoader = {
 		/**
 		 * Loads level for all layers in ncWMS ('datasets')
 		 */
-		wms_root : function(resourceOptions, callback) {
+		ncwms_root : function(resourceOptions, callback) {
 			// Get capabilities
 			OpenLayers.Request
 					.GET({
@@ -728,7 +735,7 @@ VIS.ResourceLoader = {
 									layerOptions.push(OpenLayers.Util.applyDefaults({
 										text : layers[i].title,
 										loaderId : layers[i].name || layers[i].title,
-										resourceLoader : 'wms_dataset',
+										resourceLoader : 'ncwms_dataset',
 										wmsLayer : layers[i],
 										iconCls : 'icon-raster',
 										leaf : false,
@@ -749,12 +756,12 @@ VIS.ResourceLoader = {
 		/**
 		 * Loads level for a dataset of WMS
 		 */
-		wms_dataset : function(resourceOptions, callback) {
+		ncwms_dataset : function(resourceOptions, callback) {
 			var wmsLayer = resourceOptions.wmsLayer;
 
 			var commonLayerOptions = OpenLayers.Util.applyDefaults({
-				type : 'wms_layer',
-				resourceLoader : 'wms_layer',
+				type : 'ncwms_layer',
+				resourceLoader : 'ncwms_layer',
 				iconCls : 'icon-raster',
 				leaf : true,
 				wmsLayer : wmsLayer
@@ -762,30 +769,6 @@ VIS.ResourceLoader = {
 
 			var layerNames = [];
 			var layerOptions = [];
-
-			// // VIS compatible WMS layer class
-			// var t = new OpenLayers.Class(OpenLayers.Layer.WMS, {
-			// getParameterOptions : function() {
-			// return [];
-			// }
-			// });
-			//
-			// for ( var i = 0; i < wmsLayer.nestedLayers.length; i++) {
-			// layerNames.push(wmsLayer.nestedLayers[i].name);
-			//
-			// // Plain WMS layer
-			// layerOptions.push({
-			// text : wmsLayer.nestedLayers[i].title || wmsLayer.nestedLayers[i].name,
-			// layerClass : t,
-			// name : wmsLayer.nestedLayers[i].name,
-			// getParamOptions : function() {
-			// return {
-			// layers : this.name
-			// };
-			// }
-			// });
-			//
-			// }
 
 			// Special ncWMS visualizations
 			var visualizations = [ [ OpenLayers.Layer.WMSQ.ColorRange, 'Color Range' ],
@@ -827,7 +810,70 @@ VIS.ResourceLoader = {
 			callback(layerOptions);
 		},
 
-		wms_layer : function(resourceOptions, callback) {
+		/**
+		 * Loads level for all layers in WMS
+		 */
+		wms_root : function(resourceOptions, callback) {
+			// Get capabilities
+			OpenLayers.Request
+					.GET({
+						url : wmsCapabilitiesProxy ? (wmsCapabilitiesProxy + '?URL=' + resourceOptions.url)
+								: resourceOptions.url,
+						params : {
+							SERVICE : 'WMS',
+							VERSION : '1.1.1',
+							REQUEST : 'GetCapabilities'
+						},
+						success : function(resp) {
+							var respStatus = resp.status;
+							var resp = resp.responseXML || resp.responseText;
+
+							var capabilities = new OpenLayers.Format.WMSCapabilities().read(resp);
+
+							if (!capabilities.capability) {
+								if (respStatus == 0) {
+									callback(new Error(
+											'Server seems to not support cross-origin resource sharing (CORS) or is not available'));
+								} else {
+									callback(new Error('Invalid capabilities response'));
+								}
+								return;
+							}
+
+							if (capabilities.capability.nestedLayers.length == 0) {
+								callback(new Error('No Layers'));
+							} else {
+								var layerOptions = [];
+								var layers = capabilities.capability.layers;
+								for ( var i = 0; i < layers.length; i++) {
+									layerOptions.push(OpenLayers.Util.applyDefaults({
+										text : layers[i].title,
+										loaderId : layers[i].title || layers[i].name,
+										resourceLoader : 'wms_layer',
+										wmsLayer : layers[i],
+										iconCls : 'icon-raster',
+										leaf : true,
+										capabilities : capabilities,
+										layerClass : OpenLayers.Layer.VIS.WMS,
+										getParamOptions : function() {
+											return {
+												layers : this.wmsLayer.name,
+												styles : ''
+											};
+										}
+									}, resourceOptions));
+								}
+								callback(layerOptions);
+							}
+
+						},
+						failure : function(resp) {
+							callback(new Error(resp.responseText));
+						}
+					});
+		},
+
+		ncwms_layer : function(resourceOptions, callback) {
 			var layerOptions = resourceOptions.getLayerOptions ? resourceOptions.getLayerOptions() : {};
 
 			var availSrs = resourceOptions.wmsLayer.srs || resourceOptions.wmsLayer.crs;
@@ -849,10 +895,18 @@ VIS.ResourceLoader = {
 					// Fallback to 4326, pseudo reprojection by still using 3857 grid,
 					// but overriding request parameters to use corresponding 4326 bounds
 					layerProjection = new OpenLayers.Projection('EPSG:3857');
-					layerOptions.reverseAxisOrder = function() {
-						// 4326 is reversed if version >=1.3.0
-						return true; // TODO
-					};
+
+					if (parseFloat(resourceOptions.capabilities.version) >= 1.3) {
+						// 4326 is reversed if WMS version >= 1.3.0
+						layerOptions.reverseAxisOrder = function() {
+							return true;
+						};
+					} else {
+						layerOptions.reverseAxisOrder = function() {
+							return false;
+						};
+					}
+
 					layerOptions.getURL = function(bounds) {
 						// transform bounds but dont change original ons
 						bounds = bounds.clone();
@@ -888,7 +942,7 @@ VIS.ResourceLoader = {
 					.extend({
 						transparent : true,
 						styles : 'boxfill/greyscale',
-						version : '1.3.0',
+						version : resourceOptions.capabilities.version,
 					}, resourceOptions.getParamOptions ? resourceOptions.getParamOptions() : {}),
 					OpenLayers.Util.extend({
 						opacity : 0.8,
@@ -945,8 +999,10 @@ VIS.ResourceLoader = {
 			}, layerOptions));
 
 			callback(layer);
+		},
+
+		wms_layer : function(resourceOptions, callback) {
+			this.ncwms_layer(resourceOptions, callback);
 		}
-
 	}
-
 };

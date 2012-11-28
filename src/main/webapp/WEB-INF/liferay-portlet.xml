@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 5.0.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_5_0_0.dtd">
+
+<liferay-portlet-app>
+	<portlet>
+		<portlet-name>GeoViQuaGreenland</portlet-name>
+		<instanceable>false</instanceable>
+		
+		<!-- CSS required for Greenland -->
+		<header-portlet-css>/js/ExtJs/resources/css/ext-all.css</header-portlet-css>
+		<header-portlet-css>/js/ExtJs/resources/css/xtheme-gray.css</header-portlet-css>
+		<header-portlet-css>/js/ExtUx/MultiSelect.css</header-portlet-css>
+		<header-portlet-css>/images/style.css</header-portlet-css>
+	</portlet>
+</liferay-portlet-app>

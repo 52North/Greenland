@@ -47,6 +47,8 @@ OpenLayers.SOS.Format.JSOM = OpenLayers.Class(OpenLayers.Format.JSON, {
 					"OM_UncertaintyObservation", info);
 		} else if (j.OM_TextObservationCollection) {
 			result = this.parsers.collection(j.OM_TextObservationCollection, "OM_TextObservation", info);
+		} else if (j.OM_ObservationCollection) {
+			result = this.parsers.collection(j.OM_ObservationCollection, null, info);
 		} else if (j.OM_ReferenceObservationCollection) {
 			throw "OM_ReferenceObservations are not supported.";
 		} else {
@@ -71,7 +73,26 @@ OpenLayers.SOS.Format.JSOM = OpenLayers.Class(OpenLayers.Format.JSON, {
 			info.hasDistributions = false;
 
 			for ( var i = 0; i < json.length; i++) {
-				var o = this.observation(json[i][obsType], obsType);
+				var o;
+				if (obsType == null) {
+					// observation collection, no fixed obsType
+					collectionElement = json[i];
+					if (collectionElement.OM_Measurement) {
+						o = this.observation(collectionElement.OM_Measurement, "OM_Measurement");
+					} else if (collectionElement.OM_CategoryObservation) {
+						o = this.observation(collectionElement.OM_CategoryObservation, "OM_Measurement");
+					} else if (collectionElement.OM_UncertaintyObservation) {
+						o = this.observation(collectionElement.OM_UncertaintyObservation,
+								"OM_UncertaintyObservation");
+					} else if (collectionElement.OM_TextObservation) {
+						o = this.observation(collectionElement.OM_TextObservation, "OM_TextObservation");
+					} else {
+						// TODO info message
+						continue;
+					}
+				} else {
+					o = this.observation(json[i][obsType], obsType);
+				}
 
 				if (info.format.obsProp != null && info.format.obsProp != o.obsProp)
 					continue;
@@ -194,6 +215,7 @@ OpenLayers.SOS.Format.JSOM = OpenLayers.Class(OpenLayers.Format.JSON, {
 					throw "Invalid JSOM.";
 				if (!(json.timePosition instanceof Date)) {
 					json.timePosition = OpenLayers.Date.parse(json.timePosition);
+					// TODO handle invalid date
 				}
 			};
 			parsePeriod = function(json) {

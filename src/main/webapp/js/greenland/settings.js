@@ -19,18 +19,20 @@ var omConversionServiceUrl = "http://giv-uw.uni-muenster.de:8080/omcs";
 // url of visualization service to use
 var vissUrl = "http://giv-uw.uni-muenster.de:8080/viss";
 
+var wmsCapabilitiesProxy = "wmsproxy";
+
 // Resources to show by default
 var defaultResources = [
 // ncWMS
 {
 	url : 'http://geoviqua.dev.52north.org/WMSQAdapter/local/wms',
-	mime : 'application/vnd.ogc.wms'
+	mime : 'ncwms'
 }, {
 	url : 'http://geoviqua.dev.52north.org/ncWMS/wms',
-	mime : 'application/vnd.ogc.wms'
+	mime : 'ncwms'
 }, {
 	url : 'http://behemoth.nerc-essc.ac.uk/ncWMS/wms',
-	mime : 'application/vnd.ogc.wms'
+	mime : 'ncwms'
 },
 
 // VISS
@@ -51,7 +53,7 @@ var defaultResources = [
 	mime : 'application/vnd.org.uncertweb.viss.uncertainty-collection+json'
 }, {
 	url : 'data/json/gaussian.json',
-	mime : 'application/jsom'
+	mime : 'application/x-om-u+json'
 },
 
 // Conversion service

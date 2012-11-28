@@ -532,7 +532,7 @@ function showResourceWindow(map, resources, requestParam) {
 				if (node.leaf === true && node.attributes.resourceLoader) {
 					// Node is leaf node
 
-					if (node.attributes.resourceLoader == 'wms_layer' && node.attributes.requiredLayers) {
+					if (node.attributes.resourceLoader == 'ncwms_layer' && node.attributes.requiredLayers) {
 						// Intercept WMS loading
 						// TODO method may have return value when automatic layer matching
 						// works
@@ -685,12 +685,13 @@ function createInputTypeComboBox() {
 			data : [
 					[ 'NetCDF (*.nc)', 'application/netcdf' ],
 					[ 'GeoTIFF (*.tiff)', 'image/geotiff' ],
-					[ 'ncWMS(-Q) Resource', 'application/vnd.ogc.wms' ],
+					[ 'ncWMS(-Q) Resource', 'ncwms' ],
+					[ 'WMS Resource', 'wms' ],
 					[ 'O&M2 Raster', 'application/vnd.ogc.om+xml' ],
 					[ '', null ],
 					[ 'O&M Vector (*.xml)', 'application/xml' ],
 					[ 'O&M2 Vector(*.xml)', 'application/x-om-u+xml' ],
-					[ 'JSOM (*.json)', 'application/jsom' ],
+					[ 'JSOM (*.json)', 'application/x-om-u+json' ],
 					[ 'Uncertainty Collection',
 							'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ] ]
 		}),
