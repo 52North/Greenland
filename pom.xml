@@ -104,7 +104,7 @@
 				<version>2.3</version>
 				<configuration>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
-
+					<filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
 					<webResources>
 						<resource>
 							<directory>src/main/webapp</directory>

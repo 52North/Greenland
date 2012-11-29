@@ -20,7 +20,6 @@ OpenLayers.Request.XMLHttpRequest.prototype.setRequestHeader = function(sName, s
 		OpenLayers.Request.XMLHttpRequest.prototype.setRequestHeaderOld.call(this, sName, sValue);
 };
 
-// Utility method to extract human readable part of observed property
 if (typeof VIS == 'undefined')
 	VIS = {};
 /**
@@ -79,7 +78,7 @@ VIS.convertUserDefinedFunction = function(funcString, allowedVariables) {
 Ext.BLANK_IMAGE_URL = 'js/ExtJs/resources/images/default/s.gif';
 
 // represents the two map views
-var mapComponents = [];
+VIS.mapComponents = [];
 
 Ext.onReady(function() {
 	// Executed when Ext framework is ready, i.e. website is loaded
@@ -169,8 +168,8 @@ Ext.onReady(function() {
 	function enableSyncPointers(enable) {
 		syncPointers = enable;
 		if (!syncPointers) {
-			for ( var i = 0, len = mapComponents.length; i < len; i++) {
-				var mouseMarkerLayer = mapComponents[i].mouseMarkerLayer;
+			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+				var mouseMarkerLayer = VIS.mapComponents[i].mouseMarkerLayer;
 				mouseMarkerLayer.setVisibility(false);
 			}
 		}
@@ -181,11 +180,11 @@ Ext.onReady(function() {
 	function enableSyncViewports(enable) {
 		syncViewports = enable;
 		if (syncViewports) {
-			var mainMap = mapComponents[0].mapPanel.map;
+			var mainMap = VIS.mapComponents[0].mapPanel.map;
 			var center = mainMap.getCenter().clone();
 			var zoom = mainMap.getZoom();
-			for ( var i = 0, len = mapComponents.length; i < len; i++) {
-				var map = mapComponents[i].mapPanel.map;
+			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+				var map = VIS.mapComponents[i].mapPanel.map;
 				if (map != mainMap) {
 					map.setCenter(center, zoom, false);
 				}
@@ -194,8 +193,8 @@ Ext.onReady(function() {
 	}
 
 	function enableBoxSelection(enable) {
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			mapComponents[i].selectLayer.setBoxSelectionEnabled(enable);
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			VIS.mapComponents[i].selectLayer.setBoxSelectionEnabled(enable);
 		}
 	}
 
@@ -204,8 +203,8 @@ Ext.onReady(function() {
 	function showSelectedFeatureDetails() {
 		var layerFeatureMap = {};
 
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var selectLayer = mapComponents[i].selectLayer;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var selectLayer = VIS.mapComponents[i].selectLayer;
 			for ( var j = 0, featureLen = selectLayer.selectedFeatures.length; j < featureLen; j++) {
 				var feature = selectLayer.selectedFeatures[j].originalFeature;
 				if (feature) {
@@ -242,8 +241,8 @@ Ext.onReady(function() {
 			return;
 		var lonLat = evt.object.getLonLatFromViewPortPx(evt.xy);
 
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var mouseMarker = mapComponents[i].mouseMarker;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var mouseMarker = VIS.mapComponents[i].mouseMarker;
 			if (evt.object == mouseMarker.map) {
 				continue;
 			}
@@ -254,8 +253,8 @@ Ext.onReady(function() {
 	var handleMouseOver = function(evt) {
 		if (!syncPointers)
 			return;
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var mouseMarkerLayer = mapComponents[i].mouseMarkerLayer;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var mouseMarkerLayer = VIS.mapComponents[i].mouseMarkerLayer;
 			if (evt.object != mouseMarkerLayer.map) {
 				mouseMarkerLayer.setVisibility(true);
 				mouseMarkerLayer.map
@@ -272,8 +271,8 @@ Ext.onReady(function() {
 	var handleMouseOut = function(evt) {
 		if (!syncPointers)
 			return;
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var mouseMarkerLayer = mapComponents[i].mouseMarkerLayer;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var mouseMarkerLayer = VIS.mapComponents[i].mouseMarkerLayer;
 			mouseMarkerLayer.setVisibility(false);
 		}
 	};
@@ -284,8 +283,8 @@ Ext.onReady(function() {
 
 		var center = evt.object.getCenter().clone();
 		var zoom = evt.object.getZoom();
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var map = mapComponents[i].mapPanel.map;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var map = VIS.mapComponents[i].mapPanel.map;
 			if (map != evt.object && (map.zoom != zoom || !map.center.equals(center))) {
 				map.setCenter(center, zoom, false);
 			}
@@ -296,8 +295,8 @@ Ext.onReady(function() {
 		var min = Number.POSITIVE_INFINITY;
 		var max = Number.NEGATIVE_INFINITY;
 		var extents = [];
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var map = mapComponents[i].mapPanel.map;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var map = VIS.mapComponents[i].mapPanel.map;
 			if (min > map.time.min) {
 				min = map.time.min;
 			}
@@ -326,8 +325,8 @@ Ext.onReady(function() {
 		}
 
 		// Set new time
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var map = mapComponents[i].mapPanel.map;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var map = VIS.mapComponents[i].mapPanel.map;
 			map.setTime(newTimeValue);
 		}
 
@@ -558,8 +557,28 @@ Ext.onReady(function() {
 			});
 		}
 
+		var store = function(parcel) {
+			parcel.writeFloat(map.getCenter().lon);
+			parcel.writeFloat(map.getCenter().lat);
+			parcel.writeInt(map.getZoom());
+			parcel.writeInt(baseLayers.indexOf(map.baseLayer));
+		};
+
+		var restore = function(parcel) {
+			var center = new OpenLayers.LonLat(parcel.readFloat(), parcel.readFloat());
+			map.setCenter(center, parcel.readInt());
+			var baseLayerIndex = parcel.readInt();
+			if (baseLayerIndex >= 0 && baseLayerIndex < baseLayers.length) {
+				map.setBaseLayer(baseLayers[baseLayerIndex]);
+			}
+		};
+
 		// Return object of all required parts for a map component
 		return {
+			// Functions to save/restore map state
+			store : store,
+			restore : restore,
+
 			// GeoExt.MapPanel
 			mapPanel : new GeoExt.MapPanel({
 				map : map,
@@ -577,6 +596,7 @@ Ext.onReady(function() {
 					style : {
 						'border-top' : 'none'
 					},
+					enableOverflow : true,
 					items : [
 							new GeoExt.Action({
 								control : new OpenLayers.Control.ZoomIn(),
@@ -664,7 +684,7 @@ Ext.onReady(function() {
 		};
 	}
 
-	mapComponents = [];
+	VIS.mapComponents = [];
 
 	var bottomPanel = new Ext.Panel({
 		title : 'Visualizations',
@@ -700,7 +720,7 @@ Ext.onReady(function() {
 	function updateSelectionInfo(reset) {
 		if (reset === true) {
 			selectedCount = 0;
-			Ext.each(mapComponents, function(components) {
+			Ext.each(VIS.mapComponents, function(components) {
 				selectedCount += components.selectLayer.selectedFeatures.length;
 			});
 		}
@@ -732,7 +752,7 @@ Ext.onReady(function() {
 			updateSelectionInfo(true);
 		});
 
-		mapComponents.push(components);
+		VIS.mapComponents.push(components);
 	};
 
 	var removeMap = function(components) {
@@ -742,7 +762,17 @@ Ext.onReady(function() {
 
 		// TODO possibly unregister feature selection events
 
-		mapComponents.remove(components);
+		VIS.mapComponents.remove(components);
+	};
+
+	VIS.addMap = function() {
+		addMap(createMapComponents());
+	};
+
+	VIS.removeMap = function() {
+		if (VIS.mapComponents.length > 1) {
+			removeMap(VIS.mapComponents[VIS.mapComponents.length - 1]);
+		}
 	};
 
 	// Reusable action to clear local cache
@@ -761,7 +791,7 @@ Ext.onReady(function() {
 		tooltip : 'Allows to cache VISS data in local browser storage',
 		enabled : window.localStorage != null,
 		toggleHandler : function(button, pressed) {
-			Ext.each(mapComponents, function(components) {
+			Ext.each(VIS.mapComponents, function(components) {
 				components.cacheWriteControl[pressed ? 'activate' : 'deactivate']();
 				components.cacheReadControl[pressed ? 'activate' : 'deactivate']();
 			});
@@ -773,7 +803,7 @@ Ext.onReady(function() {
 		text : 'Clear Selection',
 		tooltip : 'Clears local VISS data cache',
 		handler : function(button, pressed) {
-			Ext.each(mapComponents, function(components) {
+			Ext.each(VIS.mapComponents, function(components) {
 				components.selectLayer.unselectAll();
 			});
 		}
@@ -781,15 +811,15 @@ Ext.onReady(function() {
 
 	timeSlider.on('change', function(slider, value) {
 		// Set selected time for all map views
-		for ( var i = 0, len = mapComponents.length; i < len; i++) {
-			var map = mapComponents[i].mapPanel.map;
+		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+			var map = VIS.mapComponents[i].mapPanel.map;
 			map.setTime(new Date(value));
 		}
 		timeLabel.setText(new Date(value).toUTCString());
 	});
 
 	// Viewport eventually combining all ExtJs components
-	var viewport = null;
+	VIS.viewport = null;
 
 	// Toolbar creation
 	var toolbar = new Ext.Toolbar({
@@ -808,13 +838,13 @@ Ext.onReady(function() {
 				text : 'Add Resource...',
 				handler : function() {
 					// Left map
-					showResourceWindow(mapComponents[0].mapPanel.map);
+					showResourceWindow(VIS.mapComponents[0].mapPanel.map);
 				},
 				iconCls : 'icon-database'
 			}, {
 				text : 'Refresh',
 				handler : function() {
-					Ext.each(mapComponents, function(components) {
+					Ext.each(VIS.mapComponents, function(components) {
 						Ext.each(components.mapPanel.map.layers, function(layer) {
 							// Reresh and/or redraw depending on which functions are
 							// available
@@ -850,8 +880,8 @@ Ext.onReady(function() {
 				text : 'Add Map',
 				iconCls : 'icon-addmap',
 				handler : function(button) {
-					addMap(createMapComponents());
-					viewport.doLayout();
+					VIS.addMap();
+					VIS.viewport.doLayout();
 				}
 			}, {
 				xtype : 'button',
@@ -866,10 +896,9 @@ Ext.onReady(function() {
 				text : 'Remove Map',
 				iconCls : 'icon-deletemap',
 				handler : function(button) {
-					if (mapComponents.length > 1) {
-						removeMap(mapComponents[mapComponents.length - 1]);
-						viewport.doLayout();
-					}
+					VIS.removeMap();
+					VIS.viewport.doLayout();
+
 				}
 			} ]
 		}, {
@@ -909,7 +938,7 @@ Ext.onReady(function() {
 			},
 			items : [ cacheButton, clearCacheAction ]
 		}, '->',
-		// About and help links, directly from html
+		// About and help
 		{
 			xtype : 'panel',
 			layout : {
@@ -922,13 +951,19 @@ Ext.onReady(function() {
 				xtype : 'button',
 				text : 'About',
 				handler : function() {
-					showHTMLWindow('About', 'about.html');
+					VIS.showHTMLWindow('About', 'about.html');
 				}
 			}, {
 				xtype : 'button',
 				text : 'Help',
 				handler : function() {
-					showHTMLWindow('Help', 'help.html');
+					VIS.showHTMLWindow('Help', 'help.html');
+				}
+			}, {
+				xtype : 'button',
+				text : 'Permalink',
+				handler : function() {
+					window.open(VIS.ResourceLoader.getPermalink(VIS.getAllLayers(), true));
 				}
 			} ]
 
@@ -936,14 +971,14 @@ Ext.onReady(function() {
 	});
 
 	// Initialize 2 map component sets
-	addMap(createMapComponents());
-	addMap(createMapComponents());
+	VIS.addMap();
+	VIS.addMap();
 
 	// The complete ui layout
 	var greenlandDiv = Ext.Element.get('greenlandDiv');
 	if (greenlandDiv != null) {
 		// If there is a div element with id greenlandDiv, render to that
-		viewport = new Ext.Panel({
+		VIS.viewport = new Ext.Panel({
 			renderTo : greenlandDiv,
 			width : 100,
 			height : 100,
@@ -953,49 +988,76 @@ Ext.onReady(function() {
 		});
 	} else {
 		// If not, use the full body viewport
-		viewport = new Ext.Viewport({
+		VIS.viewport = new Ext.Viewport({
 			layout : 'border',
 			items : [ centerPanel, toolbar, bottomPanel ]
 		});
 	}
 
 	// Check for get parameters
-	checkForResourceRequest(function(newResource) {
+	VIS.checkForResourceRequest(function(newResource) {
 		// Add new resource info at te beginning of default resources
 		defaultResources.unshift(newResource);
-		showResourceWindow(mapComponents[0].mapPanel.map, [ newResource ], true);
+		showResourceWindow(VIS.mapComponents[0].mapPanel.map, [ newResource ], true);
 	});
 
-	checkForPermalink();
+	VIS.checkForPermalink();
 
 }); // end onReady
 
-function getAllLayers() {
+VIS.getAllLayers = function() {
 	var res = [];
-	for ( var i = 0; i < mapComponents.length; i++) {
-		var layers = mapComponents[i].mapPanel.map.layers;
+	for ( var i = 0; i < VIS.mapComponents.length; i++) {
+		var layers = VIS.mapComponents[i].mapPanel.map.layers;
 		for ( var j = 0; j < layers.length; j++) {
 			res.push(layers[j]);
 		}
 	}
 	return res;
-}
+};
 
-function getMapIndex(layer) {
+VIS.storeViewport = function(parcel) {
+	parcel.writeInt(VIS.mapComponents.length);
+	for ( var i = 0; i < VIS.mapComponents.length; i++) {
+		VIS.mapComponents[i].store(parcel);
+	}
+};
+
+VIS.restoreViewport = function(parcel) {
+	var mapCount = Math.max(0, parcel.readInt());
+	if (mapCount > VIS.mapComponents.length) {
+		var len = mapCount - VIS.mapComponents.length;
+		for ( var i = 0; i < len; i++) {
+			VIS.addMap();
+		}
+	} else if (mapCount < VIS.mapComponents.length) {
+		var len = VIS.mapComponents.length - mapCount;
+		for ( var i = 0; i < len; i++) {
+			VIS.removeMap();
+		}
+	}
+	VIS.viewport.doLayout();
+
+	for ( var i = 0; i < VIS.mapComponents.length; i++) {
+		VIS.mapComponents[i].restore(parcel);
+	}
+};
+
+VIS.getMapIndex = function(layer) {
 	var map = layer.map;
-	for ( var i = 0; i < mapComponents.length; i++) {
-		if (map == mapComponents[i].mapPanel.map) {
+	for ( var i = 0; i < VIS.mapComponents.length; i++) {
+		if (map == VIS.mapComponents[i].mapPanel.map) {
 			return i;
 		}
 	}
 
 	return -1;
-}
+};
 
 /**
  * Processes "permalink" url parameters and adds resulting layers to first map
  */
-function checkForPermalink() {
+VIS.checkForPermalink = function() {
 
 	var parameters = OpenLayers.Util.getParameters();
 	if (!parameters.perma) {
@@ -1009,16 +1071,17 @@ function checkForPermalink() {
 	var msgBox = Ext.Msg.progress("Restoring Layers",
 			"Please wait while Greenland restores visualizations from permalink");
 	var messages = "";
-	VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result, mapIndex,
-			currentNumber, length) {
+	var hasLayers = VIS.ResourceLoader.loadResourcesFromPermalink(parameters.perma, function(result,
+			mapIndex, currentNumber, length) {
+		msgBox.updateProgress(currentNumber / length);
 		if (result instanceof Error) {
 			if (messages != '')
 				messages += '<br/>';
 			messages += Ext.util.Format.htmlEncode(result.message);
 		} else {
-			if (mapIndex < mapComponents.length) {
-				mapComponents[Math.max(0, mapIndex)].mapPanel.map.addLayers([ result ]);
-			}
+			VIS.mapComponents[Math.min(Math.max(0, mapIndex), VIS.mapComponents.length)].mapPanel.map
+					.addLayers([ result ]);
+			// TODO add viewport if required
 		}
 		if (currentNumber >= length) {
 			msgBox.hide();
@@ -1029,12 +1092,15 @@ function checkForPermalink() {
 		}
 	});
 
-}
+	if (hasLayers === false) {
+		msgBox.hide();
+	}
+};
 
 /**
  * Processes url parameters, callback function will receive a resource object
  */
-function checkForResourceRequest(callback) {
+VIS.checkForResourceRequest = function(callback) {
 
 	var parameters = OpenLayers.Util.getParameters();
 	if (parameters.url && parameters.url.join) // Check if url is parsed as array
@@ -1099,7 +1165,7 @@ function checkForResourceRequest(callback) {
 	if (newResource.url) {
 		callback.call(this, newResource);
 	}
-}
+};
 
 /**
  * Shows a window with a custom title rendering the html given by an url
@@ -1109,7 +1175,7 @@ function checkForResourceRequest(callback) {
  * @param url
  *          URL of the html content to show
  */
-function showHTMLWindow(title, url) {
+VIS.showHTMLWindow = function(title, url) {
 	new Ext.Window({
 		layout : 'fit',
 		constrainHeader : true,
@@ -1127,4 +1193,4 @@ function showHTMLWindow(title, url) {
 			}
 		} ]
 	}).show();
-}
+};

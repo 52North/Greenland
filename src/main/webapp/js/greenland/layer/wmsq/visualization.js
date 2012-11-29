@@ -117,15 +117,13 @@ OpenLayers.Layer.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.
 			}
 
 			// Pixel access functions
-			// this.layerOptions[i].cache = {};
-
+			
 			this.layerOptions[i].getValue = function(merger, x, y) {
 				var colorValue = merger.getColor(this.layerIndex, x, y);
 				if (colorValue[3] == 0 || colorValue[0] == 0) {
 					// Transparent or 0 -> no value
 					// TODO zero seems to be ambiguous, value is lesser or equal
-					// to lower
-					// colorscalerange
+					// to lower colorscalerange
 					return null;
 				}
 

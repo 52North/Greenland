@@ -107,7 +107,7 @@ VIS.ResourceLoader = {
 		}
 
 		var settingsParcel = new VIS.SettingsParcel();
-		settingsParcel.writeInt(getMapIndex(layer)); // map index
+		settingsParcel.writeInt(VIS.getMapIndex(layer)); // map index
 
 		if (layer.store) {
 			// Store layer information if it has store function
@@ -122,7 +122,7 @@ VIS.ResourceLoader = {
 	 * Converts permalink object of layers into special JSON notation and appends
 	 * it as "perma" parameter to document.location.href
 	 */
-	getPermalink : function(layers) {
+	getPermalink : function(layers, storeViewport) {
 		if (!OpenLayers.Util.isArray(layers)) {
 			layers = [ layers ];
 		}
@@ -138,7 +138,17 @@ VIS.ResourceLoader = {
 		}
 
 		// pack as JSON
-		var json = new OpenLayers.Format.JSON().write(permaObjects);
+		var json = null;
+		if (storeViewport) {
+			var settingsParcel = new VIS.SettingsParcel();
+			VIS.storeViewport(settingsParcel);
+			json = new OpenLayers.Format.JSON().write({
+				layers : permaObjects,
+				viewport : settingsParcel.toString()
+			});
+		} else {
+			json = new OpenLayers.Format.JSON().write(permaObjects);
+		}
 
 		// make url shorter by replacing {, } and " with unencoded chars
 		json = json.replace(/{/g, '!').replace(/}/g, '*').replace(/"/g, "'");
@@ -169,13 +179,24 @@ VIS.ResourceLoader = {
 			if (result instanceof OpenLayers.Layer && result.restore) {
 				result.restore(settingsParcel);
 			}
-			callback.call(this, result, mapIndex, count, perma.length);
+			callback.call(this, result, mapIndex, count, layers.length);
 		};
 
 		var perma = new OpenLayers.Format.JSON().read(param);
-		for ( var i = 0; i < perma.length; i++) {
-			o = perma[i];
+
+		if (perma.viewport) {
+			VIS.restoreViewport(new VIS.SettingsParcel(perma.viewport));
+		}
+
+		var layers = perma.layers ? perma.layers : perma;
+
+		for ( var i = 0; i < layers.length; i++) {
+			o = layers[i];
 			VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function.bind(callbackIntercept, o));
+		}
+
+		if (layers.length == 0) {
+			return false;
 		}
 
 	},

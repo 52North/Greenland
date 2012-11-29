@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="author" content="h.hopmann@52north.org" />
+<meta name="author" content="c.autermann@52north.org" />
+<meta name="description"
+	content="Greenland is a dynamic map viewer for uncertainty- and quality-aware geodata." />
+<meta http-equiv="Content-Language" content="en" />
+
+<title>Greenland Debug</title>
+
+<link href="http://52north.org/templates/52n/favicon.ico"
+	rel="shortcut icon" type="image/x-icon" />
+
+<!-- ** CSS ** -->
+<link rel="stylesheet" type="text/css"
+	href="js/ExtJs/resources/css/ext-all.css" />
+<link rel="stylesheet" type="text/css"
+	href="js/ExtJs/resources/css/xtheme-gray.css" />
+<link rel="stylesheet" type="text/css" href="js/ExtUx/MultiSelect.css" />
+<link rel="stylesheet" type="text/css" href="images/style.css" />
+
+<!-- ** Javascript ** -->
+
+<!-- ExtJS + User Extensions -->
+<script type="text/javascript" src="js/ExtJs/ext-base.js"></script>
+<script type="text/javascript" src="js/ExtJs/ext-all.js"></script>
+<!-- <script type="text/javascript" src="js/ExtJs/ext-all-debug.js"></script>  -->
+<script type="text/javascript" src="js/ExtUx/FitToParent.js"></script>
+<script type="text/javascript" src="js/ExtUx/TabCloseMenu.js"></script>
+<script type="text/javascript" src="js/ExtUx/MultiSelect.js"></script>
+<script type="text/javascript" src="js/ExtUx/ItemSelector.js"></script>
+
+<!-- OpenLayers + Proj4js-->
+<script type="text/javascript" src="js/OpenLayers/OpenLayers.js"></script>
+<!-- Debug Script -->
+<!-- <script type="text/javascript" src="js/OpenLayers/lib/OpenLayers.js"></script> -->
+
+<script type="text/javascript" src="js/proj4/proj4js-compressed.js"></script>
+<script type="text/javascript" src="js/proj4/defs.js"></script>
+
+
+<!-- GeoExt -->
+<script type="text/javascript" src="js/GeoExt/GeoExt.js"></script>
+
+
+<!-- Greenland Ext Extensions -->
+<!-- Component combining Flot with ExtJs -->
+<script type="text/javascript" src="js/greenland/ext/flotpanel.js"></script>
+<!-- Control to visually connect a window and a map feature -->
+<script type="text/javascript" src="js/greenland/ext/featurearrow.js"></script>
+<!-- Custom MultiSlider allowing irregular snapping values -->
+<script type="text/javascript" src="js/greenland/ext/slider.js"></script>
+<!-- TreeNode and TreeLoader implementation for handling resources -->
+<script type="text/javascript" src="js/greenland/ext/resourcetree.js"></script>
+<!-- Component for depiction of VIS-layer value extents and symbology -->
+<script type="text/javascript"
+	src="js/greenland/ext/legendscalebar.js"></script>
+<!-- Component handling the legends and settings of a map and its layers -->
+<script type="text/javascript" src="js/greenland/ext/legend.js"></script>
+
+
+<!-- Base Maps -->
+<script type="text/javascript" src="js/OpenLayers/OpenStreetMap.js"></script>
+<script type="text/javascript"
+	src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+<!-- JStat -->
+<script type="text/javascript" src="js/jstat/jstat.js"></script>
+<script type="text/javascript" src="js/jstat/jstat.additions.js"></script>
+
+<!-- Flot/JQuery -->
+<script type="text/javascript" src="js/flot/jquery.js"></script>
+<script type="text/javascript" src="js/flot/jquery.flot.js"></script>
+<script type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
+<script type="text/javascript"
+	src="js/flot/jquery.flot.navigate.min.js"></script>
+<script type="text/javascript" src="js/flot/jquery.flot.stack.min.js"></script>
+<script type="text/javascript"
+	src="js/flot/jquery.flot.selection.min.js"></script>
+
+<!-- Greenland -->
+
+<script type="text/javascript" src="js/greenland/settings.js"></script>
+
+<!-- Parser -->
+<script type="text/javascript" src="js/greenland/parser/jsom.js"></script>
+<script type="text/javascript" src="js/greenland/parser/om.js"></script>
+<script type="text/javascript" src="js/greenland/parser/om2.js"></script>
+<!-- No longer needed -->
+<script type="text/javascript"
+	src="js/greenland/parser/statisticsvalue.js"></script>
+
+<!-- Layer -->
+<script type="text/javascript" src="js/greenland/layer/raster.js"></script>
+<script type="text/javascript" src="js/greenland/layer/vector.js"></script>
+<script type="text/javascript" src="js/greenland/layer/multivector.js"></script>
+<script type="text/javascript" src="js/greenland/layer/observation.js"></script>
+
+<!-- Styler -->
+<script type="text/javascript" src="js/greenland/styler/styler.js"></script>
+<script type="text/javascript" src="js/greenland/styler/color.js"></script>
+<script type="text/javascript" src="js/greenland/styler/shape.js"></script>
+<script type="text/javascript" src="js/greenland/styler/size.js"></script>
+<script type="text/javascript" src="js/greenland/styler/width.js"></script>
+<script type="text/javascript" src="js/greenland/styler/opacity.js"></script>
+<script type="text/javascript"
+	src="js/greenland/styler/continuousBounds.js"></script>
+<script type="text/javascript"
+	src="js/greenland/styler/equalIntervalBounds.js"></script>
+<script type="text/javascript"
+	src="js/greenland/styler/exceedanceIntervalBounds.js"></script>
+<script type="text/javascript" src="js/greenland/styler/label.js"></script>
+<script type="text/javascript" src="js/greenland/styler/chooser.js"></script>
+
+<!-- Symbology -->
+<script type="text/javascript"
+	src="js/greenland/symbology/symbology.js"></script>
+<script type="text/javascript" src="js/greenland/symbology/vector.js"></script>
+<script type="text/javascript"
+	src="js/greenland/symbology/numericvector.js"></script>
+<script type="text/javascript"
+	src="js/greenland/symbology/categoricalvector.js"></script>
+
+
+<!-- WMSQ -->
+<script type="text/javascript"
+	src="js/greenland/parser/v1_3_0_ncWMS.js"></script>
+<script type="text/javascript" src="js/greenland/layer/wmsq/wmsq.js"></script>
+<script type="text/javascript"
+	src="js/greenland/layer/wmsq/visualization.js"></script>
+<script type="text/javascript" src="js/greenland/layer/wmsq/vector.js"></script>
+<script type="text/javascript"
+	src="js/greenland/layer/wmsq/whitening.js"></script>
+<script type="text/javascript"
+	src="js/greenland/layer/wmsq/contour.js"></script>
+<script type="text/javascript" src="js/greenland/layer/wmsq/glyphs.js"></script>
+<script type="text/javascript"
+	src="js/greenland/layer/wmsq/colorrange.js"></script>
+<script type="text/javascript"
+	src="js/greenland/layer/wmsq/exceedance.js"></script>
+<script type="text/javascript"
+	src="js/greenland/layer/wmsq/confidenceinterval.js"></script>
+
+<!-- ResultValue -->
+<script type="text/javascript"
+	src="js/greenland/resultvalue/resultvalue.js"></script>
+<script type="text/javascript" src="js/greenland/resultvalue/mean.js"></script>
+<script type="text/javascript" src="js/greenland/resultvalue/mode.js"></script>
+<script type="text/javascript"
+	src="js/greenland/resultvalue/modeprobability.js"></script>
+<script type="text/javascript"
+	src="js/greenland/resultvalue/exceedanceprobability.js"></script>
+<script type="text/javascript"
+	src="js/greenland/resultvalue/statistics.js"></script>
+<script type="text/javascript"
+	src="js/greenland/resultvalue/custom.js"></script>
+
+
+<script type="text/javascript" src="js/greenland/color.js"></script>
+<!-- Extended OpenLayers.Map class for temporal data -->
+<script type="text/javascript" src="js/greenland/map.js"></script>
+<!-- Extension of OpenLayers SLD functionalities to use GeoServer extensions and fix browser incompatibilites -->
+<script type="text/javascript" src="js/greenland/sld.js"></script>
+<!-- Most UI functions -->
+<script type="text/javascript" src="js/greenland/ui.js"></script>
+<!-- Custom OpenLayers control to allow layer swipe -->
+<script type="text/javascript" src="js/greenland/swipe.js"></script>
+
+<script type="text/javascript"
+	src="js/greenland/resources/settingsparcel.js"></script>
+<script type="text/javascript"
+	src="js/greenland/resources/resourceloader.js"></script>
+<!-- Wrapping VISS functionalities and web resources -->
+<script type="text/javascript"
+	src="js/greenland/resources/resource.js"></script>
+
+<!-- Entry point -->
+<script type="text/javascript" src="js/greenland/main.js"></script>
+
+
+
+
+</head>
+<body>
+</body>
+</html>

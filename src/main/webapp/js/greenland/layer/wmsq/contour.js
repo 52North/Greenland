@@ -85,7 +85,8 @@ OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
 		};
 
 		OpenLayers.Layer.WMSQ.Vector.prototype.initialize.apply(this, arguments);
-
+		
+		// Styler needs bounds for legend
 		this.styler.bounds = this.valueLayer.styler.bounds;
 	},
 
