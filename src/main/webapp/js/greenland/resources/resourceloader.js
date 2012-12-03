@@ -394,7 +394,6 @@ VIS.ResourceLoader = {
 												this.handleRead(resp, options);
 											}
 										}),
-										strategies : [ new OpenLayers.Layer.VIS.Strategy.FeatureProjection() ],
 										// Set previously acquired procedure info to
 										// show procedure parameter
 										procedures : collectionInfo.procedures.slice(0)
@@ -575,7 +574,8 @@ VIS.ResourceLoader = {
 
 						return OpenLayers.Util.extend({
 							visualization : new this.visualizationClass(visualizationOptions || {}),
-							resultValue : new this.resultValueClass(resultValueOptions || {})
+							resultValue : new this.resultValueClass(resultValueOptions || {}),
+							strategies : [ new OpenLayers.Layer.VIS.Strategy.FeatureProjection() ]
 						}, resourceOptions.layerOptions);
 					}.createDelegate(visualizationMap[key])
 				});
@@ -613,7 +613,9 @@ VIS.ResourceLoader = {
 							visualization : new OpenLayers.VIS.Symbology.NumericVector(),
 							resultValue : new OpenLayers.VIS.ResultValue.Custom({
 								resultValueMap : resultValueMap
-							})
+							}),
+							strategies : [ new OpenLayers.Layer.VIS.Strategy.FeatureProjection() ]
+
 						}, resourceOptions.layerOptions);
 					}
 				});
@@ -867,7 +869,8 @@ VIS.ResourceLoader = {
 									} else {
 										// try to load again without proxy, if proxy loading failed
 										resourceOptions.noProxy = true;
-										VIS.ResourceLoader.resourceLoader.wms_root.call(this, resourceOptions, callback);
+										VIS.ResourceLoader.resourceLoader.wms_root
+												.call(this, resourceOptions, callback);
 									}
 								} else {
 									callback(new Error('Invalid capabilities response'));
