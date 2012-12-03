@@ -340,12 +340,13 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 				text : service.title
 			});
 		}
-		if (service.abstract) {
+		if (service['abstract']) {
 			panel.add({
 				xtype : 'textarea',
 				fieldLabel : 'Abstract',
-				value : service.abstract,
-				readOnly : true
+				value : service['abstract'],
+				readOnly : true,
+				anchor : '100%'
 			});
 		}
 		if (service.keywords || service.keyword) {

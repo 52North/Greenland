@@ -113,10 +113,10 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 			title : this.stylers.fieldLabel || null,
 			items : [ comboBoxStyler ],
 			// hideLabel : true,
-			hideLabels : false
-		// defaults : {
-		// anchor : '100%'
-		// },
+			hideLabels : false,
+			defaults : {
+				anchor : '100%'
+			}
 		// labelStyle : 'display:none;',
 		// listeners : {
 		// render : function(comp) {
