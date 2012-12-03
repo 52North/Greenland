@@ -81,6 +81,7 @@ OpenLayers.VIS.Styler.EqualIntervals = OpenLayers.Class(OpenLayers.VIS.Styler.Co
 	createParameters : function() {
 		var options = OpenLayers.VIS.Styler.Continuous.prototype.createParameters.apply(this);
 		options.ints = {
+			fieldLabel : 'Intervals',
 			value : this.intCount,
 			minimum : 1,
 			maximum : 20,

@@ -77,11 +77,11 @@ OpenLayers.VIS.Styler.Continuous = OpenLayers.Class(OpenLayers.VIS.Styler.Base, 
 	createParameters : function() {
 		var options = {
 			minValue : {
+				fieldLabel: 'Minimum Value',
 				value : this.minValue,
 				minimum : this.symbology.getMinValue ? this.symbology.getMinValue() : this.fixedMinValue,
 				maximum : this.symbology.getMaxValue ? this.symbology.getMaxValue() : this.fixedMaxValue,
 				type : 'number',
-				description : 'Minimum',
 				action : function(value) {
 					this.minValue = value;
 					this.triggerChangeEvent('valueExtent');
@@ -90,13 +90,13 @@ OpenLayers.VIS.Styler.Continuous = OpenLayers.Class(OpenLayers.VIS.Styler.Base, 
 				required : false
 			},
 			maxValue : {
+				fieldLabel: 'Maximum Value',
 				value : this.maxValue,
 				minimum : this.symbology.getMinValue ? this.symbology.getMinValue() : this.fixedMinValue,
 				maximum : this.symbology.getMaxValue ? this.symbology.getMaxValue() : this.fixedMaxValue,
 				defaultValue : this.symbology.getMaxValue ? this.symbology.getMaxValue()
 						: this.fixedMaxValue,
 				type : 'number',
-				description : 'Maximum',
 				action : function(value) {
 					this.maxValue = value;
 					this.triggerChangeEvent('valueExtent');

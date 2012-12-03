@@ -848,9 +848,13 @@ VIS.ResourceLoader = {
 						success : function(resp) {
 							var respStatus = resp.status;
 							var resp = resp.responseXML || resp.responseText;
-
-							var capabilities = new OpenLayers.Format.WMSCapabilities().read(resp);
-
+							var capabilities;
+							try {
+								capabilities = new OpenLayers.Format.WMSCapabilities().read(resp);
+							} catch (e) {
+								callback(new Error(e));
+								return;
+							}
 							if (!capabilities.capability) {
 								if (respStatus == 0) {
 									callback(new Error(
@@ -952,7 +956,7 @@ VIS.ResourceLoader = {
 						return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(this, arguments);
 					};
 					layerOptions.warning = 'This WMS is not compatible with ' + mapProjection.toString()
-							+ '. Trying to reproject data which may result in less accurate visualizations.';
+							+ '. Greenland will reproject this resource, which may result in less accurate visualizations.';
 				} else {
 					// Even 4326 not available
 					throw new Error('No SRS compatible with ' + mapProjection.toString());

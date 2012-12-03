@@ -60,8 +60,8 @@ OpenLayers.VIS.Styler.Shape = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 
 		var options = {
 			shape : {
+				fieldLabel: 'Shape',
 				comp : comboBoxShape,
-				description : 'Shape',
 				required : true
 			}
 		};

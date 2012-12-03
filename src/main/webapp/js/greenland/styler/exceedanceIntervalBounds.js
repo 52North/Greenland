@@ -47,11 +47,12 @@ OpenLayers.VIS.Styler.ExceedanceIntervals = OpenLayers.Class(OpenLayers.VIS.Styl
 			createParameters : function() {
 				var options = {
 					confidence : {
+						fieldLabel : 'Confidence',
 						value : this.confidence,
 						minimum : 1,
 						maximum : 100,
 						type : 'integer',
-						description : 'Condifence',
+						description : 'Condifence interval value',
 						action : function(value) {
 							this.confidence = value;
 							this.triggerChangeEvent('valueExtent');

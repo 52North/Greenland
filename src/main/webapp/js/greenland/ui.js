@@ -88,16 +88,15 @@ function showResourceWindow(map, resources, requestParam) {
 				Ext.Msg.alert('Error', Ext.util.Format.htmlEncode(result.message));
 				return;
 			} else if (result instanceof OpenLayers.Layer) {
-
-				if (result.warning) {
-					Ext.Msg.alert('Warning', result.warning);
-				}
-
 				// Set button handler
 				buttonAdd.setText('Add to Map');
 				buttonAdd.handler = function() {
 					// add layer to map
 					if (result != null) {
+						if (result.warning) {
+							Ext.Msg.alert('Warning', result.warning);
+						}
+
 						map.addLayers([ result ]);
 						delete result;
 						resourceDetails.removeAll();
@@ -806,7 +805,9 @@ function createParameterControls(options, onChange, legend) {
 		if (!option.type && option.comp) {
 			// option has its own component
 			var comp = option.comp;
-			comp.fieldLabel = key;
+			if (comp.fieldLabel == null) {
+				comp.fieldLabel = option.fieldLabel || key;
+			}
 			// paramItems.push(comp);
 			paramComp = comp;
 		} else if (option.type == 'number' || option.type == 'integer') {
@@ -816,7 +817,7 @@ function createParameterControls(options, onChange, legend) {
 				// option has min/max constraints -> SliderField
 
 				var slider = new Ext.form.SliderField({
-					fieldLabel : key,
+					fieldLabel : option.fieldLabel || key,
 					value : option.value != null ? option.value : option.minimum,
 					minValue : option.type != 'integer' ? Math.round(option.minimum - 1) : option.minimum,
 					maxValue : option.type != 'integer' ? Math.round(option.maximum + 1) : option.maximum,
@@ -880,7 +881,7 @@ function createParameterControls(options, onChange, legend) {
 						flex : 1
 					}), field ],
 					anchor : '100%',
-					fieldLabel : key,
+					fieldLabel : option.fieldLabel || key,
 					baseCls : 'x-plain',
 					disabled : option.value == null
 				});
@@ -917,7 +918,7 @@ function createParameterControls(options, onChange, legend) {
 					paramComp : textfield,
 					items : [ textfield, okbutton ],
 					anchor : '100%',
-					fieldLabel : key,
+					fieldLabel : option.fieldLabel || key,
 					disabled : option.value == null
 				});
 
@@ -941,7 +942,7 @@ function createParameterControls(options, onChange, legend) {
 				},
 				flex : 1,
 				disabled : option.value == null,
-				fieldLabel : key
+				fieldLabel : option.fieldLabel || key
 			// ,anchor : '100%'
 			});
 			optionHandler.changeListener.push(function(sender) {
@@ -977,7 +978,7 @@ function createParameterControls(options, onChange, legend) {
 					autoScroll : true,
 					hideHeaders : true,
 					displayField : 'value',
-					fieldLabel : key,
+					fieldLabel : option.fieldLabel || key,
 					multiSelect : true,
 					reserveScrollOffset : true,
 					columns : [ {
@@ -1050,7 +1051,7 @@ function createParameterControls(options, onChange, legend) {
 					items : [ selectionLabel, changeButton ],
 					border : false,
 					anchor : '100%',
-					fieldLabel : key
+					fieldLabel : option.fieldLabel || key
 				});
 			}
 		} else if (option.type == 'selectone') {
@@ -1073,7 +1074,7 @@ function createParameterControls(options, onChange, legend) {
 				store : itemStore,
 				valueField : 'value',
 				displayField : 'value',
-				fieldLabel : key,
+				fieldLabel : option.fieldLabel || key,
 				editable : false,
 				listeners : {
 					select : function(comp, record) {
@@ -1138,8 +1139,23 @@ function createParameterControls(options, onChange, legend) {
 					flex : 1
 				}) ],
 				anchor : '100%',
-				fieldLabel : key,
+				fieldLabel : option.fieldLabel || key,
 				baseCls : 'x-plain'
+			});
+		}
+
+		if (option.label === false) {
+			paramComp.hideLabel = true;
+			paramComp.defaults = {
+				anchor : '100%'
+			};
+
+			paramComp.labelStyle = 'display:none;';
+			paramComp.on('render', function(comp) {
+				comp.el.up('div.x-form-item').removeClass('x-hide-label');
+				comp.el.up('div.x-form-element').setStyle({
+					'padding-left' : 0
+				});
 			});
 		}
 

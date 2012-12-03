@@ -57,7 +57,7 @@ OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
 				var speedMax = Math.pow(Math.max(options.uLayer.max, options.vLayer.max), 2);
 
 				options.styler = {
-					fillColor : [ new OpenLayers.VIS.Styler.Color({
+					fillColor : new OpenLayers.VIS.Styler.Color([ new OpenLayers.VIS.Styler.Color({
 						predefinedColors : [ // 
 						[ [ 120, 100, 100 ], [ 0, 100, 100 ] ], // Green-Red
 						[ [ 30, 20, 100 ], [ 0, 100, 100 ] ], // Orange-Red
@@ -85,12 +85,19 @@ OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
 						[ [ 0, 0, 0 ], [ 0, 0, 0 ] ] // Gray
 						],
 						title : 'Solid'
-					}) ],
+					}) ], {
+						fieldLabel : 'Color Scheme',
+						attribute : '_speed'
+					}),
 					graphicName : new OpenLayers.VIS.Styler.Shape({
 						shapes : [ [ 'Arrow 1', 'arrow1' ], [ 'Arrow 2', 'arrow2' ], [ 'Arrow 3', 'arrow3' ] ]
 					}),
-					bounds : [ new OpenLayers.VIS.Styler.Continuous(),
-							new OpenLayers.VIS.Styler.EqualIntervals() ],
+					bounds : new OpenLayers.VIS.Styler.Color([ new OpenLayers.VIS.Styler.Continuous(),
+							new OpenLayers.VIS.Styler.EqualIntervals() ], {
+						fieldLabel : 'Value Bounds',
+						fixedMinValue : speedMin,
+						fixedMaxValue : speedMax
+					}),
 					strokeWidth : {
 						getValue : function() {
 							return 0;
@@ -112,17 +119,15 @@ OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
 							return 5 + (interval[0] + interval[1]) / 2;
 						}
 					}
-					// TODO opacity
+				// TODO opacity
 				};
-				options.styler.fillColor.attribute = '_speed';
-				options.styler.bounds.fixedMinValue = speedMin;
-				options.styler.bounds.fixedMaxValue = speedMax;
 
 				options.layerOptions = [ options.uLayer, options.vLayer ];
 
 				// General Customizable parameters
 				options.parameters = {
 					spacing : {
+						fieldLabel: 'Aggregation Spacing',
 						value : 32,
 						items : [ 8, 16, 32, 64, 128 ],
 						type : 'selectone',
@@ -165,7 +170,7 @@ OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
 					for ( var x = 0; x < width; x += gx) {
 						// u and v component
 						u = 0, v = 0, count = 0;
-						
+
 						// Aggregation, mean of all values in gx/gy range
 						for ( var i = 0, ut, vt; i < gy; i++)
 							for ( var j = 0; j < gx; j++) {

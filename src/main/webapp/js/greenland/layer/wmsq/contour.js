@@ -37,7 +37,7 @@ OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
 		};
 
 		options.styler = {
-			strokeColor : [ new OpenLayers.VIS.Styler.Color({
+			strokeColor : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.Color({
 				predefinedColors : [ // 
 				[ [ 120, 100, 100 ], [ 0, 100, 100 ] ], // Green-Red
 				[ [ 30, 20, 100 ], [ 0, 100, 100 ] ], // Orange-Red
@@ -55,17 +55,20 @@ OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
 				[ [ 0, 0, 100 ], [ 0, 0, 0 ] ] // Gray
 				],
 				title : 'Single Hue'
-			}) ],
+			}) ], {
+				fieldLabel : 'Color Scheme',
+				attribute : '_level'
+			}),
 			strokeWidth : new OpenLayers.VIS.Styler.StrokeWidth()
 		// TODO opacity
 		};
-		options.styler.strokeColor.attribute = '_level';
 
 		options.layerOptions = [ options.valueLayer ];
 
 		// General parameters specific for this visualization.
 		options.parameters = {
 			step : {
+				fieldLabel : 'Contouring Quality',
 				value : 2,
 				minimum : 1,
 				maximum : 50,
@@ -85,7 +88,7 @@ OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
 		};
 
 		OpenLayers.Layer.WMSQ.Vector.prototype.initialize.apply(this, arguments);
-		
+
 		// Styler needs bounds for legend
 		this.styler.bounds = this.valueLayer.styler.bounds;
 	},

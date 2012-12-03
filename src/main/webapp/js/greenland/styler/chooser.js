@@ -110,21 +110,22 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 		});
 
 		var panelCurrentStyler = new Ext.form.FieldSet({
+			title : this.stylers.fieldLabel || null,
 			items : [ comboBoxStyler ],
-			hideLabel : true,
-			hideLabels : false,
-			defaults : {
-				anchor : '100%'
-			},
-			labelStyle : 'display:none;',
-			listeners : {
-				render : function(comp) {
-					comp.el.up('div.x-form-item').removeClass('x-hide-label');
-					comp.el.up('div.x-form-element').setStyle({
-						'padding-left' : 0
-					});
-				}
-			}
+			// hideLabel : true,
+			hideLabels : false
+		// defaults : {
+		// anchor : '100%'
+		// },
+		// labelStyle : 'display:none;',
+		// listeners : {
+		// render : function(comp) {
+		// comp.el.up('div.x-form-item').removeClass('x-hide-label');
+		// comp.el.up('div.x-form-element').setStyle({
+		// 'padding-left' : 0
+		// });
+		// }
+		// }
 		});
 
 		updatePanel = function() {
@@ -147,7 +148,8 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 			test : {
 				comp : panelCurrentStyler,
 				description : '',
-				required : true
+				required : true,
+				label : false
 			}
 		};
 

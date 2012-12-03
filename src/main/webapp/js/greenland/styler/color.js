@@ -248,17 +248,17 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 						var options = {
 							// Color combobox
 							color : {
+								fieldLabel : 'Color',
 								comp : comboBoxColor,
-								description : 'Color',
 								required : true
 							},
 							// Option to swap ends of color gradient
 							swap : {
+								fieldLabel : 'Swap Ends',
 								value : this.swap,
 								minimum : 0,
 								maximum : 100,
 								type : 'boolean',
-								description : 'Swap colors',
 								action : function(value) {
 									if (value != this.swap) {
 										var t = this.endColor;

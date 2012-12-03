@@ -75,6 +75,11 @@ VIS.convertUserDefinedFunction = function(funcString, allowedVariables) {
 	return funcString;
 };
 
+VIS.createPropertyArray = function(array, properties) {
+	OpenLayers.Util.extend(array, properties);
+	return array;
+};
+
 Ext.BLANK_IMAGE_URL = 'js/ExtJs/resources/images/default/s.gif';
 
 // represents the two map views

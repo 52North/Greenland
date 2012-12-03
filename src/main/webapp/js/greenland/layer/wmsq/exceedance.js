@@ -104,7 +104,7 @@ OpenLayers.Layer.WMSQ.ExceedanceProbability = OpenLayers.Class(OpenLayers.Layer.
 				}
 
 				options.styler = {
-					fillColor : [ new OpenLayers.VIS.Styler.Color({
+					fillColor : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.Color({
 						predefinedColors : [ // 
 						[ [ 120, 100, 100 ], [ 0, 100, 100 ] ], // Green-Red
 						[ [ 30, 20, 100 ], [ 0, 100, 100 ] ], // Orange-Red
@@ -122,22 +122,28 @@ OpenLayers.Layer.WMSQ.ExceedanceProbability = OpenLayers.Class(OpenLayers.Layer.
 						[ [ 0, 0, 100 ], [ 0, 0, 0 ] ] // Gray
 						],
 						title : 'Single Hue'
-					}) ],
+					}) ], {
+						fieldLabel : 'Color Scheme'
+					}),
 					strokeWidth : {
 						// Only for legend
 						getValue : function() {
 							return 0;
 						}
 					},
-					bounds : [ new OpenLayers.VIS.Styler.Continuous(),
-							new OpenLayers.VIS.Styler.EqualIntervals() ],
+					bounds : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.Continuous(),
+							new OpenLayers.VIS.Styler.EqualIntervals() ], {
+						fieldLabel : 'Value Bounds',
+						// 0-100%
+						fixedMinValue : 0,
+						fixedMaxValue : 100
+					}),
 					opacity : new OpenLayers.VIS.Styler.Opacity()
 				};
-				options.styler.bounds.fixedMinValue = 0;
-				options.styler.bounds.fixedMaxValue = 100;
 
 				options.options = {
 					threshold : {
+						fieldLabel : 'Threshold',
 						value : 0,
 						type : 'number',
 						description : 'Threshold for Exceedance Probability'

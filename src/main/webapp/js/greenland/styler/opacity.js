@@ -44,11 +44,12 @@ OpenLayers.VIS.Styler.Opacity = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 	createParameters : function() {
 		var options = {
 			opacity : {
+				fieldLabel : 'Opacity',
 				value : this.opacity * 100,
 				minimum : 0,
 				maximum : 100,
 				type : 'integer',
-				description : 'Opacity',
+				description : 'Opacity of this layer in %',
 				action : function(value) {
 					this.opacity = value / 100;
 					this.symbology.layer.setOpacity(this.opacity);

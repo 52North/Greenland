@@ -34,6 +34,7 @@ OpenLayers.VIS.Styler.Size = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 	createParameters : function() {
 		var options = {
 			size : {
+				fieldLabel : 'Size',
 				value : this.pointRadius,
 				minimum : 1,
 				maximum : 25,
@@ -51,12 +52,12 @@ OpenLayers.VIS.Styler.Size = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 
 		return options;
 	},
-	
+
 	restore : function(parcel) {
 		this.pointRadius = parcel.readInt();
 	},
-	
-	store: function(parcel) {
+
+	store : function(parcel) {
 		return parcel.writeInt(this.pointRadius);
 	}
 });

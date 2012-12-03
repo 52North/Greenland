@@ -33,12 +33,13 @@ OpenLayers.VIS.Styler.StrokeWidth = OpenLayers.Class(OpenLayers.VIS.Styler.Base,
 
 	createParameters : function() {
 		var options = {
-			size : {
+			width : {
+				fieldLabel : 'Width',
 				value : this.strokeWidth,
 				minimum : 1,
 				maximum : 25,
 				type : 'integer',
-				description : 'Line width',
+				description : 'Stroke width',
 				action : function(value) {
 					this.strokeWidth = value;
 					this.triggerChangeEvent('symbology');
