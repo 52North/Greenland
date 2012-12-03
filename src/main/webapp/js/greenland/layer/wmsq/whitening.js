@@ -18,7 +18,7 @@
  * in "A generic framework for spatial prediction of soil variables based on
  * regression-kriging".
  */
-OpenLayers.Layer.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualization, {
+OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization, {
 	requiredLayers : {
 		'default' : {
 			layers : {
@@ -65,12 +65,12 @@ OpenLayers.Layer.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visuali
 
 		options.layerOptions = [ options.valueLayer, options.errorLayer ];
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
 
 	},
 
 	update : function() {
-		OpenLayers.Layer.WMSQ.Visualization.prototype.update.call(this);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.update.call(this);
 		this.events.triggerEvent('change', {
 			property : 'legend'
 		});

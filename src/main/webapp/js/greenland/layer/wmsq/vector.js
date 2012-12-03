@@ -17,7 +17,7 @@
  * General vector visualization for ncWMS layers. Manages a
  * OpenLayers.Layer.Vector layer and styles to show and cache vector features.
  */
-OpenLayers.Layer.WMSQ.Vector = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualization, {
+OpenLayers.Layer.VIS.WMSQ.Vector = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization, {
 	vectorLayer : null,
 
 	handleVisibilityChanged : function(evt) {
@@ -25,12 +25,12 @@ OpenLayers.Layer.WMSQ.Vector = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualizat
 	},
 
 	setLayer : function(layer) {
-		OpenLayers.Layer.WMSQ.Visualization.prototype.setLayer.call(this, layer);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.setLayer.call(this, layer);
 		this.layer.events.register('visibilitychanged', this, this.handleVisibilityChanged);
 	},
 
 	removeLayer : function(layer) {
-		OpenLayers.Layer.WMSQ.Visualization.prototype.removeLayer.call(this, layer);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.removeLayer.call(this, layer);
 		this.layer.events.unregister('visibilitychanged', this, this.handleVisibilityChanged);
 	},
 
@@ -66,7 +66,7 @@ OpenLayers.Layer.WMSQ.Vector = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualizat
 		});
 		map.addLayer(this.vectorLayer);
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.setMap.call(this, map);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.setMap.call(this, map);
 
 		map.events.register('changetime', this, this.handleChangeTime);
 	},
@@ -74,7 +74,7 @@ OpenLayers.Layer.WMSQ.Vector = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualizat
 	removeMap : function(map) {
 		map.events.unregister('changetime', this, this.handleChangeTime);
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.removeMap.call(this, map);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.removeMap.call(this, map);
 		if (!this.vectorLayer)
 			return;
 

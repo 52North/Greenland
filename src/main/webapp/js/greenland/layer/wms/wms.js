@@ -29,10 +29,20 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 				return true;
 			},
 			getLegend : function() {
-				return new Ext.Panel({});
+				return new Ext.Panel({
+					border : false
+				});
 			},
 			createParameters : function() {
-				return [ this.opacityStyler.createParameters() ];
+				var parameters = [ this.opacityStyler.createParameters() ];
+				parameters.push({
+					service : {
+						comp : OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel.call(this.layer),
+						label : false
+					},
+					group : 'Service Metadata'
+				});
+				return parameters;
 			}
 		};
 

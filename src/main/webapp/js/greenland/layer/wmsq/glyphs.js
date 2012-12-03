@@ -17,7 +17,7 @@
  * Glyph visualization for ncWMS layers. Test case for UV-component movement,
  * e.g. wind/water speed/direction.
  */
-OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
+OpenLayers.Layer.VIS.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Vector,
 		{
 			requiredLayers : {
 				'default' : {
@@ -143,7 +143,7 @@ OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
 					group : 'Result'
 				};
 
-				OpenLayers.Layer.WMSQ.Vector.prototype.initialize.apply(this, arguments);
+				OpenLayers.Layer.VIS.WMSQ.Vector.prototype.initialize.apply(this, arguments);
 			},
 
 			/**
@@ -276,7 +276,7 @@ OpenLayers.Layer.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector,
 				this.events.triggerEvent('change', {
 					property : 'legend'
 				});
-				OpenLayers.Layer.WMSQ.Vector.prototype.update.call(this);
+				OpenLayers.Layer.VIS.WMSQ.Vector.prototype.update.call(this);
 			}
 
 		});

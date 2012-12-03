@@ -18,7 +18,7 @@
  * changes and handling of customizable parameters. Provides the logic to
  * combine multiple raster layers into a single new visualization.
  */
-OpenLayers.Layer.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Base, {
+OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Base, {
 
 	EVENT_TYPES : [ 'change' ],
 
@@ -257,7 +257,15 @@ OpenLayers.Layer.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.
 			}
 
 		}
-
+		
+		options.push({
+			service : {
+				comp : this.layer.createServiceMetadataPanel(),
+				label : false
+			},
+			group : 'Service Metadata'
+		});
+		
 		return options;
 	},
 

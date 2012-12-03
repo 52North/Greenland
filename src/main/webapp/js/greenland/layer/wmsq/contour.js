@@ -17,7 +17,7 @@
  * Visualization to extract contour lines from ncWMS tiles by applying a
  * marching squares algorithm.
  */
-OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
+OpenLayers.Layer.VIS.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Vector, {
 	requiredLayers : {
 		'default' : {
 			layers : {
@@ -87,14 +87,14 @@ OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
 			group : 'Result'
 		};
 
-		OpenLayers.Layer.WMSQ.Vector.prototype.initialize.apply(this, arguments);
+		OpenLayers.Layer.VIS.WMSQ.Vector.prototype.initialize.apply(this, arguments);
 
 		// Styler needs bounds for legend
 		this.styler.bounds = this.valueLayer.styler.bounds;
 	},
 
 	setLayer : function(layer) {
-		OpenLayers.Layer.WMSQ.Vector.prototype.setLayer.call(this, layer);
+		OpenLayers.Layer.VIS.WMSQ.Vector.prototype.setLayer.call(this, layer);
 
 		this.layer.tileOptions.shouldDraw = function() {
 			if (!(this.bounds.toBBOX() in this.layer.visualization.featureCache) || this.forceRedraw) {
@@ -118,7 +118,7 @@ OpenLayers.Layer.WMSQ.Contour = OpenLayers.Class(OpenLayers.Layer.WMSQ.Vector, {
 			legendSymbolType : 'Line'
 		});
 
-		OpenLayers.Layer.WMSQ.Vector.prototype.update.call(this);
+		OpenLayers.Layer.VIS.WMSQ.Vector.prototype.update.call(this);
 	},
 
 	/**

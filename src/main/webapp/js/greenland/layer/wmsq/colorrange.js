@@ -17,7 +17,7 @@
  * Simple visualization for ncWMS layer applying a colorrange to a single nested
  * layer.
  */
-OpenLayers.Layer.WMSQ.ColorRange = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualization, {
+OpenLayers.Layer.VIS.WMSQ.ColorRange = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization, {
 	requiredLayers : {
 		'default' : {
 			layers : {
@@ -71,7 +71,7 @@ OpenLayers.Layer.WMSQ.ColorRange = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visual
 
 		options.layerOptions = [ options.valueLayer ];
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
 
 	},
 
@@ -88,7 +88,7 @@ OpenLayers.Layer.WMSQ.ColorRange = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visual
 			legendSymbolType : 'Polygon'
 		});
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.update.call(this);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.update.call(this);
 	},
 
 	/**

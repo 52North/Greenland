@@ -16,7 +16,7 @@
 /**
  * ncWMS Layer
  */
-OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
+OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 	visualization : null,
 	time : null,
@@ -64,7 +64,8 @@ OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		OpenLayers.Util.applyDefaults(options, {
 			// Set class to use for this layer's tiles
 			tileClass : OpenLayers.Tile.Image.MultiImage,
-			maxZoom : 10	// maximum zoom level to request
+			maxZoom : 10
+		// maximum zoom level to request
 		// TODO make maxZoom a layer parameter
 		});
 
@@ -205,10 +206,10 @@ OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		return options;
 	},
 
-	updateVisualization: function() {
+	updateVisualization : function() {
 		this.visualization.update();
 	},
-	
+
 	getLegend : function() {
 		if (this.visualization.getLegend) {
 			return this.visualization.getLegend();
@@ -302,16 +303,155 @@ OpenLayers.Layer.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		return result;
 
 	},
-	
+
 	restore : function(parcel) {
 		this.visualization.restore(parcel);
 		this.updateVisualization();
 	},
-	
+
 	store : function(parcel) {
 		this.visualization.store(parcel);
+	},
+
+	/**
+	 * Creates and returns a FormPanel with all information from this layer's
+	 * capability service metadata
+	 * 
+	 * @returns {Ext.form.FormPanel}
+	 */
+	createServiceMetadataPanel : function() {
+		var panel = new Ext.form.FormPanel({
+			border : false
+		});
+
+		var service = this.capabilities.service;
+		if (service == null) {
+			panel.add({
+				xtype : 'label',
+				text : 'No service metadata available'
+			});
+			return panel;
+		}
+
+		if (service.title) {
+			panel.add({
+				xtype : 'label',
+				fieldLabel : 'Title',
+				text : service.title
+			});
+		}
+		if (service.abstract) {
+			panel.add({
+				xtype : 'textarea',
+				fieldLabel : 'Abstract',
+				value : service.abstract,
+				readOnly : true
+			});
+		}
+		if (service.keywords || service.keyword) {
+			panel.add({
+				xtype : 'label',
+				fieldLabel : 'Keywords',
+				text : service.keywords || service.keyword
+			});
+		}
+
+		if (service.contactInformation) {
+			var cI = service.contactInformation;
+			var fieldset = new Ext.form.FieldSet({
+				fieldLabel : 'Contact Information',
+				border : false,
+				labelWidth : 50
+			});
+			panel.add(fieldset);
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'Address',
+				text : cI.address || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'City',
+				text : cI.city || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'Country',
+				text : cI.country || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'Postcode',
+				text : cI.postcode || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'State/Province',
+				text : cI.stateOrProvince || ''
+			});
+
+			if (cI.personPrimary) {
+				fieldset.add({
+					xtype : 'label',
+					fieldLabel : 'Organization',
+					text : cI.organization || ''
+				});
+				fieldset.add({
+					xtype : 'label',
+					fieldLabel : 'Person',
+					text : cI.person || ''
+				});
+			}
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'E-Mail',
+				text : cI.email || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'Phone',
+				text : cI.phone || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'Fax',
+				text : cI.fax || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'E-Mail',
+				text : cI.email || ''
+			});
+			fieldset.add({
+				xtype : 'label',
+				fieldLabel : 'Position',
+				text : cI.poition || ''
+			});
+		}
+
+		if (service.accessConstraints) {
+			panel.add({
+				xtype : 'textarea',
+				fieldLabel : 'Access Constraints',
+				value : service.accessConstraints,
+				readOnly : true,
+				anchor : '100%'
+			});
+		}
+
+		if (service.fees) {
+			panel.add({
+				xtype : 'textarea',
+				fieldLabel : 'Fees',
+				value : service.fees,
+				readOnly : true,
+				anchor : '100%'
+			});
+		}
+
+		return panel;
 	}
-	
+
 });
 
 /**

@@ -17,7 +17,7 @@
  * Simple visualization for ncWMS layer applying a colorrange to a single nested
  * layer.
  */
-OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualization, {
+OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization, {
 	requiredLayers : {
 		// Each configuration has a distirbutionClass field and a
 		// getConfidenceInterval function. These will be used to fill the pixel
@@ -152,7 +152,7 @@ OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMS
 			group : 'Result'
 		};
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
 
 	},
 
@@ -169,7 +169,7 @@ OpenLayers.Layer.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.WMS
 			legendSymbolType : 'Polygon'
 		});
 
-		OpenLayers.Layer.WMSQ.Visualization.prototype.update.call(this);
+		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.update.call(this);
 	},
 
 	/**

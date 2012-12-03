@@ -84,7 +84,7 @@ VIS.ResourceLoader = {
 			p : layer.loaderIdPath
 		};
 
-		if (layer instanceof OpenLayers.Layer.WMSQ) {
+		if (layer instanceof OpenLayers.Layer.VIS.WMSQ) {
 			// WMS-Q layer needs to store layer configuration in order to get added
 			// without user input
 			var layerConfig = {}, visualization;
@@ -131,7 +131,8 @@ VIS.ResourceLoader = {
 		for ( var i = 0, layer; i < layers.length; i++) {
 			layer = layers[i];
 			if (layer instanceof OpenLayers.Layer.VIS.Vector
-					|| layer instanceof OpenLayers.Layer.VIS.Raster || layer instanceof OpenLayers.Layer.WMSQ
+					|| layer instanceof OpenLayers.Layer.VIS.Raster
+					|| layer instanceof OpenLayers.Layer.VIS.WMSQ
 					|| layer instanceof OpenLayers.Layer.VIS.WMS) {
 				permaObjects.push(VIS.ResourceLoader.getPermalinkObject(layer));
 			}
@@ -792,17 +793,17 @@ VIS.ResourceLoader = {
 			var layerOptions = [];
 
 			// Special ncWMS visualizations
-			var visualizations = [ [ OpenLayers.Layer.WMSQ.ColorRange, 'Color Range' ],
-					[ OpenLayers.Layer.WMSQ.Whitening, 'Whitening' ],
-					[ OpenLayers.Layer.WMSQ.Contour, 'Isolines' ],
-					[ OpenLayers.Layer.WMSQ.Glyphs, 'Glyphs' ],
-					[ OpenLayers.Layer.WMSQ.ExceedanceProbability, 'Exceedance Probability' ],
-					[ OpenLayers.Layer.WMSQ.ConfidenceInterval, 'Confidence Interval' ] ];
+			var visualizations = [ [ OpenLayers.Layer.VIS.WMSQ.ColorRange, 'Color Range' ],
+					[ OpenLayers.Layer.VIS.WMSQ.Whitening, 'Whitening' ],
+					[ OpenLayers.Layer.VIS.WMSQ.Contour, 'Isolines' ],
+					[ OpenLayers.Layer.VIS.WMSQ.Glyphs, 'Glyphs' ],
+					[ OpenLayers.Layer.VIS.WMSQ.ExceedanceProbability, 'Exceedance Probability' ],
+					[ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval, 'Confidence Interval' ] ];
 
 			for ( var i = 0; i < visualizations.length; i++) {
 				layerOptions.push({
 					text : visualizations[i][1],
-					layerClass : OpenLayers.Layer.WMSQ,
+					layerClass : OpenLayers.Layer.VIS.WMSQ,
 					requiredLayers : visualizations[i][0].prototype.requiredLayers,
 					// Layer config options from base prototype
 					visualizationClass : visualizations[i][0],
@@ -838,7 +839,8 @@ VIS.ResourceLoader = {
 			// Get capabilities
 			OpenLayers.Request
 					.GET({
-						url : wmsCapabilitiesProxy ? (wmsCapabilitiesProxy + '?URL=' + resourceOptions.url)
+						url : (wmsCapabilitiesProxy && resourceOptions.noProxy !== true) ? (wmsCapabilitiesProxy
+								+ '?URL=' + resourceOptions.url)
 								: resourceOptions.url,
 						params : {
 							SERVICE : 'WMS',
@@ -857,8 +859,16 @@ VIS.ResourceLoader = {
 							}
 							if (!capabilities.capability) {
 								if (respStatus == 0) {
-									callback(new Error(
-											'Server seems to not support cross-origin resource sharing (CORS) or is not available'));
+									if (resourceOptions.noProxy === true) {
+										// Loading fails if capabilities request fails even when not
+										// using proxy
+										callback(new Error(
+												'Server seems to not support cross-origin resource sharing (CORS) or is not available'));
+									} else {
+										// try to load again without proxy, if proxy loading failed
+										resourceOptions.noProxy = true;
+										VIS.ResourceLoader.resourceLoader.wms_root.call(this, resourceOptions, callback);
+									}
 								} else {
 									callback(new Error('Invalid capabilities response'));
 								}
@@ -955,7 +965,8 @@ VIS.ResourceLoader = {
 
 						return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(this, arguments);
 					};
-					layerOptions.warning = 'This WMS is not compatible with ' + mapProjection.toString()
+					layerOptions.warning = 'This WMS is not compatible with '
+							+ mapProjection.toString()
 							+ '. Greenland will reproject this resource, which may result in less accurate visualizations.';
 				} else {
 					// Even 4326 not available

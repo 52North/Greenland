@@ -513,7 +513,7 @@ Ext.onReady(function() {
 				function getFeatureInfoForLayerItem() {
 					var lonLat = map.getLonLatFromViewPortPx(clickPosition);
 
-					if (this.layer instanceof OpenLayers.Layer.WMSQ) {
+					if (this.layer instanceof OpenLayers.Layer.VIS.WMSQ) {
 						Ext.Msg.alert('Feature Info', this.layer.featureInfo(lonLat).replace('\n', '<br/>'));
 					} else {
 
@@ -539,7 +539,7 @@ Ext.onReady(function() {
 				for ( var i = 0, len = map.layers.length; i < len; i++) {
 					var layer = map.layers[i];
 					if ((layer instanceof OpenLayers.Layer.VIS.Raster && layer.visualization)
-							|| layer instanceof OpenLayers.Layer.WMSQ) {
+							|| layer instanceof OpenLayers.Layer.VIS.WMSQ) {
 						queryableLayerItems.push({
 							text : layer.visualization.getTitle(),
 							layer : layer,

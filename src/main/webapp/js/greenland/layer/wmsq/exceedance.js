@@ -17,7 +17,7 @@
  * Simple visualization for ncWMS layer applying a colorrange to a single nested
  * layer.
  */
-OpenLayers.Layer.WMSQ.ExceedanceProbability = OpenLayers.Class(OpenLayers.Layer.WMSQ.Visualization,
+OpenLayers.Layer.VIS.WMSQ.ExceedanceProbability = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization,
 		{
 			requiredLayers : {
 				// Each configuration has a distirbutionClass field and a
@@ -150,7 +150,7 @@ OpenLayers.Layer.WMSQ.ExceedanceProbability = OpenLayers.Class(OpenLayers.Layer.
 					}
 				};
 
-				OpenLayers.Layer.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
+				OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.initialize.apply(this, arguments);
 
 			},
 
@@ -167,7 +167,7 @@ OpenLayers.Layer.WMSQ.ExceedanceProbability = OpenLayers.Class(OpenLayers.Layer.
 					legendSymbolType : 'Polygon'
 				});
 
-				OpenLayers.Layer.WMSQ.Visualization.prototype.update.call(this);
+				OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.update.call(this);
 			},
 
 			/**

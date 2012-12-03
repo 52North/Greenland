@@ -111,7 +111,7 @@ Ext.ux.VIS.Legend = Ext.extend(Ext.Panel, {
 
 	createLegendItemForLayer : function(layer) {
 		if (layer instanceof OpenLayers.Layer.VIS.Raster
-				|| layer instanceof OpenLayers.Layer.VIS.Vector || layer instanceof OpenLayers.Layer.WMSQ
+				|| layer instanceof OpenLayers.Layer.VIS.Vector || layer instanceof OpenLayers.Layer.VIS.WMSQ
 				|| layer instanceof OpenLayers.Layer.VIS.WMS) {
 			var options = layer.getParameterOptions ? layer.getParameterOptions() : {};
 			var visualization = layer.visualization || layer;
