@@ -405,11 +405,6 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 			}
 			fieldset.add({
 				xtype : 'label',
-				fieldLabel : 'E-Mail',
-				text : cI.email || ''
-			});
-			fieldset.add({
-				xtype : 'label',
 				fieldLabel : 'Phone',
 				text : cI.phone || ''
 			});

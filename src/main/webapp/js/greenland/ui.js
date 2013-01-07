@@ -1146,6 +1146,7 @@ function createParameterControls(options, onChange, legend) {
 
 		if (option.label === false) {
 			paramComp.hideLabel = true;
+			// TODO can not define defaults after layout
 			paramComp.defaults = {
 				anchor : '100%'
 			};

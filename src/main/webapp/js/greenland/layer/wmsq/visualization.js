@@ -117,7 +117,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 			}
 
 			// Pixel access functions
-			
+
 			this.layerOptions[i].getValue = function(merger, x, y) {
 				var colorValue = merger.getColor(this.layerIndex, x, y);
 				if (colorValue[3] == 0 || colorValue[0] == 0) {
@@ -258,14 +258,46 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 
 		}
 		
+		var serviceVersion = this.layer.capabilities.version || '1.1.1';
+		options.push({
+			service : {
+				comp : new Ext.form.FieldSet({
+					title : 'Service',
+					items : [ {
+						xtype : 'label',
+						text : '(nc)WMS',
+						fieldLabel : 'Service Type'
+					}, {
+						xtype : 'label',
+						text : serviceVersion,
+						fieldLabel : 'Version'
+					}, {
+						xtype : 'label',
+						text : this.layer.url,
+						fieldLabel : 'URL'
+					}, {
+						xtype : 'label',
+						text : OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util.getParameterString({
+							'REQUEST' : 'GetCapabilities',
+							'SERVICE' : 'WMS',
+							'VERSION' : serviceVersion
+						})),
+						fieldLabel : 'GetCapabilities URL'
+					} ]
+				}),
+				label : false
+			},
+			group : 'Source'
+		});
+
 		options.push({
 			service : {
 				comp : this.layer.createServiceMetadataPanel(),
 				label : false
 			},
-			group : 'Service Metadata'
+			group : 'Source'
 		});
-		
+
 		return options;
 	},
 
@@ -299,7 +331,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 		for ( var key in this.parameters || {}) {
 			parcel.readParameter(this.parameters[key]);
 		}
-		
+
 		// visualization-specific parameters
 		for ( var key in this.options || {}) {
 			parcel.readParameter(this.options[key]);

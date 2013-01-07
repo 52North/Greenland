@@ -35,12 +35,52 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 			},
 			createParameters : function() {
 				var parameters = [ this.opacityStyler.createParameters() ];
+				var serviceVersion = this.layer.capabilities.version || '1.1.1';
 				parameters.push({
 					service : {
-						comp : OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel.call(this.layer),
+						comp : new Ext.form.FieldSet({
+							title : 'Service',
+							items : [
+									{
+										xtype : 'label',
+										text : 'WMS',
+										fieldLabel : 'Service Type'
+									},
+									{
+										xtype : 'label',
+										text : serviceVersion,
+										fieldLabel : 'Version'
+									},
+									{
+										xtype : 'label',
+										text : this.layer.url,
+										fieldLabel : 'URL'
+									},
+									{
+										xtype : 'label',
+										text : OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util
+												.getParameterString({
+													'REQUEST' : 'GetCapabilities',
+													'SERVICE' : 'WMS',
+													'VERSION' : serviceVersion
+												})),
+										fieldLabel : 'GetCapabilities URL'
+									} ]
+						}),
 						label : false
 					},
-					group : 'Service Metadata'
+					group : 'Source'
+				});
+				parameters.push({
+					service : {
+						comp : new Ext.form.FieldSet({
+							title : 'Metadata',
+							items : [ OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel
+									.call(this.layer) ]
+						}),
+						label : false
+					},
+					group : 'Source'
 				});
 				return parameters;
 			}
