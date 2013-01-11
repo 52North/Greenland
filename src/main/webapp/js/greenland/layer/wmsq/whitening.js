@@ -126,31 +126,43 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 	 */
 	getLegend : function() {
 		var self = this;
+		var leftMargin = 50;
+		var bottomMargin = 20;
 
 		var panel = new Ext.Panel({
 			border : false,
+			cursor : null,
 			listeners : {
 				render : function(comp) {
 					var el = comp.el.child('.x-panel-body');
+					comp.cursor = el.createChild({
+						tag : 'div',
+						style : {
+							position : 'absolute',
+							width : '3px',
+							height : '3px',
+							border : 'solid 2px gray'
+						}
+					});
 
 					var canvas = document.createElement("canvas");
 					var width = 200, height = 100;
-					var leftMargin = 50;
-					var legendWidth = width - leftMargin, legendHeight = height - 20;
+
+					var legendWidth = width - leftMargin, legendHeight = height - bottomMargin;
 
 					canvas.width = width;
 					canvas.height = height;
 					var ctx = canvas.getContext("2d");
 
 					// Get bounds
-					var valueMin = self.valueLayer.styler.bounds.getMinValue();
+					comp.valueMin = self.valueLayer.styler.bounds.getMinValue();
 					var valueMax = self.valueLayer.styler.bounds.getMaxValue();
-					var valueRangeRatio = (valueMax - valueMin) / legendWidth;
+					comp.valueRangeRatio = (valueMax - comp.valueMin) / legendWidth;
 
-					var errorMin = self.errorLayer.styler.bounds.getMinValue();
+					comp.errorMin = self.errorLayer.styler.bounds.getMinValue();
 					var errorMax = self.errorLayer.styler.bounds.getMaxValue();
 
-					var errorRangeRatio = (errorMax - errorMin) / legendHeight;
+					comp.errorRangeRatio = (errorMax - comp.errorMin) / legendHeight;
 
 					var imgdata = ctx.getImageData(0, 0, canvas.width, canvas.height);
 					var cpa = imgdata.data;
@@ -161,8 +173,8 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 					for ( var i = 0; i < legendHeight; i++) {
 						for ( var j = 0; j < legendWidth; j++) {
 
-							value = valueMin + (valueRangeRatio) * j;
-							error = errorMin + (errorRangeRatio) * i;
+							value = comp.valueMin + comp.valueRangeRatio * j;
+							error = comp.errorMin + comp.errorRangeRatio * i;
 							hue = self.valueLayer.styler.fillColor.getValueObject(value).h;
 
 							error = self.errorLayer.styler.bounds.getInterval(error)[0];
@@ -189,7 +201,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 						ctx.moveTo(i + leftMargin, legendHeight);
 						ctx.lineTo(i + leftMargin, legendHeight + 5);
 						ctx.stroke();
-						ctx.fillText((valueMin + (valueRangeRatio) * i).toFixed(2), i + leftMargin,
+						ctx.fillText((comp.valueMin + (comp.valueRangeRatio) * i).toFixed(2), i + leftMargin,
 								legendHeight + 5);
 					}
 
@@ -200,12 +212,57 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 						ctx.moveTo(leftMargin, i);
 						ctx.lineTo(leftMargin - 5, i);
 						ctx.stroke();
-						ctx.fillText((errorMin + (errorRangeRatio) * i).toFixed(2), leftMargin, i);
+						ctx.fillText((comp.errorMin + (comp.errorRangeRatio) * i).toFixed(2), leftMargin, i);
 					}
 					el.appendChild(canvas);
 				}
+			},
+
+			setCursorPosition : function(v, e) {
+				if (this.cursor) {
+					this.cursor.setLeft(leftMargin + ((v - this.valueMin) / this.valueRangeRatio));
+					this.cursor.setTop((e - this.errorMin) / this.errorRangeRatio);
+				}
+			},
+
+			setCursorVisible : function(visible) {
+				if (this.cursor) {
+					this.cursor.setVisible(visible);
+				}
 			}
 		});
+
+		var map = this.layer.map;
+
+		var cursorUpdateFunction = function(e) {
+			if (!this.layer.getVisibility()) {
+				return;
+			}
+			var lonLat = map.getLonLatFromViewPortPx(e.xy);
+
+			var data = this.layer.getTileData(lonLat);
+			if (!data.tile || data.tile.loadingMask != 0) {
+				panel.setCursorVisible(false);
+				return;
+			}
+
+			var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages,
+					data.tile);
+
+			var v = this.valueLayer.getValue(merger, Math.floor(data.i), Math.floor(data.j));
+			var e = this.errorLayer.getValue(merger, Math.floor(data.i), Math.floor(data.j));
+			if (v == null || e == null) {
+				panel.setCursorVisible(false);
+				return;
+			}
+			panel.setCursorPosition(v, e);
+			panel.setCursorVisible(true);
+		};
+
+		map.events.register('mousemove', this, cursorUpdateFunction);
+		panel.on('destroy', function() {
+			map.events.unregister('mousemove', this, cursorUpdateFunction);
+		}, this);
 
 		return panel;
 	}
