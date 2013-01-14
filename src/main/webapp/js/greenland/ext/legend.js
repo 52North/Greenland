@@ -26,262 +26,272 @@ Ext.namespace('Ext.ux.VIS');
  * provides simple drag and drop functionality in conjunction with other
  * Ext.ux.VIS.Legend instances and their maps.
  */
-Ext.ux.VIS.Legend = Ext.extend(Ext.Panel, {
-	autoScroll : true,
-	map : null,
+Ext.ux.VIS.Legend = Ext.extend(Ext.Panel,
+		{
+			autoScroll : true,
+			map : null,
 
-	initComponent : function() {
-		Ext.ux.VIS.Legend.superclass.initComponent.call(this);
+			initComponent : function() {
+				Ext.ux.VIS.Legend.superclass.initComponent.call(this);
 
-		this.map.events.register('addlayer', this, this.handleAddLayer);
-		this.map.events.register('removelayer', this, this.handleRemoveLayer);
+				this.map.events.register('addlayer', this, this.handleAddLayer);
+				this.map.events.register('removelayer', this, this.handleRemoveLayer);
 
-		this.map.events.register('changelayer', this, this.handleChangeLayer);
-	},
+				this.map.events.register('changelayer', this, this.handleChangeLayer);
+			},
 
-	initEvents : function() {
-		Ext.ux.VIS.Legend.superclass.initEvents.call(this);
-		this.dd = new Ext.ux.VIS.Legend.DropZone(this, this.dropConfig);
-	},
+			initEvents : function() {
+				Ext.ux.VIS.Legend.superclass.initEvents.call(this);
+				this.dd = new Ext.ux.VIS.Legend.DropZone(this, this.dropConfig);
+			},
 
-	handleChangeLayer : function(evt) {
+			handleChangeLayer : function(evt) {
 
-	},
+			},
 
-	handleAddLayer : function(evt) {
-		if (!this.hasLegendItemForLayer(evt.layer)) {
-			// TODO Correct ordering of layers
-			var item = this.createLegendItemForLayer(evt.layer);
-			if (item == null) {
-				return;
-			}
+			handleAddLayer : function(evt) {
+				if (!this.hasLegendItemForLayer(evt.layer)) {
+					// TODO Correct ordering of layers
+					var item = this.createLegendItemForLayer(evt.layer);
+					if (item == null) {
+						return;
+					}
 
-			this.insert(0, item);
-			this.doLayout();
-		}
-	},
+					this.insert(0, item);
+					this.doLayout();
+				}
+			},
 
-	handleRemoveLayer : function(evt) {
-		for ( var i = 0, len = this.items.items.length; i < len; i++) {
-			var item = this.items.items[i];
-			if (item.layer && item.layer == evt.layer) {
-				this.remove(item);
-				break;
-			}
-		}
-	},
+			handleRemoveLayer : function(evt) {
+				for ( var i = 0, len = this.items.items.length; i < len; i++) {
+					var item = this.items.items[i];
+					if (item.layer && item.layer == evt.layer) {
+						this.remove(item);
+						break;
+					}
+				}
+			},
 
-	insert : function(index, comp) {
-		Ext.ux.VIS.Legend.superclass.insert.apply(this, arguments);
-		if (comp.layer) {
-			if (!this.hasLayerForLegendItem(comp)) {
-				comp.layer.map.removeLayer(comp.layer);
-				this.map.addLayer(comp.layer);
-			}
-			this.map.setLayerIndex(comp.layer, this.map.layers.length - 3 - index);
-			this.map.resetLayersZIndex();
-		}
-	},
+			insert : function(index, comp) {
+				Ext.ux.VIS.Legend.superclass.insert.apply(this, arguments);
+				if (comp.layer) {
+					if (!this.hasLayerForLegendItem(comp)) {
+						comp.layer.map.removeLayer(comp.layer);
+						this.map.addLayer(comp.layer);
+					}
+					this.map.setLayerIndex(comp.layer, this.map.layers.length - 3 - index);
+					this.map.resetLayersZIndex();
+				}
+				comp.fireEvent("legendInsert", {});
+			},
 
-	// handleAddLegendItem : function(item) {
-	// if (!this.hasLayerForLegendItem(item)) {
-	// item.layer.map.removeLayer(item.layer);
-	// this.map.addLayer(item.layer);
-	// }
-	// },
+			// handleAddLegendItem : function(item) {
+			// if (!this.hasLayerForLegendItem(item)) {
+			// item.layer.map.removeLayer(item.layer);
+			// this.map.addLayer(item.layer);
+			// }
+			// },
 
-	hasLegendItemForLayer : function(layer) {
-		for ( var i = 0, len = this.items.items.length; i < len; i++) {
-			var item = this.items.items[i];
-			if (item.layer && item.layer == layer) {
-				return true;
-			}
-		}
-		return false;
-	},
+			hasLegendItemForLayer : function(layer) {
+				for ( var i = 0, len = this.items.items.length; i < len; i++) {
+					var item = this.items.items[i];
+					if (item.layer && item.layer == layer) {
+						return true;
+					}
+				}
+				return false;
+			},
 
-	hasLayerForLegendItem : function(item) {
-		for ( var i = 0, len = this.map.layers.length; i < len; i++) {
-			if (this.map.layers[i] == item.layer) {
-				return true;
-			}
-		}
-		return false;
-	},
+			hasLayerForLegendItem : function(item) {
+				for ( var i = 0, len = this.map.layers.length; i < len; i++) {
+					if (this.map.layers[i] == item.layer) {
+						return true;
+					}
+				}
+				return false;
+			},
 
-	createLegendItemForLayer : function(layer) {
-		if (layer instanceof OpenLayers.Layer.VIS.Raster
-				|| layer instanceof OpenLayers.Layer.VIS.Vector || layer instanceof OpenLayers.Layer.VIS.WMSQ
-				|| layer instanceof OpenLayers.Layer.VIS.WMS) {
-			var options = layer.getParameterOptions ? layer.getParameterOptions() : {};
-			var visualization = layer.visualization || layer;
+			createLegendItemForLayer : function(layer) {
+				if (layer instanceof OpenLayers.Layer.VIS.Raster
+						|| layer instanceof OpenLayers.Layer.VIS.Vector
+						|| layer instanceof OpenLayers.Layer.VIS.WMSQ
+						|| layer instanceof OpenLayers.Layer.VIS.WMS) {
+					var options = layer.getParameterOptions ? layer.getParameterOptions() : {};
+					var visualization = layer.visualization || layer;
 
-			var items = [ new Ext.ux.VIS.LegendScaleBar({
-				anchor : '100%',
-				visualization : visualization
-			}), new Ext.form.Label({
-				fieldLabel : 'Description',
-				text : visualization.description
-			}) ];
+					var legendScaleBar = new Ext.ux.VIS.LegendScaleBar({
+						anchor : '100%',
+						visualization : visualization
+					});
+					var items = [ legendScaleBar, new Ext.form.Label({
+						fieldLabel : 'Description',
+						text : visualization.description
+					}) ];
 
-			var updateTask = new Ext.util.DelayedTask(function() {
-				layer.updateVisualization();
-			});
-			var paramItems = createParameterControls(options, function() {
-				updateTask.delay(1000);
-			}, true);
-			if (paramItems.length > 0) {
-				items.push(new Ext.form.FieldSet({
-					items : paramItems,
-					title : 'Parameters',
-					collapsible : true,
-					listeners : {
-						collapse : function(p) {
-							var info = '';
-							for ( var key in options) {
-								var option = options[key];
-								if (info != '') {
-									info += ', ';
-								}
-								info += key + ' = ';
-								if (option.value) {
-									info += option.value;
-								} else {
-									info += 'NA';
+					var updateTask = new Ext.util.DelayedTask(function() {
+						layer.updateVisualization();
+					});
+					var paramItems = createParameterControls(options, function() {
+						updateTask.delay(1000);
+					}, true);
+					if (paramItems.length > 0) {
+						items.push(new Ext.form.FieldSet({
+							items : paramItems,
+							title : 'Parameters',
+							collapsible : true,
+							listeners : {
+								collapse : function(p) {
+									var info = '';
+									for ( var key in options) {
+										var option = options[key];
+										if (info != '') {
+											info += ', ';
+										}
+										info += key + ' = ';
+										if (option.value) {
+											info += option.value;
+										} else {
+											info += 'NA';
+										}
+									}
+									p.setTitle('Parameters - ' + info);
+								},
+								expand : function(p) {
+									p.setTitle('Parameters');
 								}
 							}
-							p.setTitle('Parameters - ' + info);
+						}));
+
+					}
+
+					items.push(new Ext.Button({
+						text : 'Permalink',
+						layer : layer,
+						handler : function(button) {
+							window.open(VIS.ResourceLoader.getPermalink(this.layer));
+						}
+					}));
+
+					// Tools to show in legend panel (small icons in the header)
+					var tools = [];
+					tools.push({
+						id : 'close',
+						qtip : 'Remove layer',
+						handler : function(event, toolEl, panel) {
+							var layer = panel.layer;
+							layer.map.removeLayer(layer);
+						}
+					});
+					if (layer instanceof OpenLayers.Layer.Vector) {
+						// Add zoom to layer tool if layer supports getDataExtent
+						tools.push({
+							id : 'maximize', // TODO find better image
+							qtip : 'Zoom to layer',
+							handler : function(event, toolEl, panel) {
+								var layer = panel.layer;
+								layer.map.zoomToExtent(layer.getDataExtent());
+							}
+						});
+					}
+					tools.push({
+						id : 'gear',
+						qtip : 'Layer settings',
+						handler : function(event, toolEl, panel) {
+							var layer = panel.layer;
+							showLayerSettings(layer);
+						}
+					});
+
+					var item = new Ext.form.FieldSet({
+						title : layer.getTitle() || 'Loading...',
+						collapsible : true,
+						items : items,
+						draggable : true,
+						layer : layer,
+						loading : false,
+						tools : tools,
+						listeners : {
+							render : function(comp) {
+								// add loading icon by inserting custom div into fieldset header
+								var loadingCfg = {
+									tag : 'div',
+									cls : 'legend-loading x-tool'
+								};
+								comp.loadingIcon = comp.header.insertFirst(loadingCfg);
+								comp.setLoading(comp.loading);
+
+								// add visibility checkbox by inserting custom input element
+								// into
+								// fieldset header
+								var visibilityCfg = {
+									tag : 'input',
+									type : 'checkbox',
+									name : 'test',
+									checked : comp.layer.getVisibility()
+								};
+								comp.visibilityCheckbox = comp.header.insertFirst(visibilityCfg);
+								comp.visibilityCheckbox.on('click', function(event) {
+									layer.setVisibility(event.target.checked);
+								}.createDelegate(comp));
+							}
+
 						},
-						expand : function(p) {
-							p.setTitle('Parameters');
+						setLoading : function(l) {
+							this.loading = l;
+							if (this.loadingIcon) {
+								if (this.loading) {
+									this.loadingIcon.show();
+								} else {
+									this.loadingIcon.hide();
+								}
+							}
 						}
-					}
-				}));
+					});
+					layer.events.register('changetitle', this, function(evt) {
+						item.setTitle(evt.layer.getTitle() || 'Loading...');
+					});
 
+					layer.events.register('loadstart', this, function(evt) {
+						item.setLoading(true);
+					});
+					layer.events.register('loadend', this, function(evt) {
+						item.setLoading(false);
+					});
+
+					item.on('legendInsert', function() {
+						legendScaleBar.refresh();
+					}, this);
+
+					return item;
+					// } else if (layer instanceof OpenLayers.Layer.VIS.Vector) {
+					// var items = [ new Ext.ux.VIS.LegendScaleBar({
+					// visualization : layer.visualization
+					// }) ];
+					//
+					// return new Ext.form.FieldSet({
+					// title : 'test Vector',
+					// collapsible : true,
+					// items : items,
+					// draggable : true,
+					// layer : layer
+					// });
+				} else {
+					return null;
+				}
+			},
+
+			beforeDestroy : function() {
+				if (this.dd) {
+					this.dd.unreg();
+				}
+
+				this.map.events.unregister('addlayer', this, this.handleAddLayer);
+				this.map.events.unregister('removelayer', this, this.handleRemoveLayer);
+				this.map.events.unregister('changelayer', this, this.handleChangeLayer);
+
+				Ext.ux.VIS.Legend.superclass.beforeDestroy.call(this);
 			}
-
-			items.push(new Ext.Button({
-				text : 'Permalink',
-				layer : layer,
-				handler : function(button) {
-					window.open(VIS.ResourceLoader.getPermalink(this.layer));
-				}
-			}));
-
-			// Tools to show in legend panel (small icons in the header)
-			var tools = [];
-			tools.push({
-				id : 'close',
-				qtip : 'Remove layer',
-				handler : function(event, toolEl, panel) {
-					var layer = panel.layer;
-					layer.map.removeLayer(layer);
-				}
-			});
-			if (layer instanceof OpenLayers.Layer.Vector) {
-				// Add zoom to layer tool if layer supports getDataExtent
-				tools.push({
-					id : 'maximize', // TODO find better image
-					qtip : 'Zoom to layer',
-					handler : function(event, toolEl, panel) {
-						var layer = panel.layer;
-						layer.map.zoomToExtent(layer.getDataExtent());
-					}
-				});
-			}
-			tools.push({
-				id : 'gear',
-				qtip : 'Layer settings',
-				handler : function(event, toolEl, panel) {
-					var layer = panel.layer;
-					showLayerSettings(layer);
-				}
-			});
-
-			var item = new Ext.form.FieldSet({
-				title : layer.getTitle() || 'Loading...',
-				collapsible : true,
-				items : items,
-				draggable : true,
-				layer : layer,
-				loading : false,
-				tools : tools,
-				listeners : {
-					render : function(comp) {
-						// add loading icon by inserting custom div into fieldset header
-						var loadingCfg = {
-							tag : 'div',
-							cls : 'legend-loading x-tool'
-						};
-						comp.loadingIcon = comp.header.insertFirst(loadingCfg);
-						comp.setLoading(comp.loading);
-
-						// add visibility checkbox by inserting custom input element into
-						// fieldset header
-						var visibilityCfg = {
-							tag : 'input',
-							type : 'checkbox',
-							name : 'test',
-							checked : comp.layer.getVisibility()
-						};
-						comp.visibilityCheckbox = comp.header.insertFirst(visibilityCfg);
-						comp.visibilityCheckbox.on('click', function(event) {
-							layer.setVisibility(event.target.checked);
-						}.createDelegate(comp));
-					}
-				},
-				setLoading : function(l) {
-					this.loading = l;
-					if (this.loadingIcon) {
-						if (this.loading) {
-							this.loadingIcon.show();
-						} else {
-							this.loadingIcon.hide();
-						}
-					}
-				}
-			});
-			layer.events.register('changetitle', this, function(evt) {
-				item.setTitle(evt.layer.getTitle() || 'Loading...');
-			});
-
-			layer.events.register('loadstart', this, function(evt) {
-				item.setLoading(true);
-			});
-			layer.events.register('loadend', this, function(evt) {
-				item.setLoading(false);
-			});
-
-			return item;
-			// } else if (layer instanceof OpenLayers.Layer.VIS.Vector) {
-			// var items = [ new Ext.ux.VIS.LegendScaleBar({
-			// visualization : layer.visualization
-			// }) ];
-			//
-			// return new Ext.form.FieldSet({
-			// title : 'test Vector',
-			// collapsible : true,
-			// items : items,
-			// draggable : true,
-			// layer : layer
-			// });
-		} else {
-			return null;
-		}
-	},
-
-	beforeDestroy : function() {
-		if (this.dd) {
-			this.dd.unreg();
-		}
-
-		this.map.events.unregister('addlayer', this, this.handleAddLayer);
-		this.map.events.unregister('removelayer', this, this.handleRemoveLayer);
-		this.map.events.unregister('changelayer', this, this.handleChangeLayer);
-
-		Ext.ux.VIS.Legend.superclass.beforeDestroy.call(this);
-	}
-});
+		});
 
 /**
  * Based on Ext.ux.Portal.DropZone example code
