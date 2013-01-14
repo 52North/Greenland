@@ -239,7 +239,24 @@ OpenLayers.VIS.Symbology.Vector = OpenLayers.Class(OpenLayers.VIS.Symbology.Base
 				options.push(styler.createParameters());
 			}
 		}
-
+		options.push({
+			service : {
+				comp : new Ext.form.FormPanel({
+					border : false,
+					items : [ {
+						xtype : 'label',
+						text : this.layer.resourceOptions.mime,
+						fieldLabel : 'MIME Type'
+					}, {
+						xtype : 'label',
+						text : this.layer.resourceOptions.url,
+						fieldLabel : 'URL'
+					} ]
+				}),
+				label : false
+			},
+			group : 'Source'
+		});
 		return options;
 	},
 

@@ -71,7 +71,8 @@ OpenLayers.Layer.VIS.Vector = OpenLayers.Class(OpenLayers.Layer.Vector, {
 				this.setProcedures(value);
 			},
 			scope : this,
-			store : false 	// do not include in permalink
+			store : false
+		// do not include in permalink
 		};
 
 		this.visualization.setLayer(this);
@@ -112,7 +113,6 @@ OpenLayers.Layer.VIS.Vector = OpenLayers.Class(OpenLayers.Layer.Vector, {
 		var options = OpenLayers.Util.extend({}, this.resultValue.options || {});
 		OpenLayers.Util.extend(options, this.visualization.options || {});
 		OpenLayers.Util.extend(options, this.parameterOptions || {});
-
 		return options;
 	},
 

@@ -128,8 +128,6 @@
 
 			</plugin>
 
-
-
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
 				<artifactId>minify-maven-plugin</artifactId>
