@@ -51,7 +51,7 @@ OpenLayers.VIS.Color = {
 			var h = this.h / 360;
 			var s = this.s / 100;
 			var v = this.v / 100;
-			var r, g, b;
+			var r = null, g = null, b = null;
 			if (s === 0) {
 				r = g = b = v;
 			} else {

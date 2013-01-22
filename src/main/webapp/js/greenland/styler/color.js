@@ -130,7 +130,7 @@ OpenLayers.VIS.Styler.Color = OpenLayers
 					},
 
 					getSld : function() {
-						var max = this.symbology.styler.bounds.getMaxValue();
+						// var max = this.symbology.styler.bounds.getMaxValue(); // max is never read
 						var min = this.symbology.styler.bounds.getMinValue();
 						// var ints = this.symbology.styler.bounds.getInts();
 

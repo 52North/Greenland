@@ -678,7 +678,7 @@ VIS.ResourceLoader = {
 		 * Creates level for all visualizers of a VISS dataset
 		 */
 		viss_dataset : function(resourceOptions, callback) {
-			var self = this;
+			// var self = this; // variable never read
 			var dataSet = resourceOptions.dataSet;
 
 			// Load data set

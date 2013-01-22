@@ -339,7 +339,7 @@ Ext.ux.VIS.Legend.DropZone = Ext.extend(Ext.dd.DropTarget, {
 			this.legend.doLayout();
 		}
 
-		var p, match = false, pos = 0, items = legend.items.items, overSelf = false;
+		var p = null, match = false, pos = 0, items = legend.items.items, overSelf = false;
 
 		for ( var len = items.length; pos < len; pos++) {
 			p = items[pos];
