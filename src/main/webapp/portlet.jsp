@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="ISO-8859-1"%>
-<%@ taglib uri="http://java.sun.com/portlet" prefix="portlet"%>
+<%@ taglib uri="/WEB-INF/tld/liferay-portlet.tld" prefix="portlet"%>
 <portlet:defineObjects />
 
 <!-- ** Javascript ** -->
