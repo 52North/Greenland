@@ -23,6 +23,7 @@
 <!-- OpenLayers + Proj4js-->
 <script type="text/javascript"
 	src="<%=request.getContextPath()%>/js/OpenLayers/OpenLayers.js"></script>
+	
 <!-- Debug Script -->
 <!-- <script type="text/javascript" src="<%=request.getContextPath()%>/js/OpenLayers/lib/OpenLayers.js"></script> -->
 
@@ -31,11 +32,9 @@
 <script type="text/javascript"
 	src="<%=request.getContextPath()%>/js/proj4/defs.js"></script>
 
-
 <!-- GeoExt -->
 <script type="text/javascript"
 	src="<%=request.getContextPath()%>/js/GeoExt/GeoExt.js"></script>
-
 
 <!-- Greenland Ext Extensions -->
 <script type="text/javascript"
@@ -58,9 +57,11 @@
 	src="<%=request.getContextPath()%>/js/flot/jquery-flot.js"></script>
 
 <!-- Greenland -->
-
 <script type="text/javascript"
 	src="<%=request.getContextPath()%>/js/greenland/greenland.min.js"></script>
 
 
 <div id="greenlandDiv" style="width: 100%; height: 600px;"></div>
+
+<!-- for testing only: -->
+<div style="color: grey;">${buildNumber}</div>
