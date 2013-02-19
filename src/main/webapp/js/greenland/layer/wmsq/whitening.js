@@ -241,7 +241,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 			var lonLat = map.getLonLatFromViewPortPx(e.xy);
 
 			var data = this.layer.getTileData(lonLat);
-			if (!data.tile || data.tile.loadingMask != 0) {
+			if (!data || !data.tile || data.tile.loadingMask != 0) {
 				panel.setCursorVisible(false);
 				return;
 			}

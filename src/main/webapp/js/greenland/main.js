@@ -80,19 +80,25 @@ VIS.createPropertyArray = function(array, properties) {
 	return array;
 };
 
-Ext.BLANK_IMAGE_URL = 'js/ExtJs/resources/images/default/s.gif';
-
 // represents the two map views
 VIS.mapComponents = [];
+VIS.syncViewports = true;
 
 Ext.onReady(function() {
 	// Executed when Ext framework is ready, i.e. website is loaded
+
+	Ext.BLANK_IMAGE_URL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP'
+			+ '///yH5BAEAAAAALAAAAAABAAEAQAIBRAA7';
+	if (Ext.isIE6 || Ext.isIE7) {
+		Ext.BLANK_IMAGE_URL = 'js/ExtJs/resources/images/default/s.gif';
+		// TODO will not work in portlet
+	}
 
 	Ext.QuickTips.init();
 
 	// Flags for viewport sync
 	var syncPointers = true;
-	var syncViewports = true;
+	var showExtents = true;
 
 	// Timeslider component
 	var timeSlider = new Ext.ux.VIS.Slider({
@@ -180,17 +186,39 @@ Ext.onReady(function() {
 		}
 	}
 
+	// Function to show map extents on other maps. Hides the "extentLayer"
+	// of each map when disabled
+	function enableShowExtents(enable) {
+		showExtents = enable;
+		if (!showExtents) {
+			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+				var extentLayer = VIS.mapComponents[i].extentLayer;
+				extentLayer.setVisibility(false);
+				extentLayer.map.setLayerIndex(extentLayer, 0);
+			}
+		}
+	}
+
 	// Function to synchronize viewports. The center location and zoom level
 	// of each map gets adapted to the values of the first map
 	function enableSyncViewports(enable) {
-		syncViewports = enable;
-		if (syncViewports) {
+		VIS.syncViewports = enable;
+		if (VIS.syncViewports) {
 			var mainMap = VIS.mapComponents[0].mapPanel.map;
 			var center = mainMap.getCenter().clone();
 			var zoom = mainMap.getZoom();
 			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
 				var map = VIS.mapComponents[i].mapPanel.map;
-				if (map != mainMap) {
+				if (map == mainMap)
+					continue;
+				if (map.getProjection() != mainMap.getProjection()) {
+					var centerProj = center.clone();
+					centerProj.transform(mainMap.getProjectionObject(), map.getProjectionObject());
+					var boundsProj = mainMap.getExtent();
+					boundsProj.transform(mainMap.getProjectionObject(), map.getProjectionObject());
+					var zoomProj = map.getZoomForExtent(boundsProj, true);
+					map.setCenter(centerProj, zoomProj, false);
+				} else {
 					map.setCenter(center, zoom, false);
 				}
 			}
@@ -251,7 +279,16 @@ Ext.onReady(function() {
 			if (evt.object == mouseMarker.map) {
 				continue;
 			}
-			mouseMarker.moveTo(mouseMarker.map.getLayerPxFromLonLat(lonLat));
+			var moveToLonLat = lonLat;
+			if (evt.object.getProjection() != mouseMarker.map.getProjection()) {
+				moveToLonLat = lonLat.clone();
+				moveToLonLat.transform(evt.object.getProjectionObject(), mouseMarker.map
+						.getProjectionObject());
+			}
+
+			if (mouseMarker.map.getExtent().containsLonLat(moveToLonLat)) {
+				mouseMarker.moveTo(mouseMarker.map.getLayerPxFromLonLat(moveToLonLat));
+			}
 		}
 	};
 
@@ -282,18 +319,103 @@ Ext.onReady(function() {
 		}
 	};
 
-	var handleMapMove = function(evt) {
-		if (!syncViewports)
-			return;
+	// Counter ensures that no move events from manually invoking setCenter
+	// are
+	// processed
+	var mapMoveCounter = 0;
 
-		var center = evt.object.getCenter().clone();
-		var zoom = evt.object.getZoom();
-		for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
-			var map = VIS.mapComponents[i].mapPanel.map;
-			if (map != evt.object && (map.zoom != zoom || !map.center.equals(center))) {
-				map.setCenter(center, zoom, false);
+	var handleMapMove = function(evt) {
+		if (mapMoveCounter >= 1 || evt.object.reprojecting === true) {
+			// cycle detected
+			return;
+		}
+		mapMoveCounter++;
+		var mapEvent = evt.object;
+
+		if (showExtents) {
+			var viewportDiv = mapEvent.getViewport();
+			var points = [], lonLat = null;
+			var numPoints = 8;
+			for ( var i = 0; i < numPoints; i++) {
+				lonLat = mapEvent.getLonLatFromViewPortPx({
+					x : viewportDiv.clientWidth * (i / numPoints),
+					y : 0
+				});
+				points.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+			}
+			for ( var i = 0; i < numPoints; i++) {
+				lonLat = mapEvent.getLonLatFromViewPortPx({
+					x : viewportDiv.clientWidth,
+					y : viewportDiv.clientHeight * (i / numPoints)
+				});
+				points.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+			}
+			for ( var i = numPoints; i > 0; i--) {
+				lonLat = mapEvent.getLonLatFromViewPortPx({
+					x : viewportDiv.clientWidth * (i / numPoints),
+					y : viewportDiv.clientHeight
+				});
+				points.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+			}
+			for ( var i = numPoints; i > 0; i--) {
+				lonLat = mapEvent.getLonLatFromViewPortPx({
+					x : 0,
+					y : viewportDiv.clientHeight * (i / numPoints)
+				});
+				points.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+			}
+			var extentBounds = new OpenLayers.Geometry.LinearRing(points);
+
+			// update viewport extent indicator
+			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+				var extentLayer = VIS.mapComponents[i].extentLayer;
+				var mapOther = extentLayer.map;
+				if (mapEvent != extentLayer.map && mapEvent.getProjection() != mapOther.getProjection()) {
+					extentLayer.setVisibility(true);
+					extentLayer.map.setLayerIndex(extentLayer, extentLayer.map.layers.length - 1);
+
+					extentLayer.extentBox.geometry = extentBounds.clone();
+					if (mapEvent.getProjection() != extentLayer.map.getProjection()) {
+						extentLayer.extentBox.geometry.transform(mapEvent.getProjectionObject(),
+								extentLayer.map.getProjectionObject());
+					}
+					extentLayer.extentBoxHalo.geometry = extentLayer.extentBox.geometry.clone();
+					extentLayer.renderer.clear();
+					extentLayer.drawFeature(extentLayer.extentBoxHalo, 'halo');
+					// extentLayer.extentBox.geometry.id += '_halo';
+					extentLayer.drawFeature(extentLayer.extentBox, 'default');
+				} else {
+					extentLayer.setVisibility(false);
+					extentLayer.map.setLayerIndex(extentLayer, 0);
+				}
+
 			}
 		}
+
+		if (VIS.syncViewports) {
+			// Keep viewports in sync
+			var center = mapEvent.getCenter().clone();
+			var zoom = mapEvent.getZoom();
+			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
+				var mapOther = VIS.mapComponents[i].mapPanel.map;
+				if (mapOther != mapEvent) {
+
+					if (mapEvent.getProjection() != mapOther.getProjection()) {
+						var centerProj = center.clone();
+						centerProj.transform(mapEvent.getProjectionObject(), mapOther.getProjectionObject());
+						var boundsProj = mapEvent.getExtent();
+						boundsProj.transform(mapEvent.getProjectionObject(), mapOther.getProjectionObject());
+						var zoomProj = mapOther.getZoomForExtent(boundsProj, true);
+						mapOther.setCenter(centerProj, zoomProj, false);
+
+					} else if (mapOther.zoom != zoom || !mapOther.center.equals(center)) {
+						mapOther.setCenter(center, zoom, false);
+					}
+
+				}
+			}
+		}
+		mapMoveCounter--;
 	};
 
 	var handleChangeTimeLimits = function(evt) {
@@ -338,33 +460,39 @@ Ext.onReady(function() {
 	};
 
 	// Function creates all components needed for a single map view
-	function createMapComponents() {
+	function createMapComponents(options) {
+		options = options || {};
+
 		// Base layers
+		var proj3857 = new OpenLayers.Projection('EPSG:3857');
 		var baseLayers = [ new OpenLayers.Layer.OSM.Mapnik('OpenStreetMap Mapnik', {
-			transitionEffect : 'resize'
+			transitionEffect : 'resize',
+			projection : proj3857
 		}), new OpenLayers.Layer.OSM.CycleMap('OpenStreetMap CycleMap', {
-			transitionEffect : 'resize'
+			transitionEffect : 'resize',
+			projection : proj3857
 		}), new OpenLayers.Layer.Google('Google Streets', {
-			transitionEffect : 'resize'
+			transitionEffect : 'resize',
+			projection : proj3857
 		}), new OpenLayers.Layer.Google('Google Satellite', {
 			type : google.maps.MapTypeId.SATELLITE,
-			transitionEffect : 'resize'
+			transitionEffect : 'resize',
+			projection : proj3857
 		}), new OpenLayers.Layer.Google('Google Hybrid', {
 			type : google.maps.MapTypeId.HYBRID,
-			transitionEffect : 'resize'
+			transitionEffect : 'resize',
+			projection : proj3857
 		}), new OpenLayers.Layer.Google('Google Physical', {
 			type : google.maps.MapTypeId.TERRAIN,
-			transitionEffect : 'resize'
+			transitionEffect : 'resize',
+			projection : proj3857
 		}), new OpenLayers.Layer('None', {
-			isBaseLayer : true
+			isBaseLayer : true,
+			projection : proj3857
 		}) ];
 		// Map itself
-		var map = new OpenLayers.VIS.Map({
-			maxExtent : new OpenLayers.Bounds(-128 * 156543.0339, -128 * 156543.0339, 128 * 156543.0339,
-					128 * 156543.0339),
-			maxResolution : 156543.0339,
-			units : 'm',
-			projection : new OpenLayers.Projection('EPSG:3857'),
+		var map = new OpenLayers.VIS.Map(OpenLayers.Util.applyDefaults(options, {
+			projection : proj3857, // Default projection
 			displayProjection : new OpenLayers.Projection('EPSG:4326'),
 			controls : [ new OpenLayers.Control.ScaleLine(), // new
 			// OpenLayers.Control.ZoomBox(),
@@ -374,7 +502,7 @@ Ext.onReady(function() {
 					documentDrag : true
 				}
 			}) ], // , new OpenLayers.Control.KeyboardDefaults() ]
-		});
+		}));
 		map.addLayers(baseLayers);
 
 		var center = new OpenLayers.LonLat(7.6, 51.9);
@@ -385,10 +513,35 @@ Ext.onReady(function() {
 		// Mouse marker, to show the position of the mouse in other map views
 		var mouseMarkerLayer = new OpenLayers.Layer.Markers("MouseMarker");
 		map.addLayer(mouseMarkerLayer);
-
 		var mouseMarker = new OpenLayers.Marker(map.getCenter(), new OpenLayers.Icon(
 				'images/cross.png', new OpenLayers.Size(20, 20), new OpenLayers.Pixel(-10, -10)));
 		mouseMarkerLayer.addMarker(mouseMarker);
+
+		// Layer showing the extent of the map with which the user is currently
+		// interacting
+		var extentBox = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LinearRing([]));
+		var extentBoxHalo = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LinearRing([]));
+
+		var extentLayer = new OpenLayers.Layer.Vector("Extent", {
+			extentBox : extentBox,
+			extentBoxHalo : extentBoxHalo,
+			styleMap : new OpenLayers.StyleMap({
+				'default' : {
+					strokeOpacity : 0.8,
+					fillOpacity : 0,
+					fillColor : 'transparent',
+					strokeColor : 'black',
+					strokeWidth : 2,
+					strokeLinecap : 'square'
+				},
+				'halo' : {
+					strokeColor : 'white',
+					strokeWidth : 4
+				}
+			})
+		});
+		extentLayer.addFeatures([ extentBoxHalo, extentBox ]);
+		map.addLayer(extentLayer);
 
 		// layer which manages the feature selection
 		var selectLayer = new OpenLayers.Layer.VIS.MultiProxyVector("", {});
@@ -406,8 +559,8 @@ Ext.onReady(function() {
 		// Graticule
 		// TODO fix problems with layer ordering
 		var graticuleControl = new OpenLayers.Control.Graticule({
-			numPoints : 2,
 			labelled : true,
+			targetSize : 200,
 			layerName : 'grat_', // Used to identify graticule layer in
 			// MultiProxyVector
 			displayInLayerSwitcher : false,
@@ -471,17 +624,26 @@ Ext.onReady(function() {
 			listeners : {
 				itemclick : function(item) {
 					item.layer.map.setBaseLayer(item.layer);
+				},
+				beforeshow : function(menu) {
+					// Create menu items every time the menu is shown to dynamically add
+					// available base layers based on the projection
+					menu.removeAll();
+					for ( var i = 0, len = map.layers.length; i < len; i++) {
+						var layer = map.layers[i];
+						if (layer.isBaseLayer
+								&& (!layer.projection || layer.projection.getCode() == map.getProjection())) {
+							menu.add({
+								text : layer.name,
+								layer : layer,
+								checked : layer == map.baseLayer,
+								group : map.id + 'baselayer'
+							});
+						}
+					}
 				}
 			}
 		});
-		for ( var i = 0, len = baseLayers.length; i < len; i++) {
-			layerMenu.add({
-				text : baseLayers[i].name,
-				layer : baseLayers[i],
-				checked : i == 0,
-				group : map.id + 'baselayer'
-			});
-		}
 
 		var featureInfoControl = new OpenLayers.Control.WMSGetFeatureInfo({
 			infoFormat : 'application/vnd.ogc.gml'
@@ -563,19 +725,41 @@ Ext.onReady(function() {
 		}
 
 		var store = function(parcel) {
+			parcel.writeString(map.getProjection());
 			parcel.writeFloat(map.getCenter().lon);
 			parcel.writeFloat(map.getCenter().lat);
 			parcel.writeInt(map.getZoom());
 			parcel.writeInt(baseLayers.indexOf(map.baseLayer));
+
 		};
 
-		var restore = function(parcel) {
+		var restore = function(parcel, callback) {
+			var projectionCode = parcel.readString();
 			var center = new OpenLayers.LonLat(parcel.readFloat(), parcel.readFloat());
-			map.setCenter(center, parcel.readInt());
+			var zoom = parcel.readInt();
 			var baseLayerIndex = parcel.readInt();
-			if (baseLayerIndex >= 0 && baseLayerIndex < baseLayers.length) {
-				map.setBaseLayer(baseLayers[baseLayerIndex]);
-			}
+
+			VIS.getProjection(projectionCode, function(projection) {
+				map.reprojecting = true;
+				map.projection = projection;
+				map.maxExtent = new OpenLayers.Bounds(
+						OpenLayers.Projection.defaults[projection.getCode()].maxExtent);
+				map.setCenter(center, zoom);
+				if (baseLayerIndex >= 0 && baseLayerIndex < baseLayers.length) {
+					map.setBaseLayer(baseLayers[baseLayerIndex]);
+				} else {
+					var baseLayer = new OpenLayers.Layer('None', {
+						isBaseLayer : true,
+						projection : projection
+					});
+					map.addLayers([ baseLayer ]);
+					map.setBaseLayer(baseLayer);
+				}
+				map.reprojecting = false;
+
+				callback.call(this);
+			});
+
 		};
 
 		// Return object of all required parts for a map component
@@ -663,6 +847,11 @@ Ext.onReady(function() {
 								},
 								tooltip : 'Allows to swipe the top most layer'
 							}), '->', {
+								text : 'Settings',
+								handler : function() {
+									showMapSettings(map);
+								}
+							}, {
 								text : 'Base Layer',
 								menu : layerMenu
 							} ]
@@ -679,6 +868,8 @@ Ext.onReady(function() {
 			// Mouse marker layer
 			mouseMarker : mouseMarker,
 			mouseMarkerLayer : mouseMarkerLayer,
+			// Extent Layer
+			extentLayer : extentLayer,
 			// Selection layer
 			selectLayer : selectLayer,
 			// Feature Info Control
@@ -758,6 +949,7 @@ Ext.onReady(function() {
 		});
 
 		VIS.mapComponents.push(components);
+		return components;
 	};
 
 	var removeMap = function(components) {
@@ -770,8 +962,8 @@ Ext.onReady(function() {
 		VIS.mapComponents.remove(components);
 	};
 
-	VIS.addMap = function() {
-		addMap(createMapComponents());
+	VIS.addMap = function(options) {
+		return addMap(createMapComponents(options));
 	};
 
 	VIS.removeMap = function() {
@@ -843,7 +1035,8 @@ Ext.onReady(function() {
 				text : 'Add Resource...',
 				handler : function() {
 					// Left map
-					showResourceWindow(VIS.mapComponents[0].mapPanel.map);
+					VIS.showResourceWindow();
+					// showResourceWindow(VIS.mapComponents[0].mapPanel.map);
 				},
 				iconCls : 'icon-database'
 			}, {
@@ -868,19 +1061,11 @@ Ext.onReady(function() {
 			// Navigation
 			xtype : 'buttongroup',
 			title : 'Navigation',
-			columns : 2,
+			columns : 3,
 			defaults : {
 				scale : 'small'
 			},
 			items : [ {
-				xtype : 'button',
-				text : 'Sync Pointer',
-				enableToggle : true,
-				pressed : syncPointers,
-				toggleHandler : function(button, pressed) {
-					enableSyncPointers(pressed);
-				}
-			}, {
 				xtype : 'button',
 				text : 'Add Map',
 				iconCls : 'icon-addmap',
@@ -890,11 +1075,19 @@ Ext.onReady(function() {
 				}
 			}, {
 				xtype : 'button',
-				text : 'Sync Viewports',
+				text : 'Sync Pointer',
 				enableToggle : true,
-				pressed : syncViewports,
+				pressed : syncPointers,
 				toggleHandler : function(button, pressed) {
-					enableSyncViewports(pressed);
+					enableSyncPointers(pressed);
+				}
+			}, {
+				xtype : 'button',
+				text : 'Show Extents',
+				enableToggle : true,
+				pressed : showExtents,
+				toggleHandler : function(button, pressed) {
+					enableShowExtents(pressed);
 				}
 			}, {
 				xtype : 'button',
@@ -903,7 +1096,14 @@ Ext.onReady(function() {
 				handler : function(button) {
 					VIS.removeMap();
 					VIS.viewport.doLayout();
-
+				}
+			}, {
+				xtype : 'button',
+				text : 'Sync Viewports',
+				enableToggle : true,
+				pressed : VIS.syncViewports,
+				toggleHandler : function(button, pressed) {
+					enableSyncViewports(pressed);
 				}
 			} ]
 		}, {
@@ -1003,7 +1203,7 @@ Ext.onReady(function() {
 	VIS.checkForResourceRequest(function(newResource) {
 		// Add new resource info at te beginning of default resources
 		defaultResources.unshift(newResource);
-		showResourceWindow(VIS.mapComponents[0].mapPanel.map, [ newResource ], true);
+		VIS.showResourceWindow([ newResource ], true);
 	});
 
 	VIS.checkForPermalink();
@@ -1022,13 +1222,15 @@ VIS.getAllLayers = function() {
 };
 
 VIS.storeViewport = function(parcel) {
+	parcel.writeBoolean(VIS.syncViewports);
 	parcel.writeInt(VIS.mapComponents.length);
 	for ( var i = 0; i < VIS.mapComponents.length; i++) {
 		VIS.mapComponents[i].store(parcel);
 	}
 };
 
-VIS.restoreViewport = function(parcel) {
+VIS.restoreViewport = function(parcel, callback) {
+	VIS.syncViewports = parcel.readBoolean();	// TODO use enableSyncViewport
 	var mapCount = Math.max(0, parcel.readInt());
 	if (mapCount > VIS.mapComponents.length) {
 		var len = mapCount - VIS.mapComponents.length;
@@ -1043,8 +1245,16 @@ VIS.restoreViewport = function(parcel) {
 	}
 	VIS.viewport.doLayout();
 
-	for ( var i = 0; i < VIS.mapComponents.length; i++) {
-		VIS.mapComponents[i].restore(parcel);
+	var restoreCount = 0, mapCount = VIS.mapComponents.length;
+	var mapRestoreCallback = function() {
+		restoreCount++;
+		if (restoreCount >= mapCount) {
+			callback.call(this);
+		}
+	};
+
+	for ( var i = 0; i < mapCount; i++) {
+		VIS.mapComponents[i].restore(parcel, mapRestoreCallback);
 	}
 };
 
@@ -1198,4 +1408,129 @@ VIS.showHTMLWindow = function(title, url) {
 			}
 		} ]
 	}).show();
+};
+
+/**
+ * Shows a window to select a new layer to be added to the specified
+ * OpenLayers.Map object. Shows different data sources and visualizations and
+ * allows specification of new resources.
+ */
+VIS.showResourceWindow = function(resources, requestParam) {
+	var maps = [];
+	for ( var i = 0; i < VIS.mapComponents.length; i++) {
+		maps.push(VIS.mapComponents[i].mapPanel.map);
+	}
+	// Show window
+	new Ext.ux.VIS.ResourceWindow({
+		resources : resources,
+		requestParam : requestParam,
+		maps : maps,
+		title : 'Add Resource',
+		height : 400,
+		width : 600,
+		constrainHeader : true,
+		createNewMap : function(projCode, mapCallback) {
+
+			VIS.getProjection(projCode, function(projection) {
+				var map = VIS.addMap({
+					projection : projection
+				}).mapPanel.map;
+				VIS.viewport.doLayout();
+				var baseLayer = new OpenLayers.Layer('None', {
+					isBaseLayer : true,
+					projection : projection
+				});
+				map.reprojecting = true;
+				map.addLayers([ baseLayer ]);
+				map.setBaseLayer(baseLayer);
+				map.reprojecting = false;
+				mapCallback.call(this, map);
+			});
+
+		}
+	}).show();
+
+	return;
+};
+
+/**
+ * Returns projection by projection code via callback mechanism. Ensures that
+ * OpenLayers.Projection.defaults is updated with default max resolutions
+ * 
+ * @param projCode
+ * @param projCallback
+ */
+VIS.getProjection = function(projCode, projCallback) {
+	var projectionCallback = function() {
+		var projection = new OpenLayers.Projection(projCode);
+
+		if (!OpenLayers.Projection.defaults[projection.getCode()]) {
+			// Define projection default settings if not set using whole world as
+			// max extent
+			if (projection.proj.units == 'm') {
+				OpenLayers.Projection.defaults[projection.getCode()] = {
+					units : 'm',
+					maxExtent : [ -20037508.34, -20037508.34, 20037508.34, 20037508.34 ]
+				};
+			} else { // if (projection.proj.units == 'degrees') {	// TODO handle unkown unit
+				OpenLayers.Projection.defaults[projection.getCode()] = {
+					units : 'degrees',
+					maxExtent : [ -180, -90, 180, 90 ]
+				};
+			}
+		}
+
+		projCallback.call(this, projection);
+	};
+
+	if (typeof Proj4js == "object") {
+		// Proj4js library detected, so load projection manually and use
+		// callback mechanism to ensure that projection is ready to use before
+		// using it within OpenLayers
+		new Proj4js.Proj(projCode, function() {
+			projectionCallback.call(this);
+		});
+	} else {
+		projectionCallback.call(this);
+	}
+};
+
+VIS.projCodeTitleCache = {};
+/**
+ * Extracts the name of a projection of its WKT and caches the result. The
+ * projection itself needs to be already cached to receive a result.
+ */
+VIS.getProjectionTitle = function(projCode) {
+	if (typeof Proj4js != "object") {
+		// No Proj4js
+		return;
+	}
+
+	if (VIS.projCodeTitleCache[projCode]) {
+		return VIS.projCodeTitleCache[projCode];
+	}
+
+	var wkt = Proj4js.defs[projCode];
+	if (wkt == null || wkt.length == 0) {
+		return;
+	}
+
+	var result = /\+title=([^+]*)/.exec(wkt);
+	if (result != null && result[1] != null) {
+		VIS.projCodeTitleCache[projCode] = result[1];
+		return result[1];
+	}
+};
+
+/**
+ * Shows a message box with an error text automatically truncated to a maximum
+ * length
+ * 
+ */
+VIS.showServerError = function(error, title) {
+	var message = error.message;
+	if (message.length > 150) {
+		message = message.substring(0, 150) + "...";
+	}
+	Ext.Msg.alert(title ? title : 'Error', message);
 };

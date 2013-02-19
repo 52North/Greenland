@@ -163,6 +163,9 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 	},
 
 	setMap : function(map) {
+		if (map.projection != null) {
+			this.projection = map.projection;
+		}
 		OpenLayers.Layer.WMS.prototype.setMap.apply(this, arguments);
 		this.map.events.register('changetime', this, this.handleChangeTime);
 

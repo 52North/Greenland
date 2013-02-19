@@ -13,764 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Shows a message box with an error text automatically truncated to a maximum
- * length
- * 
- */
-function showServerError(error, title) {
-	var message = error.message;
-	if (message.length > 150) {
-		message = message.substring(0, 150) + "...";
-	}
-	Ext.Msg.alert(title ? title : 'Error', message);
-}
 
-/**
- * Shows a window to select a new layer to be added to the specified
- * OpenLayers.Map object. Shows different data sources and visualizations and
- * allows specification of new resources.
- */
-function showResourceWindow(map, resources, requestParam) {
-	resources = resources || defaultResources;
-	var layerList = new Ext.ux.VIS.ResourceNodesContainer();
-	layerList.addResources(resources);
-
-	var loadingMask = null; // will hold a Ext.LoadMask object to display a
-	// loading mask while fetching server data
-
-	var buttonAdd = new Ext.Button({
-		text : 'Add to Map',
-		disabled : true
-	});
-
-	// Right panel
-	var resourceDetails = new Ext.form.FormPanel({
-		autoScroll : true,
-		region : 'east',
-		width : 280,
-		listeners : {
-			render : function() {
-				// LoadMask has to be set for a rendered component
-				loadingMask = new Ext.LoadMask(this.getEl(), {
-					msg : 'Please wait...'
-				});
-			}
-		},
-		bbar : [ '->', buttonAdd ],
-		title : 'Details'
-	});
-
-	/**
-	 * Loads last level of resource loading process, displays layer parameters (if
-	 * available)
-	 * 
-	 * @param attributes
-	 * @param allowImmediately
-	 *          Allows to directly add layer to map if it has no parameters
-	 */
-	function loadLayer(attributes, allowImmediately) {
-
-		if (loadingMask != null) {
-			loadingMask.show();
-		}
-
-		// Loading result options should return a layer instance
-		VIS.ResourceLoader.loadResourceOptions(attributes, function(result) {
-
-			if (loadingMask != null) {
-				loadingMask.hide();
-			}
-			resourceDetails.removeAll();
-
-			if (result instanceof Error) {
-				// Error handling
-				Ext.Msg.alert('Error', Ext.util.Format.htmlEncode(result.message));
-				return;
-			} else if (result instanceof OpenLayers.Layer) {
-				// Set button handler
-				buttonAdd.setText('Add to Map');
-				buttonAdd.handler = function() {
-					// add layer to map
-					if (result != null) {
-						if (result.warning) {
-							Ext.Msg.alert('Warning', result.warning);
-						}
-
-						map.addLayers([ result ]);
-						delete result;
-						resourceDetails.removeAll();
-						buttonAdd.handler = function() {
-						};
-						buttonAdd.setDisabled(true);
-					}
-				};
-				buttonAdd.setDisabled(false);
-
-				// Create parameter controls
-				var paramItems = createParameterControls(result.getParameterOptions());
-				if (paramItems.length != 0) {
-					resourceDetails.add({
-						xtype : 'fieldset',
-						title : 'Info',
-						items : [ {
-							xtype : 'label',
-							text : 'The following parameters need to be set for this visualization.'
-						} ]
-					});
-					resourceDetails.add(new Ext.form.FieldSet({
-						title : 'Parameters',
-						items : paramItems,
-						labelWidth : 80
-					}));
-
-					resourceDetails.doLayout();
-
-				} else if (allowImmediately === true) {
-					// No parameters to set, directly add layer by calling button handler
-					// if allowed
-					buttonAdd.handler.call(this);
-				} else {
-					resourceDetails.add({
-						xtype : 'fieldset',
-						title : 'Info',
-						items : [ {
-							xtype : 'label',
-							text : 'This visualization does not require any parameters.'
-						} ]
-					});
-
-					resourceDetails.doLayout();
-				}
-			}
-
-		});
-	}
-
-	/**
-	 * Function called while loading resources to intercept wms layer loading.
-	 * Allows user to set required layer information. Should return directly if
-	 * attributes already contains all necessary information (automatic assignment
-	 * based on WMS-Q metadata).
-	 * 
-	 * @param attributes
-	 * @returns
-	 */
-	function assignLayers(attributes) {
-		if (!attributes.requiredLayers) {
-			return {};
-		}
-
-		var requiredLayers = attributes.requiredLayers;
-
-		// Returns a layer configuration object matching names to layer entries from
-		// requiredLayers structure based on WMS-Q metadata contained in
-		// GetCapabilities response
-		var autoMatching = function(reqLayers) {
-			var layers = {};
-
-			// prepare result object
-			for ( var layerKey in reqLayers.layers) {
-				layers[layerKey] = {};
-			}
-
-			// Gets uncertainty keyword from a nested layer WMS capabilities node
-			var getUncertainty = function(nestedLayer) {
-				if (!nestedLayer.keywords) {
-					return null;
-				}
-				for ( var j = 0; j < nestedLayer.keywords.length; j++) {
-					if (nestedLayer.keywords[j].vocabulary == 'http://www.uncertml.org/distributions/') {
-						return nestedLayer.keywords[j].value;
-
-					}
-				}
-				return null;
-			};
-
-			// Find matching layer descriptions from the requiredLayers structure for
-			// each layer described in the capabilities response
-			var nestedLayer, uncertaintyKeyword;
-			for ( var i = 0; i < attributes.wmsLayer.nestedLayers.length; i++) {
-				// For each specified layer from the capabilities
-				nestedLayer = attributes.wmsLayer.nestedLayers[i];
-				uncertaintyKeyword = getUncertainty(nestedLayer);
-
-				if (uncertaintyKeyword == null) {
-					// Layer has no uncertainty keyword
-					continue;
-				}
-
-				for ( var layerKey in reqLayers.layers) {
-					// For each layer description in requiredLayers
-					if (!reqLayers.layers[layerKey].uncertainty) {
-						continue;
-					}
-					compatible = reqLayers.layers[layerKey].uncertainty[uncertaintyKeyword];
-					if (compatible != null) {
-						if (layers[layerKey].name != null && layers[layerKey].transformFunc == null) {
-							// Already found best match, i.e. has match which needs no
-							// transformFunc
-							continue;
-						}
-						layers[layerKey].name = nestedLayer.name;
-						layers[layerKey].usedKeyword = uncertaintyKeyword;
-						if (compatible !== true) {
-							layers[layerKey].transformFunc = compatible;
-						}
-					}
-				}
-			}
-
-			return layers;
-
-		};
-
-		// Creates combobox for all available WMS layers as defined in
-		// GetCapabilities
-		var createLayerComboBox = function() {
-			var data = [];
-			for ( var i = 0; i < attributes.wmsLayer.nestedLayers.length; i++) {
-				data
-						.push([
-								attributes.wmsLayer.nestedLayers[i].name,
-								attributes.wmsLayer.nestedLayers[i].title
-										|| attributes.wmsLayer.nestedLayers[i].name ]);
-			}
-
-			return new Ext.form.ComboBox({
-				triggerAction : 'all',
-				lazyRender : true,
-				mode : 'local',
-				store : new Ext.data.ArrayStore({
-					id : 0,
-					fields : [ 'name', 'title' ],
-					data : data
-				}),
-				valueField : 'name',
-				displayField : 'title',
-				fieldLabel : 'Layer',
-				editable : false,
-				anchor : '100%',
-				allowBlank : false
-			});
-		};
-
-		// Creates Combobox for all available requiredLayers configurations
-		var createRequiredLayersTypeCombo = function() {
-			var data = [];
-			for ( var key in requiredLayers) {
-				data.push([ key, requiredLayers[key].title || key ]);
-			}
-
-			return new Ext.form.ComboBox({
-				triggerAction : 'all',
-				lazyRender : true,
-				mode : 'local',
-				store : new Ext.data.ArrayStore({
-					id : 0,
-					fields : [ 'type', 'title' ],
-					data : data
-				}),
-				valueField : 'type',
-				displayField : 'title',
-				fieldLabel : 'Layer Configuration',
-				editable : false,
-				anchor : '100%',
-				allowBlank : false
-			});
-		};
-
-		// Performs a GetMetadata request (ncWMS extension) to get min/mx values for
-		// a specific WMS layer
-		// Callback receives object with min and max
-		var getScaleRange = function(name, callback) {
-			var url = attributes.url;
-			// Use GetMetadata URL as specified in capabilities
-			if (attributes.capabilities && attributes.capabilities.capability
-					&& attributes.capabilities.capability.request
-					&& attributes.capabilities.capability.request.getmetadata) {
-				url = attributes.capabilities.capability.request.getmetadata.href || url;
-			}
-
-			// Request
-			OpenLayers.Request.GET({
-				url : url,
-				params : {
-					item : 'layerDetails',
-					layerName : name,
-					request : 'GetMetadata'
-				},
-				success : function(resp) {
-					var details = new OpenLayers.Format.JSON().read(resp.responseText);
-					callback({
-						min : Math.floor(details.scaleRange[0]),
-						max : Math.ceil(details.scaleRange[1])
-					});
-				},
-				failure : function(resp) {
-					callback(new Error(resp.responseText));
-				}
-			});
-		};
-
-		var requiredLayersType = null;
-		// Holds currently selected requiredLayers configuration type
-		var layers = {}; // Holds components for each required layers
-
-		resourceDetails.removeAll();
-
-		resourceDetails.add(new Ext.form.FieldSet({
-			title : 'Info',
-			items : [ {
-				xtype : 'label',
-				text : 'Please assign WMS layers to the inputs required by this visualization below.'
-			} ]
-		}));
-
-		// Panel will be used for the UI of the different requiredLayers
-		// configurations
-		var assignmentPanel = new Ext.Panel({
-			layout : 'form',
-			border : false
-		});
-
-		// Build the UI for a specific requiredLayers configuration, identified by
-		// its type
-		var updateLayerAssigmentItems = function(type) {
-
-			var items = [], layerItems;
-			requiredLayersType = type;
-			layers = {};
-			var requiredLayersForType = requiredLayers[requiredLayersType];
-
-			var autoMatchedLayers = autoMatching(requiredLayersForType);
-
-			for ( var key in requiredLayersForType.layers) {
-				// Create layername, min and max components for each layer
-				layers[key] = {};
-				layerItems = [];
-				if (autoMatchedLayers[key].usedKeyword) {
-					// Auto matching info
-					layerItems.push({
-						xtype : 'label',
-						fieldLabel : '',
-						text : 'Automatic assignment based on uncertainty keyword "'
-								+ autoMatchedLayers[key].usedKeyword + '"'
-					});
-				}
-
-				if (autoMatchedLayers[key].name) {
-					layerItems.push({
-						xtype : 'label',
-						fieldLabel : 'Layer',
-						text : autoMatchedLayers[key].name
-					});
-					layers[key].name = autoMatchedLayers[key].name;
-				} else {
-					layerItems.push(layers[key].name = createLayerComboBox());
-				}
-
-				layerItems.push(layers[key].min = new Ext.form.NumberField({
-					fieldLabel : 'Min',
-					allowBlank : false,
-					anchor : '100%',
-					value : autoMatchedLayers[key].min
-				}));
-
-				layerItems.push(layers[key].max = new Ext.form.NumberField({
-					fieldLabel : 'Max',
-					allowBlank : false,
-					anchor : '100%',
-					value : autoMatchedLayers[key].max
-				}));
-
-				if (autoMatchedLayers[key].name) {
-					// Automatically matched layer
-					if (autoMatchedLayers[key].transformFunc != null) {
-						// Transformation function set
-						layerItems.push({
-							xtype : 'label',
-							fieldLabel : '',
-							text : 'Automatic Transformation'
-						});
-						layers[key].transformFunc = autoMatchedLayers[key].transformFunc;
-					}
-				} else {
-					layerItems.push(layers[key].transformFunc = new Ext.form.TextField({
-						fieldLabel : 'Function f(x) = ',
-						allowBlank : true,
-						anchor : '100%',
-						validator : function(value) {
-							try {
-								VIS.convertUserDefinedFunction(value, [ 'x' ]);
-								return true;
-							} catch (e) {
-								return e;
-							}
-						}
-					}));
-				}
-
-				// Add button for automatic scalerange detection
-				layerItems.push(new Ext.Panel({
-					layout : 'hbox',
-					border : false,
-					items : [
-							new Ext.Spacer({
-								flex : 1
-							}),
-							new Ext.Button({
-								text : 'Auto',
-								layers : layers[key],
-								handler : function() {
-									this.setDisabled(true);
-									getScaleRange(this.layers.name.getValue ? this.layers.name.getValue()
-											: this.layers.name, function(scale) {
-										if (!(scale instanceof Error)) {
-											this.layers.min.setValue(scale.min);
-											this.layers.max.setValue(scale.max);
-										}
-										this.setDisabled(false);
-									}.createDelegate(this));
-								}
-							}) ]
-				}));
-
-				// Optional description text
-				if (requiredLayersForType.layers[key].description) {
-					layerItems.push(new Ext.form.Label({
-						text : requiredLayersForType.layers[key].description,
-						fieldLabel : 'Description'
-					}));
-				}
-
-				items.push(new Ext.form.FieldSet({
-					title : requiredLayersForType.layers[key].title || key,
-					items : layerItems,
-					labelWidth : 100
-				}));
-			}
-
-			assignmentPanel.removeAll();
-			assignmentPanel.add(items);
-			assignmentPanel.doLayout();
-		};
-
-		// Build UI
-		var typeCombo = createRequiredLayersTypeCombo();
-		if (typeCombo.getStore().getCount() != 1) {
-			// Use Combobox for different requiredLayers types
-			typeCombo.on('select', function(combo, record, index) {
-				updateLayerAssigmentItems(record.data.type);
-			});
-			resourceDetails.add(typeCombo);
-
-			// Find completely automatically assignable layer configuration
-			for ( var typeKey in requiredLayers) {
-				var autoMatchedLayers = autoMatching(requiredLayers[typeKey]);
-				complete = true;
-				// Check if every required layer has a name
-				for ( var key in autoMatchedLayers) {
-					if (!autoMatchedLayers[key].name) {
-						complete = false;
-						break;
-					}
-				}
-
-				if (complete) {
-					// Found matched layer configuration
-					updateLayerAssigmentItems(typeKey);
-					typeCombo.setValue(typeKey);
-					break;
-				}
-			}
-		} else {
-			// Use first requiredLayers type if there is only one configuration
-			updateLayerAssigmentItems(typeCombo.getStore().getAt(0).data.type);
-		}
-
-		resourceDetails.add(assignmentPanel);
-		resourceDetails.doLayout();
-
-		buttonAdd.setText('Next');
-		buttonAdd.handler = function() {
-			if (!resourceDetails.form.isValid()) {
-				return;
-			}
-			// Get layer config from UI field values, project each value of 'layers'
-			// using the getValue function
-			layerConfig = {};
-			for ( var layerKey in layers) {
-				layerConfig[layerKey] = {};
-				for ( var key in layers[layerKey]) {
-					layerConfig[layerKey][key] = layers[layerKey][key].getValue ? layers[layerKey][key]
-							.getValue() : layers[layerKey][key];
-				}
-			}
-
-			// Actual resource loading options which are passed to the next loading
-			// step/level
-			attributes.layers = layerConfig;
-			attributes.requiredLayersType = requiredLayersType;
-
-			loadLayer(attributes, true);
-		};
-		buttonAdd.setDisabled(false);
-	}
-
-	// Resources tree
-	var layerTree = new Ext.tree.TreePanel({
-		title : 'Resources',
-		root : layerList,
-		region : 'center',
-		rootVisible : false,
-		autoScroll : true,
-		listeners : {
-			click : function(node, e) {
-				if (node.leaf === true && node.attributes.resourceLoader) {
-					// Node is leaf node
-
-					if (node.attributes.resourceLoader == 'ncwms_layer' && node.attributes.requiredLayers) {
-						// Intercept WMS loading
-						// TODO method may have return value when automatic layer matching
-						// works
-						assignLayers(node.attributes);
-
-						return;
-					}
-
-					loadLayer(node.attributes);
-
-				}
-			},
-			contextmenu : function(node, e) {
-				var menuItems = [];
-
-				// Reload function in context menu
-				menuItems.push({
-					text : 'Reload',
-					handler : function() {
-						node.reload();
-					}
-				});
-
-				// Manually added resources get a remove option in context menu
-				if (node.attributes.resourceId != null) {
-					menuItems.push({
-						text : 'Remove',
-						handler : function() {
-							layerList.removeResource(node.attributes.resourceId);
-							for ( var i = 0; i < defaultResources.length; i++) {
-								if (defaultResources[i].resourceId != null
-										&& defaultResources[i].resourceId == node.attributes.resourceId) {
-									defaultResources.splice(i, 1);
-									break;
-								}
-							}
-						}
-					});
-				}
-
-				// Show menu if it got items
-				if (menuItems.length > 0) {
-					var menu = new Ext.menu.Menu({
-						items : menuItems
-					});
-					menu.showAt(e.getXY());
-				}
-
-			}
-		}
-	});
-
-	var windowItems = [];
-
-	if (requestParam !== true) {
-		// Add general add resources dialog if not shown for adding request
-		// parameters resource
-		var comboBoxType = createInputTypeComboBox(); // combobox of supported input
-		// data types
-
-		var textFieldURL = new Ext.form.TextField({
-			fieldLabel : 'URL',
-			anchor : '100%'
-		});
-
-		var buttonNewResource = new Ext.Button({
-			text : 'Add',
-			handler : function() {
-				if (comboBoxType.getValue().length > 0 && textFieldURL.getValue().length > 0) {
-					// Add new resource
-					var newResource = {
-						resourceId : nextResourceId++,
-						vissUrl : vissUrl,
-						url : textFieldURL.getValue(),
-						mime : comboBoxType.getValue()
-					};
-					layerList.addResource(newResource);
-					defaultResources.push(newResource);
-
-					comboBoxType.reset();
-					textFieldURL.reset();
-				}
-			}
-		});
-
-		var buttonAdvancedResource = new Ext.Button({
-			text : 'Advanced...',
-			handler : function() {
-				// Show window to specify a request as datasource
-				showAdvancedNewResourceWindow(layerList, textFieldURL.getValue(), comboBoxType.getValue());
-			}
-		});
-
-		var addResourcePanel = new Ext.form.FormPanel({
-			title : 'Add Resource',
-			region : 'south',
-			height : 150,
-			labelWidth : 50,
-			padding : 5,
-			items : [ textFieldURL, comboBoxType ],
-			bbar : [ buttonAdvancedResource, '->', buttonNewResource ]
-		});
-
-		windowItems.push({
-			region : 'center',
-			layout : 'border',
-			defaults : {
-				split : true
-			},
-			items : [ layerTree, addResourcePanel ]
-		});
-	} else {
-		// Special dialog for adding resources from request parameter
-		// Does not include adding custom resources
-
-		layerTree.expandAll();
-		windowItems.push(layerTree);
-	}
-
-	windowItems.push(resourceDetails);
-
-	// Show window
-	new Ext.Window({
-		title : 'Add Resource',
-		layout : 'border',
-		defaults : {
-			split : true
-		},
-		items : windowItems,
-		height : 400,
-		width : 600,
-		constrainHeader : true
-	}).show();
-
-}
-
-/**
- * Creates a combobox of supported resource types with mime as item value
- * 
- * @returns {Ext.form.ComboBox}
- */
-function createInputTypeComboBox() {
-	var comboBoxType = new Ext.form.ComboBox({
-		triggerAction : 'all',
-		lazyRender : true,
-		mode : 'local',
-		store : new Ext.data.ArrayStore({
-			id : 0,
-			fields : [ 'name', 'mime' ],
-			data : [
-					[ 'NetCDF (*.nc)', 'application/netcdf' ],
-					[ 'GeoTIFF (*.tiff)', 'image/geotiff' ],
-					[ 'ncWMS(-Q) Resource', 'ncwms' ],
-					[ 'WMS Resource', 'wms' ],
-					[ 'O&M2 Raster', 'application/vnd.ogc.om+xml' ],
-					[ '', null ],
-					[ 'O&M Vector (*.xml)', 'application/xml' ],
-					[ 'O&M2 Vector(*.xml)', 'application/x-om-u+xml' ],
-					[ 'JSOM (*.json)', 'application/x-om-u+json' ],
-					[ 'Uncertainty Collection',
-							'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ] ]
-		}),
-		valueField : 'mime',
-		displayField : 'name',
-		fieldLabel : 'Type',
-		editable : false
-	});
-
-	return comboBoxType;
-}
-
-/**
- * Shows a windows to add a custom resource with advanced options, such as a
- * request string
- * 
- * @param layerList
- *          layer list from resource window
- * @param url
- *          preset url
- * @param typeValue
- *          preset resource type
- */
-function showAdvancedNewResourceWindow(layerList, url, typeValue) {
-	var advWindow;
-
-	var comboBoxType = createInputTypeComboBox();
-	comboBoxType.setValue(typeValue);
-
-	var textFieldURL = new Ext.form.TextField({
-		fieldLabel : 'URL',
-		anchor : '100%',
-		value : url
-	});
-
-	var textAreaRequest = new Ext.form.TextArea({
-		fieldLabel : 'Request',
-		anchor : '100% -50'
-	});
-
-	var buttonNewResource = new Ext.Button({
-		text : 'Add',
-		handler : function() {
-			if (comboBoxType.getValue().length > 0
-					&& (textFieldURL.getValue().length > 0 || textAreaRequest.getValue().length > 0)) {
-				var newResource = {
-					resourceId : nextResourceId++,
-					vissUrl : vissUrl,
-					url : textFieldURL.getValue(),
-					mime : comboBoxType.getValue(),
-					request : textAreaRequest.getValue()
-				};
-				layerList.addResource(newResource);
-				defaultResources.push(newResource);
-				advWindow.close();
-			}
-		}
-	});
-
-	var addResourcePanel = new Ext.form.FormPanel({
-		title : 'Add Resource',
-		region : 'south',
-		height : 150,
-		labelWidth : 50,
-		padding : 5,
-		items : [ textFieldURL, comboBoxType, textAreaRequest ],
-		bbar : [ '->', buttonNewResource ]
-	});
-
-	// Show window
-	advWindow = new Ext.Window({
-		title : 'Add new Resource',
-		layout : 'fit',
-		items : [ addResourcePanel ],
-		height : 300,
-		width : 350,
-		constrainHeader : true
-	});
-	advWindow.show();
-}
 
 /**
  * Takes option descriptions as received from the visualization service or
@@ -1566,5 +809,123 @@ function showLayerSettings(layer) {
 	});
 
 	layer.events.register('removed', this, handleLayerRemoved);
+	window.show();
+}
+
+function showMapSettings(map) {
+
+	var supportedSrs = {};
+	supportedSrs[map.getProjection()] = true;
+	for ( var i = 0, len = map.layers.length; i < len; i++) {
+		var layer = map.layers[i];
+		if (layer.supportedSrs) {
+			OpenLayers.Util.extend(supportedSrs, layer.supportedSrs);
+		}
+	}
+
+	var srsData = [];
+	for ( var srs in supportedSrs) {
+		if (srs.substr(0, 4) == 'EPSG') {
+			// Only EPSG
+			srsData.push([ srs, VIS.getProjectionTitle(srs) ]);
+		}
+	}
+	var srsStore = new Ext.data.ArrayStore({
+		idIndex : 0,
+		fields : [ 'code', 'title' ],
+		data : srsData
+	});
+
+	// Only EPSG
+	var srsNumberField = new Ext.form.NumberField({
+		fieldLabel : 'EPSG Code',
+		value : map.getProjection().substr(5)
+	});
+
+	var srsGrid = new Ext.grid.GridPanel({
+		xtype : 'grid',
+		store : srsStore,
+		height : 200,
+		columns : [ {
+			header : 'Code',
+			sortable : true,
+			dataIndex : 'code'
+		}, {
+			header : 'Title',
+			sortable : true,
+			dataIndex : 'title'
+		} ]
+	});
+
+	srsGrid.getSelectionModel().on('rowselect', function(model, undex, record) {
+		srsNumberField.setValue(record.data.code.substr(5));
+	});
+
+	var loadingMask = null;
+	var window = null;
+	window = new Ext.Window({
+		layout : 'form',
+		title : 'Map Settings',
+		items : [ {
+			xtype : 'fieldset',
+			title : 'SRS',
+			items : [ {
+				xtype : 'label',
+				text : 'Specify the projection to use for this map.'
+			}, srsNumberField ]
+		}, {
+			xtype : 'fieldset',
+			title : 'Supported SRS',
+			items : [ {
+				xtype : 'label',
+				text : 'Projections supported by layers in this map'
+			}, srsGrid ]
+		} ],
+		height : 400,
+		width : 350,
+		constrainHeader : true,
+		listeners : {
+			render : function() {
+				// LoadMask has to be set for a rendered component
+				loadingMask = new Ext.LoadMask(this.getEl(), {
+					msg : 'Loading Projection Information...'
+				});
+			}
+		},
+		buttons : [
+				{
+					text : 'OK',
+					handler : function() {
+						var projCode = 'EPSG:' + srsNumberField.getValue();
+						loadingMask.show();
+						VIS.getProjection(projCode, function(projection) {
+							loadingMask.hide();
+							map.reprojecting = true;
+							var oldCenter = map.getCenter(), oldProj = map.getProjectionObject();
+							map.projection = projection;
+							map.maxExtent = new OpenLayers.Bounds(
+									OpenLayers.Projection.defaults[projCode].maxExtent);
+
+							var baseLayer = new OpenLayers.Layer('None', {
+								isBaseLayer : true,
+								projection : projection
+							});
+
+							map.addLayers([ baseLayer ]);
+
+							map.setBaseLayer(baseLayer);
+							map.setCenter(oldCenter.transform(oldProj, projection));
+							map.reprojecting = false;
+							window.close();
+						});
+					}
+				}, {
+					text : 'Cancel',
+					handler : function() {
+						window.close();
+					}
+				} ]
+	});
+
 	window.show();
 }

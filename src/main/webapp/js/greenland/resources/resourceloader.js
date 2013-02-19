@@ -18,20 +18,23 @@
  */
 VIS.ResourceLoader = {
 
+	permalinkVersion : 2,
+
 	/**
 	 * Transforms object with attributes at least url, mime (and vissUrl) stepwise
 	 * into proper OpenLayers.Layer subclass. Returned objects also form valid
 	 * config options for Ext.tree.TreeNode.
 	 */
-	loadResourceOptions : function(resourceOptions, callback) {
-		VIS.ResourceLoader.loadResourcePath(resourceOptions, [], callback);
+	loadResourceOptions : function(resourceOptions, callback, scope) {
+		VIS.ResourceLoader.loadResourcePath(resourceOptions, [], callback, scope);
 	},
 
 	/**
 	 * Transforms object with attributes at least url, mime (and vissUrl) into
 	 * proper layer object following specified "path" of loaderId attributes.
 	 */
-	loadResourcePath : function(resourceOptions, path, callback) {
+	loadResourcePath : function(resourceOptions, path, callback, scope) {
+		scope = scope || this;
 		var resourceLoader = resourceOptions.resourceLoader || 'root';
 		try {
 			VIS.ResourceLoader.resourceLoader[resourceLoader](resourceOptions, function(result) {
@@ -47,24 +50,24 @@ VIS.ResourceLoader = {
 
 				if (path.length == 0 || result instanceof Error) {
 					// Final result or error
-					callback(result);
+					callback.call(scope, result);
 				} else {
 					// Follow path
 					if (r.length == 1 && !r[0].loaderId) {
 						// Skip levels without loaderId if they have only a single
 						// element
-						VIS.ResourceLoader.loadResourcePath(r[0], path, callback);
+						VIS.ResourceLoader.loadResourcePath(r[0], path, callback, scope);
 					} else {
 						// Search for element with specific loaderId corresponding to
 						// path
 						for ( var i = 0; i < r.length; i++) {
 							if (r[i].loaderId == path[0]) {
-								VIS.ResourceLoader.loadResourcePath(r[i], path.slice(1), callback);
+								VIS.ResourceLoader.loadResourcePath(r[i], path.slice(1), callback, scope);
 								return;
 							}
 						}
 
-						callback(new Error('Could not find specified resource'));
+						callback.call(scope, new Error('Could not find specified resource'));
 					}
 				}
 			});
@@ -145,10 +148,14 @@ VIS.ResourceLoader = {
 			VIS.storeViewport(settingsParcel);
 			json = new OpenLayers.Format.JSON().write({
 				layers : permaObjects,
-				viewport : settingsParcel.toString()
+				viewport : settingsParcel.toString(),
+				version : this.permalinkVersion
 			});
 		} else {
-			json = new OpenLayers.Format.JSON().write(permaObjects);
+			json = new OpenLayers.Format.JSON().write({
+				layers : permaObjects,
+				version : this.permalinkVersion
+			});
 		}
 
 		// make url shorter by replacing {, } and " with unencoded chars
@@ -185,21 +192,33 @@ VIS.ResourceLoader = {
 
 		var perma = new OpenLayers.Format.JSON().read(param);
 
-		if (perma.viewport) {
-			VIS.restoreViewport(new VIS.SettingsParcel(perma.viewport));
+		if (!perma.version || perma.version != this.permalinkVersion) {
+			callback.call(this, new Error('The permalink is not suported by this version of Greenland'),
+					0, 0, 0);
+			return;
 		}
 
 		var layers = perma.layers ? perma.layers : perma;
 
-		for ( var i = 0; i < layers.length; i++) {
-			o = layers[i];
-			VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function.bind(callbackIntercept, o));
+		var restoreLayers = function() {
+
+			for ( var i = 0; i < layers.length; i++) {
+				o = layers[i];
+				VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function
+						.bind(callbackIntercept, o));
+			}
+
+		};
+
+		if (perma.viewport) {
+			VIS.restoreViewport(new VIS.SettingsParcel(perma.viewport), restoreLayers);
+		} else {
+			restoreLayers();
 		}
 
 		if (layers.length == 0) {
 			return false;
 		}
-
 	},
 
 	parseIntervals : function(intervals) {
@@ -733,7 +752,7 @@ VIS.ResourceLoader = {
 						},
 						success : function(resp) {
 							var respStatus = resp.status;
-							var resp = resp.responseXML || resp.responseText;
+							resp = resp.responseXML || resp.responseText;
 
 							var capabilities = new OpenLayers.Format.WMSCapabilities({
 								version : '1.3.0',
@@ -851,7 +870,7 @@ VIS.ResourceLoader = {
 						},
 						success : function(resp) {
 							var respStatus = resp.status;
-							var resp = resp.responseXML || resp.responseText;
+							resp = resp.responseXML || resp.responseText;
 							var capabilities;
 							try {
 								capabilities = new OpenLayers.Format.WMSCapabilities().read(resp);
@@ -889,6 +908,7 @@ VIS.ResourceLoader = {
 										loaderId : layers[i].title || layers[i].name,
 										resourceLoader : 'wms_layer',
 										wmsLayer : layers[i],
+										supportedSrs : layers[i].srs || layers[i].crs,
 										iconCls : 'icon-raster',
 										leaf : true,
 										capabilities : capabilities,
@@ -914,68 +934,85 @@ VIS.ResourceLoader = {
 		ncwms_layer : function(resourceOptions, callback) {
 			var layerOptions = resourceOptions.getLayerOptions ? resourceOptions.getLayerOptions() : {};
 
-			var availSrs = resourceOptions.wmsLayer.srs || resourceOptions.wmsLayer.crs;
-			var mapProjection = new OpenLayers.Projection('EPSG:3857');
-			var layerProjection = null, proj;
+			// var availSrs = resourceOptions.wmsLayer.srs ||
+			// resourceOptions.wmsLayer.crs;
+
+			// var mapProjection = resourceOptions.requiredProjection
+			// || new OpenLayers.Projection('EPSG:3857');
+			// var layerProjection = null, proj = null;
 
 			// Find compatible projection (usually 3875 or 900913)
-			for ( var srs in availSrs) {
-				proj = new OpenLayers.Projection(srs);
-				if (mapProjection.equals(proj)) {
-					layerProjection = proj;
-					break;
-				}
-			}
+			// for ( var srs in availSrs) {
+			// proj = new OpenLayers.Projection(srs);
+			// if (mapProjection.equals(proj)) {
+			// layerProjection = proj;
+			// break;
+			// }
+			// }
 
-			if (!layerProjection) {
-				// No compatible projection found
-				if ('EPSG:4326' in availSrs) {
-					// Fallback to 4326, pseudo reprojection by still using 3857 grid,
-					// but overriding request parameters to use corresponding 4326 bounds
-					layerProjection = new OpenLayers.Projection('EPSG:3857');
+			// if (!layerProjection) {
+			// if (resourceOptions.selectProjectionCallback) {
+			// layerProjection = resourceOptions.selectProjectionCallback(availSrs);
+			//
+			// // TODO return if no selection?
+			// }
+			// }
+			// if (!layerProjection) {
+			// throw new Error('No SRS');
+			// }
 
-					if (parseFloat(resourceOptions.capabilities.version) >= 1.3) {
-						// 4326 is reversed if WMS version >= 1.3.0
-						layerOptions.reverseAxisOrder = function() {
-							return true;
-						};
-					} else {
-						layerOptions.reverseAxisOrder = function() {
-							return false;
-						};
-					}
-
-					layerOptions.getURL = function(bounds) {
-						// transform bounds but dont change original ons
-						bounds = bounds.clone();
-						var proj = new OpenLayers.Projection('EPSG:4326');
-						bounds.transform(this.map.getProjectionObject(), proj);
-
-						return resourceOptions.layerClass.prototype.getURL.apply(this, arguments);
-					};
-					layerOptions.getFullRequestString = function(newParams, altUrl) {
-						// Directly use EPSG:4326 in request string
-						var value = 'EPSG:4326';
-						if (parseFloat(this.params.VERSION) >= 1.3) {
-							this.params.CRS = value;
-						} else {
-							this.params.SRS = value;
-						}
-
-						if (typeof this.params.TRANSPARENT == "boolean") {
-							newParams.TRANSPARENT = this.params.TRANSPARENT ? "TRUE" : "FALSE";
-						}
-
-						return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(this, arguments);
-					};
-					layerOptions.warning = 'This WMS is not compatible with '
-							+ mapProjection.toString()
-							+ '. Greenland will reproject this resource, which may result in less accurate visualizations.';
-				} else {
-					// Even 4326 not available
-					throw new Error('No SRS compatible with ' + mapProjection.toString());
-				}
-			}
+			// if (!layerProjection) {
+			// // No compatible projection found
+			// if ('EPSG:4326' in availSrs) {
+			// // Fallback to 4326, pseudo reprojection by still using 3857 grid,
+			// // but overriding request parameters to use corresponding 4326 bounds
+			// layerProjection = new OpenLayers.Projection('EPSG:3857');
+			//
+			// if (parseFloat(resourceOptions.capabilities.version) >= 1.3) {
+			// // 4326 is reversed if WMS version >= 1.3.0
+			// layerOptions.reverseAxisOrder = function() {
+			// return true;
+			// };
+			// } else {
+			// layerOptions.reverseAxisOrder = function() {
+			// return false;
+			// };
+			// }
+			//
+			// layerOptions.getURL = function(bounds) {
+			// // transform bounds but do not change original ones
+			// bounds = bounds.clone();
+			// var proj = new OpenLayers.Projection('EPSG:4326');
+			// bounds.transform(this.map.getProjectionObject(), proj);
+			//
+			// return resourceOptions.layerClass.prototype.getURL.apply(this,
+			// arguments);
+			// };
+			// layerOptions.getFullRequestString = function(newParams, altUrl) {
+			// // Directly use EPSG:4326 in request string
+			// var value = 'EPSG:4326';
+			// if (parseFloat(this.params.VERSION) >= 1.3) {
+			// this.params.CRS = value;
+			// } else {
+			// this.params.SRS = value;
+			// }
+			//
+			// if (typeof this.params.TRANSPARENT == "boolean") {
+			// newParams.TRANSPARENT = this.params.TRANSPARENT ? "TRUE" : "FALSE";
+			// }
+			//
+			// return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(this,
+			// arguments);
+			// };
+			// layerOptions.warning = 'This WMS is not compatible with '
+			// + mapProjection.toString()
+			// + '. Greenland will reproject this resource, which may result in less
+			// accurate visualizations.';
+			// } else {
+			// // Even 4326 not available
+			// throw new Error('No SRS compatible with ' + mapProjection.toString());
+			// }
+			// }
 
 			var layer = new resourceOptions.layerClass('Test', resourceOptions.url, OpenLayers.Util
 					.extend({
@@ -985,12 +1022,13 @@ VIS.ResourceLoader = {
 					}, resourceOptions.getParamOptions ? resourceOptions.getParamOptions() : {}),
 					OpenLayers.Util.extend({
 						opacity : 0.8,
-						projection : layerProjection,
+						// projection : layerProjection,
 						resourceOptions : {
 							mime : resourceOptions.mime,
 							url : resourceOptions.url
 						},
 						wmsLayer : resourceOptions.wmsLayer,
+						supportedSrs : resourceOptions.wmsLayer.srs || resourceOptions.wmsLayer.crs,
 						capabilities : resourceOptions.capabilities
 					}, layerOptions));
 

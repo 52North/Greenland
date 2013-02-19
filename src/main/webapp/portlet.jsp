@@ -23,7 +23,7 @@
 <!-- OpenLayers + Proj4js-->
 <script type="text/javascript"
 	src="<%=request.getContextPath()%>/js/OpenLayers/OpenLayers.js"></script>
-	
+
 <!-- Debug Script -->
 <!-- <script type="text/javascript" src="<%=request.getContextPath()%>/js/OpenLayers/lib/OpenLayers.js"></script> -->
 

@@ -85,7 +85,7 @@
 									<fromDir>${basedir}/target</fromDir>
 									<includes>*.war</includes>
 									<excludes>pom.xml</excludes>
-									<url>sftp://mydev.sapienzaconsulting.com</url>
+									<url>sftp://192.168.109.128</url>
 									<toDir>geoportal/liferayng/deploy</toDir>
 								</configuration>
 							</execution>
@@ -295,6 +295,8 @@
 								<!-- Component handling the legends and settings of a map and its 
 									layers -->
 								<jsSourceFile>legend.js</jsSourceFile>
+								<!-- Component for adding resources -->
+								<jsSourceFile>resourcewindow.js</jsSourceFile>
 
 							</jsSourceFiles>
 
@@ -319,6 +321,7 @@
 								<jsSourceFile>jquery.flot.navigate.min.js</jsSourceFile>
 								<jsSourceFile>jquery.flot.stack.min.js</jsSourceFile>
 								<jsSourceFile>jquery.flot.selection.min.js</jsSourceFile>
+								<jsSourceFile>jquery.greenland.noconflict.js</jsSourceFile>
 							</jsSourceFiles>
 							<skipMinify>true</skipMinify>
 							<jsTargetDir>js/flot</jsTargetDir>

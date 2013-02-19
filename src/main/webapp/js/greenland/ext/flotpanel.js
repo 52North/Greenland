@@ -90,13 +90,14 @@ Ext.ux.VIS.FlotPanel = Ext.extend(Ext.Panel, {
 				}
 				// Always create a new flot plot, as updating plotting options is not
 				// supported
-				this.plot = $.plot(element.dom, this.plotParams.series, this.plotParams.options);
+				jQueryFlot = jQueryFlot || $;
+				this.plot = jQueryFlot.plot(element.dom, this.plotParams.series, this.plotParams.options);
 
 				if (!this.eventsBound) {
 					// bind events only once
-					$(element.dom).bind('plotclick', this.plotClick.createDelegate(this));
-					$(element.dom).bind('plothover', this.plotHover.createDelegate(this));
-					$(element.dom).bind('plotselected', this.plotSelected.createDelegate(this));
+					jQueryFlot(element.dom).bind('plotclick', this.plotClick.createDelegate(this));
+					jQueryFlot(element.dom).bind('plothover', this.plotHover.createDelegate(this));
+					jQueryFlot(element.dom).bind('plotselected', this.plotSelected.createDelegate(this));
 					this.eventsBound = true;
 				}
 			} catch (e) {

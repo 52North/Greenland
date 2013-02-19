@@ -95,5 +95,12 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 	getTitle : function() {
 		return this.wmsLayer.title || this.wmsLayer.name;
+	},
+
+	setMap : function(map) {
+		if (map.projection != null) {
+			this.projection = map.projection;
+		}
+		OpenLayers.Layer.WMS.prototype.setMap.apply(this, arguments);
 	}
 });

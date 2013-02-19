@@ -157,16 +157,22 @@ OpenLayers.Layer.VIS.Vector = OpenLayers.Class(OpenLayers.Layer.Vector, {
 		this.redraw();
 	},
 
+	handleChangeBase : function() {
+		this.refresh(true);
+	},
+
 	setMap : function(map) {
 		OpenLayers.Layer.Vector.prototype.setMap.apply(this, arguments);
 
 		// register map events
 		this.map.events.register('changetime', this, this.handleChangeTime);
+		this.map.events.register('changebaselayer', this, this.handleChangeBase);
 	},
 
 	removeMap : function(map) {
 		// unregister map events
 		this.map.events.unregister('changetime', this, this.handleChangeTime);
+		this.map.events.unregister('changebaselayer', this, this.handleChangeBase);
 
 		OpenLayers.Layer.Vector.prototype.removeMap.apply(this, arguments);
 	},
@@ -388,6 +394,7 @@ OpenLayers.Layer.VIS.Strategy.FeatureProjection = OpenLayers.Class(OpenLayers.St
 						// (unknown ones are requested from a remote server automatically).
 						// Possibly show an error
 						geom.transform(features[i].srid, mapProjection);
+						features[i].srid = mapProjection;
 					}
 				}
 			}

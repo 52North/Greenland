@@ -29,7 +29,17 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 	initialize : function(name, visualization, options) {
 		// initialize update task
-		this.updateTask = new Ext.util.DelayedTask(this.updateVisualization, this);
+		this.updateTask = new Ext.util.DelayedTask(function() {
+			if (this.updateTask.resumeDrawing === true) {
+				this.pauseRedraw = false;
+				this.updateTask.resumeDrawing = false;
+			}
+			this.updateVisualization();
+		}, this);
+		this.updateTask.delayResumeDrawing = function() {
+			this.resumeDrawing = true;
+			this.delay.call(this, arguments);
+		};
 
 		this.time = {
 			min : Number.POSITIVE_INFINITY,
@@ -69,7 +79,7 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 			// set style
 			this.updateSld(function(info) {
 				if (info instanceof Error) {
-					showServerError(info, 'Error setting SLD');
+					VIS.showServerError(info, 'Error setting SLD');
 					return;
 				}
 				this.redraw();
@@ -110,6 +120,9 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 	},
 
 	setMap : function(map) {
+		if (map.projection != null) {
+			this.projection = map.projection;
+		}
 		OpenLayers.Layer.WMS.prototype.setMap.apply(this, arguments);
 		this.map.events.register('changetime', this, this.handleChangeTime);
 
@@ -157,7 +170,7 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 					this.visualization.options.time.value = new Date(newTime);
 					// this.updateVisualization();
-					this.updateTask.delay(1000);
+					this.updateTask.delayResumeDrawing(1000);
 				} else {
 					this.updateTask.cancel();
 				}
@@ -181,22 +194,27 @@ OpenLayers.Layer.VIS.Raster = OpenLayers.Class(OpenLayers.Layer.WMS, {
 	 * backing VISS resources and redraws itself
 	 */
 	updateVisualization : function() {
-		if(this.visualization.options.time && !this.timeExtents) {
-			// Layer needs time, but has no time information yet -> do not request visualization
+		if (this.pauseRedraw === true) {
 			return;
 		}
-		
+
+		if (this.visualization.options.time && !this.timeExtents) {
+			// Layer needs time, but has no time information yet -> do not request
+			// visualization
+			return;
+		}
+
 		var visualizationUpdated = function(info) {
 
 			if (info instanceof Error) {
-				showServerError(info, 'Error updating visualization');
+				VIS.showServerError(info, 'Error updating visualization');
 				this.events.triggerEvent('loadend');
 				return;
 			}
 
 			this.updateSld(function(info) {
 				if (info instanceof Error) {
-					showServerError(info, 'Error setting SLD');
+					VIS.showServerError(info, 'Error setting SLD');
 					return;
 				}
 

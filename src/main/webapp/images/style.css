@@ -28,3 +28,16 @@
  	position: absolute;
  	background-color: white;
 }
+
+
+ol.x-tab-strip, ul.x-tab-strip, dl.x-tab-strip, blockquote.x-tab-strip, ul.x-tree-node-ct, ul.x-menu-list {
+	margin: 0;
+}
+
+li.x-tree-node {
+	list-style-type: none;
+}
+
+ul.x-tree-root-ct {
+	list-style: none;
+}

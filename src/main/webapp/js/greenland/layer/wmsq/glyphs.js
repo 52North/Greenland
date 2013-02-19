@@ -57,7 +57,7 @@ OpenLayers.Layer.VIS.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Ve
 				var speedMax = Math.pow(Math.max(options.uLayer.max, options.vLayer.max), 2);
 
 				options.styler = {
-					fillColor : new OpenLayers.VIS.Styler.Color([ new OpenLayers.VIS.Styler.Color({
+					fillColor : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.Color({
 						predefinedColors : [ // 
 						[ [ 120, 100, 100 ], [ 0, 100, 100 ] ], // Green-Red
 						[ [ 30, 20, 100 ], [ 0, 100, 100 ] ], // Orange-Red
@@ -92,7 +92,7 @@ OpenLayers.Layer.VIS.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Ve
 					graphicName : new OpenLayers.VIS.Styler.Shape({
 						shapes : [ [ 'Arrow 1', 'arrow1' ], [ 'Arrow 2', 'arrow2' ], [ 'Arrow 3', 'arrow3' ] ]
 					}),
-					bounds : new OpenLayers.VIS.Styler.Color([ new OpenLayers.VIS.Styler.Continuous(),
+					bounds : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.Continuous(),
 							new OpenLayers.VIS.Styler.EqualIntervals() ], {
 						fieldLabel : 'Value Bounds',
 						fixedMinValue : speedMin,
@@ -127,7 +127,7 @@ OpenLayers.Layer.VIS.WMSQ.Glyphs = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Ve
 				// General Customizable parameters
 				options.parameters = {
 					spacing : {
-						fieldLabel: 'Aggregation Spacing',
+						fieldLabel : 'Aggregation Spacing',
 						value : 32,
 						items : [ 8, 16, 32, 64, 128 ],
 						type : 'selectone',
