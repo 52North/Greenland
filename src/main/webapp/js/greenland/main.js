@@ -279,9 +279,8 @@ Ext.onReady(function() {
 			if (evt.object == mouseMarker.map) {
 				continue;
 			}
-			var moveToLonLat = lonLat;
+			var moveToLonLat = lonLat.clone();
 			if (evt.object.getProjection() != mouseMarker.map.getProjection()) {
-				moveToLonLat = lonLat.clone();
 				moveToLonLat.transform(evt.object.getProjectionObject(), mouseMarker.map
 						.getProjectionObject());
 			}
@@ -370,7 +369,8 @@ Ext.onReady(function() {
 			for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
 				var extentLayer = VIS.mapComponents[i].extentLayer;
 				var mapOther = extentLayer.map;
-				if (mapEvent != extentLayer.map && mapEvent.getProjection() != mapOther.getProjection()) {
+				if (mapEvent != extentLayer.map
+						&& (mapEvent.getProjection() != mapOther.getProjection() || !VIS.syncViewports)) {
 					extentLayer.setVisibility(true);
 					extentLayer.map.setLayerIndex(extentLayer, extentLayer.map.layers.length - 1);
 
@@ -626,7 +626,8 @@ Ext.onReady(function() {
 					item.layer.map.setBaseLayer(item.layer);
 				},
 				beforeshow : function(menu) {
-					// Create menu items every time the menu is shown to dynamically add
+					// Create menu items every time the menu is shown to dynamically
+					// add
 					// available base layers based on the projection
 					menu.removeAll();
 					for ( var i = 0, len = map.layers.length; i < len; i++) {
@@ -1230,7 +1231,7 @@ VIS.storeViewport = function(parcel) {
 };
 
 VIS.restoreViewport = function(parcel, callback) {
-	VIS.syncViewports = parcel.readBoolean();	// TODO use enableSyncViewport
+	VIS.syncViewports = parcel.readBoolean(); // TODO use enableSyncViewport
 	var mapCount = Math.max(0, parcel.readInt());
 	if (mapCount > VIS.mapComponents.length) {
 		var len = mapCount - VIS.mapComponents.length;
@@ -1472,7 +1473,8 @@ VIS.getProjection = function(projCode, projCallback) {
 					units : 'm',
 					maxExtent : [ -20037508.34, -20037508.34, 20037508.34, 20037508.34 ]
 				};
-			} else { // if (projection.proj.units == 'degrees') {	// TODO handle unkown unit
+			} else { // if (projection.proj.units == 'degrees') { // TODO handle
+				// unkown unit
 				OpenLayers.Projection.defaults[projection.getCode()] = {
 					units : 'degrees',
 					maxExtent : [ -180, -90, 180, 90 ]
