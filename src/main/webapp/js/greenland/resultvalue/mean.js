@@ -72,8 +72,7 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 			selection : false,
 			connectRealizations : true
 		});
-		var panel = OpenLayers.VIS.ResultValue.prototype.createPlotPanel.call(this, feature, layer,
-				options);
+		var panel = OpenLayers.VIS.ResultValue.prototype.createPlotPanel.call(this, feature, layer, options);
 
 		var toggleGroup = 'interval' + (++Ext.Component.AUTO_ID);
 		// Unique toggle group across different windows
@@ -199,8 +198,7 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 
 		panel.on('plothover', function(event, pos, item) {
 			if (item && item.datapoint) {
-				tooltip.setTitle(item.datapoint[1].toFixed(3) + '<br>'
-						+ new Date(item.datapoint[0]).toUTCString());
+				tooltip.setTitle(item.datapoint[1].toFixed(3) + '<br>' + new Date(item.datapoint[0]).toUTCString());
 				tooltip.showAt([ item.pageX + 10, item.pageY + 10 ]);
 			} else {
 				tooltip.hide();
@@ -253,7 +251,7 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 					if (this.rendered) {
 						// replot on resize
 						if (this.distributionPlot == null) {
-							var element = this.el.child('.x-panel-body');
+							var element = this.el.child('.x-panel-body');							
 							this.distributionPlot = new DistributionPlot(element.dom.id, this.distribution);
 							this.distributionPlot.setFill(true);
 						} else {
@@ -296,8 +294,7 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 
 		panel.getTopToolbar().add([ binLabel, sliderBins ]);
 
-		panel.getPlotParams = this.getHistogramPlotParamFunc
-				.createDelegate(panel, [ clickInfos, this ]);
+		panel.getPlotParams = this.getHistogramPlotParamFunc.createDelegate(panel, [ clickInfos, this ]);
 
 		var tooltip = new Ext.ToolTip({
 			header : true,
@@ -310,8 +307,7 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 		panel.on('plothover', function(event, pos, item) {
 			if (item && item.datapoint) {
 				tooltip.setTitle(item.datapoint[1].toFixed(3) + '<br>' //
-						+ item.datapoint[0].toFixed(3) + ' - '
-						+ (item.datapoint[0] + item.series.binSize).toFixed(3));
+						+ item.datapoint[0].toFixed(3) + ' - ' + (item.datapoint[0] + item.series.binSize).toFixed(3));
 				tooltip.showAt([ item.pageX + 10, item.pageY + 10 ]);
 			} else {
 				tooltip.hide();
@@ -330,8 +326,7 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 		var binSize = Math.max((maxValue - minValue) / this.binCount, minValue == maxValue ? 1 : 0);
 		var bins = new Array(this.binCount);
 		for ( var i = 0, count = clickInfos.length; i < count; i++) {
-			var binIndex = Math.min(Math.floor((clickInfos[i].realization - minValue) / binSize),
-					this.binCount - 1);
+			var binIndex = Math.min(Math.floor((clickInfos[i].realization - minValue) / binSize), this.binCount - 1);
 			if (!bins[binIndex])
 				bins[binIndex] = 1;
 			else
@@ -441,13 +436,13 @@ OpenLayers.VIS.ResultValue.Mean = OpenLayers.Class(OpenLayers.VIS.ResultValue, {
 						min = value[0];
 					if (max < value[2])
 						max = value[2];
-					
+
 					// min/max with mean (if no lower/upper border)
 					if (min > value[1])
 						min = value1[1];
 					if (max < value[1])
 						max = value[1];
-					
+
 					for ( var j = 0; j < time.length; j++) {
 						l.push([ time[j], value[0] ]);
 						m.push([ time[j], value[1] ]);
