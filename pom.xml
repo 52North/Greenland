@@ -85,7 +85,7 @@
 									<fromDir>${basedir}/target</fromDir>
 									<includes>*.war</includes>
 									<excludes>pom.xml</excludes>
-									<url>sftp://192.168.109.128</url>
+									<url>sftp://mydev.sapienzaconsulting.com</url>
 									<toDir>geoportal/liferayng/deploy</toDir>
 								</configuration>
 							</execution>
