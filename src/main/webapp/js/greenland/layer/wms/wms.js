@@ -40,32 +40,27 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 					service : {
 						comp : new Ext.form.FieldSet({
 							title : 'Service',
-							items : [
-									{
-										xtype : 'label',
-										text : 'WMS',
-										fieldLabel : 'Service Type'
-									},
-									{
-										xtype : 'label',
-										text : serviceVersion,
-										fieldLabel : 'Version'
-									},
-									{
-										xtype : 'label',
-										text : this.layer.url,
-										fieldLabel : 'URL'
-									},
-									{
-										xtype : 'label',
-										text : OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util
-												.getParameterString({
-													'REQUEST' : 'GetCapabilities',
-													'SERVICE' : 'WMS',
-													'VERSION' : serviceVersion
-												})),
-										fieldLabel : 'GetCapabilities URL'
-									} ]
+							items : [ {
+								xtype : 'label',
+								text : 'WMS',
+								fieldLabel : 'Service Type'
+							}, {
+								xtype : 'label',
+								text : serviceVersion,
+								fieldLabel : 'Version'
+							}, {
+								xtype : 'label',
+								text : this.layer.url,
+								fieldLabel : 'URL'
+							}, {
+								xtype : 'label',
+								text : OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util.getParameterString({
+									'REQUEST' : 'GetCapabilities',
+									'SERVICE' : 'WMS',
+									'VERSION' : serviceVersion
+								})),
+								fieldLabel : 'GetCapabilities URL'
+							} ]
 						}),
 						label : false
 					},
@@ -75,8 +70,7 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 					service : {
 						comp : new Ext.form.FieldSet({
 							title : 'Metadata',
-							items : [ OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel
-									.call(this.layer) ]
+							items : [ OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel.call(this.layer) ]
 						}),
 						label : false
 					},
@@ -97,10 +91,24 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		return this.wmsLayer.title || this.wmsLayer.name;
 	},
 
+	handleChangeBase : function() {
+		if (this.map.projection != null) {
+			this.projection = this.map.projection;
+			this.redraw();
+		}
+	},
+
 	setMap : function(map) {
 		if (map.projection != null) {
 			this.projection = map.projection;
 		}
 		OpenLayers.Layer.WMS.prototype.setMap.apply(this, arguments);
+		this.map.events.register('changebaselayer', this, this.handleChangeBase);
+
+	},
+
+	removeMap : function(map) {
+		this.map.events.unregister('changebaselayer', this, this.handleChangeBase);
+		OpenLayers.Layer.WMS.prototype.removeMap.apply(this, arguments);
 	}
 });

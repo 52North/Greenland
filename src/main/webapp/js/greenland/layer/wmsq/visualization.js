@@ -51,15 +51,95 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 		if (!this.layerOptions.length)
 			this.layerOptions = [ this.layerOptions ];
 
+		OpenLayers.Util.extend(this.parameters, {
+			overlay_enabled : {
+				fieldLabel : 'Show Data Overlay',
+				value : false,
+				type : 'boolean',
+				action : function(value) {
+					this.events.triggerEvent('change', {
+						property : 'symbology'
+					});
+				},
+				scope : this,
+				required : true,
+				group : 'Data Overlay',
+				minVersion: 3
+			},
+			overlay_spacing : {
+				fieldLabel : 'Aggregation Spacing',
+				value : 32,
+				items : [ 8, 16, 32, 64, 128 ],
+				type : 'selectone',
+				description : 'Text spacing in pixel',
+				action : function(value) {
+					this.events.triggerEvent('change', {
+						property : 'symbology'
+					});
+				},
+				scope : this,
+				required : true,
+				group : 'Data Overlay',
+				minVersion: 3
+			},
+			overlay_layer : {
+				fieldLabel : 'Layer',
+				value : this.layerOptions[0],
+				items : this.layerOptions,
+				toString : function(value) {
+					return value.name || '<No Name>';
+				},
+				type : 'selectone',
+				description : 'Layer',
+				action : function(value) {
+					this.events.triggerEvent('change', {
+						property : 'symbology'
+					});
+				},
+				scope : this,
+				required : true,
+				group : 'Data Overlay',
+				minVersion: 3
+			},
+			overlay_lines : {
+				fieldLabel : 'Show Grid Lines',
+				value : true,
+				type : 'boolean',
+				action : function(value) {
+					this.events.triggerEvent('change', {
+						property : 'symbology'
+					});
+				},
+				scope : this,
+				required : true,
+				group : 'Data Overlay',
+				minVersion: 3
+			},
+			overlay_opacity : {
+				fieldLabel : 'Opacity',
+				value : 90,
+				minimum : 0,
+				maximum : 100,
+				type : 'integer',
+				action : function(value) {
+					this.events.triggerEvent('change', {
+						property : 'symbology'
+					});
+				},
+				scope : this,
+				required : true,
+				group : 'Data Overlay',
+				minVersion: 3
+			}
+		});
+
 		// VIS classes only handle a single layer instance for a
-		// visualization. To
-		// change this restriction, every associated nested wms layer gets
-		// an
-		// individual context (events, min/max, etc.) to which all depending
-		// functions/objects are bound (such as styler).
+		// visualization. To change this restriction, every associated nested wms
+		// layer gets an individual context (events, min/max, etc.) to which all
+		// depending functions/objects are bound (such as styler).
 		for ( var i = 0, styler, transformFunc; i < this.layerOptions.length; i++) {
-			if (typeof this.layerOptions[i].min !== 'number'
-					|| typeof this.layerOptions[i].max !== 'number' || this.layerOptions[i].name == '') {
+			if (typeof this.layerOptions[i].min !== 'number' || typeof this.layerOptions[i].max !== 'number'
+					|| this.layerOptions[i].name == '') {
 				// Ensure that every layer has min/max values set
 				throw 'Invalid layer parameters';
 			}
@@ -75,8 +155,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 					transformFunc = VIS.convertUserDefinedFunction(transformFunc, [ 'x' ]);
 
 					// use eval to "compile" as function
-					this.layerOptions[i].transformFunc = eval("(function(x) { return " + transformFunc
-							+ "; })");
+					this.layerOptions[i].transformFunc = eval("(function(x) { return " + transformFunc + "; })");
 				}
 
 				// Remove function if its not a function
@@ -128,8 +207,8 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				}
 
 				// Transformation from color to value, based on grayscale
-				var value = this.currentScaleRange.min
-						+ (this.currentScaleRange.max - this.currentScaleRange.min) * (colorValue[0] / 255);
+				var value = this.currentScaleRange.min + (this.currentScaleRange.max - this.currentScaleRange.min)
+						* (colorValue[0] / 255);
 
 				if (this.transformFunc != null) {
 					value = this.transformFunc(value);
@@ -240,6 +319,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				options.push(this.layerOptions[i].parameters);
 			}
 		}
+
 		options.push(this.parameters);
 
 		// parameters for result styler
@@ -257,7 +337,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 			}
 
 		}
-		
+
 		var serviceVersion = this.layer.capabilities.version || '1.1.1';
 		options.push({
 			service : {
@@ -365,5 +445,54 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 		for ( var key in this.options || {}) {
 			parcel.writeParameter(this.options[key]);
 		}
+	},
+
+	drawOverlay : function(canvas, merger, ctx, tile) {
+		if (!this.parameters.overlay_enabled.value) {
+			return;
+		}
+		var ctx = canvas.getContext('2d');
+
+		var w = canvas.width, height = canvas.height;
+		var valueLayer = this.parameters.overlay_layer.value;
+		var sx = this.parameters.overlay_spacing.value;
+		var sy = sx;
+		var showLines = this.parameters.overlay_lines.value;
+
+		var textSizeFactor = 0.8;
+		var textSizeY = sy * textSizeFactor;
+		var textSizeX = sx * textSizeFactor;
+		var textMarginLeft = sx * ((1 - textSizeFactor) / 2);
+		var textMarginTop = sy * ((1 - textSizeFactor) / 2);
+		ctx.font = textSizeY + 'px sans-serif';
+		ctx.fillStyle = ctx.strokeStyle = 'rgba(0, 0, 0, ' + this.parameters.overlay_opacity.value / 100 + ')';
+		ctx.textBaseline = 'top';
+
+		for ( var y = 0; y < height; y += sy)
+			for ( var x = 0; x < w; x += sx) {
+
+				var valueSum = 0, valueCount = 0, value;
+				for ( var yy = 0; yy < sy; yy++)
+					for ( var xx = 0; xx < sx; xx++) {
+						value = valueLayer.getValue(merger, x + xx, y + yy);
+						if (value != null) {
+							valueSum += value;
+							valueCount++;
+						}
+					}
+
+				if (valueCount != 0) {
+					value = valueSum / valueCount;
+					ctx.fillText(Math.round(value * 100) / 100 + '', textMarginLeft + x, textMarginTop + y, textSizeX);
+
+					if (showLines) {
+						ctx.beginPath();
+						ctx.moveTo(x, y);
+						ctx.lineTo(x + sx, y);
+						ctx.lineTo(x + sx, y + sy);
+						ctx.stroke();
+					}
+				}
+			}
 	}
 });

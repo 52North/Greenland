@@ -901,7 +901,8 @@ Ext
 				collapsible : true,
 				split : true,
 				height : 200,
-				items : []
+				items : [],
+				tools : [ VIS.createHelpToolDef('visualizations', 'left') ]
 			});
 			var centerPanel = new Ext.Panel({
 				region : 'center',
@@ -1122,7 +1123,8 @@ Ext
 					defaults : {
 						scale : 'small'
 					},
-					items : [ timeSlider, timeForward, timeAnimateButton, timeLabel, timeBackward ]
+					items : [ timeSlider, timeForward, timeAnimateButton, timeLabel, timeBackward ],
+					tools : [ VIS.createHelpToolDef('time') ]
 				}, {
 					xtype : 'buttongroup',
 					// Selection

@@ -127,6 +127,7 @@
 	</dependencies>
 
 	<build>
+	    <finalName>greenland</finalName>
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -258,6 +259,8 @@
 								<jsSourceFile>ui.js</jsSourceFile>
 								<!-- Custom OpenLayers control to allow layer swipe -->
 								<jsSourceFile>swipe.js</jsSourceFile>
+								<!-- Context Help -->
+								<jsSourceFile>help.js</jsSourceFile>
 
 								<jsSourceFile>resources/settingsparcel.js</jsSourceFile>
 								<jsSourceFile>resources/resourceloader.js</jsSourceFile>

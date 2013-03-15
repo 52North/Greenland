@@ -21,10 +21,11 @@
  * 
  * It directly supports storing and restoring common UI definition objects.
  */
-VIS.SettingsParcel = function(value) {
+VIS.SettingsParcel = function(value, version) {
 	this.splitString = '~';
 	this.parcelStringValues = value ? value.split(this.splitString) : [];
 	this.index = 0;
+	this.version = version || 0;
 
 	this.toString = function() {
 		return this.parcelStringValues.join(this.splitString);
@@ -76,6 +77,11 @@ VIS.SettingsParcel = function(value) {
 		return res;
 	};
 	this.readParameter = function(paramDef) {
+		if (paramDef.minVersion != null && paramDef.minVersion > this.version)
+			// Can not read parameters which were not set in the applied permalink
+			// version
+			return;
+
 		if (!paramDef.type || paramDef.store === false)
 			return;
 
@@ -108,10 +114,17 @@ VIS.SettingsParcel = function(value) {
 			if (paramDef.items.length == 0)
 				break;
 
-			if (typeof paramDef.items[0] === 'number') {
-				paramDef.value = this.readFloat();
+			if (this.version <= 2) {
+				// permalink version <= 2 stored value directly
+				if (typeof paramDef.items[0] === 'number') {
+					paramDef.value = this.readFloat();
+				} else {
+					paramDef.value = this.readString();
+				}
 			} else {
-				paramDef.value = this.readString();
+				// storing of value changed from permalink version 2, now storing index
+				// instead of actual value, required for non-literal values
+				paramDef.value = paramDef.items[this.readInt()];
 			}
 			break;
 		}
@@ -165,7 +178,9 @@ VIS.SettingsParcel = function(value) {
 			this.writeStringArray(paramDef.value);
 			break;
 		case 'selectone':
-			this.writeString(paramDef.value);
+			if (paramDef.items.length == 0)
+				break;
+			this.writeInt(paramDef.items.indexOf(paramDef.value));
 			break;
 		}
 	};

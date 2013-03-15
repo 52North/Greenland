@@ -21,6 +21,7 @@
 OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization, {
 	requiredLayers : {
 		'default' : {
+			title : 'Custom Selection',
 			layers : {
 				valueLayer : {
 					title : 'Value Layer',
@@ -29,6 +30,26 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 				errorLayer : {
 					title : 'Error Layer',
 					description : 'Error Variable'
+				}
+			}
+		},
+
+		normal : {
+			title : 'Normal Distribution',
+			layers : {
+				valueLayer : {
+					title : 'Value Layer',
+					description : 'Mean',
+					uncertainty : {
+						'normal#mean' : true
+					}
+				},
+				errorLayer : {
+					title : 'Error Layer',
+					description : 'Standard Deviation',
+					uncertainty : {
+						'normal#variance' : true
+					}
 				}
 			}
 		}
@@ -126,7 +147,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 	 */
 	getLegend : function() {
 		var self = this;
-		var leftMargin = 50;
+		var leftMargin = 80;
 		var bottomMargin = 20;
 
 		var panel = new Ext.Panel({
@@ -146,7 +167,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 					});
 
 					var canvas = document.createElement("canvas");
-					var width = 200, height = 100;
+					var width = 250, height = 100;
 
 					var legendWidth = width - leftMargin, legendHeight = height - bottomMargin;
 
@@ -195,17 +216,22 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 
 					// Text
 					ctx.textBaseline = 'hanging';
-					ctx.fillText('Value', 0, legendHeight + 5);
+					ctx.fillText('Value', 0, legendHeight - 5);
+					if (self.valueLayer.uom.length != 0) {
+						ctx.fillText('(' + self.valueLayer.uom + ')', 0, legendHeight + 5);
+					}
 					for ( var i = 0; i < legendWidth; i += legendWidth / 5) {
 						ctx.beginPath();
 						ctx.moveTo(i + leftMargin, legendHeight);
 						ctx.lineTo(i + leftMargin, legendHeight + 5);
 						ctx.stroke();
-						ctx.fillText((comp.valueMin + (comp.valueRangeRatio) * i).toFixed(2), i + leftMargin,
-								legendHeight + 5);
+						ctx.fillText((comp.valueMin + (comp.valueRangeRatio) * i).toFixed(2), i + leftMargin, legendHeight + 5);
 					}
 
 					ctx.fillText('Error', 0, 0);
+					if (self.errorLayer.uom.length != 0) {
+						ctx.fillText('(' + self.errorLayer.uom + ')', 0, 10);
+					}
 					ctx.textAlign = 'right';
 					for ( var i = 0; i < legendHeight; i += legendHeight / 5) {
 						ctx.beginPath();
@@ -246,8 +272,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 				return;
 			}
 
-			var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages,
-					data.tile);
+			var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages, data.tile);
 
 			var v = this.valueLayer.getValue(merger, Math.floor(data.i), Math.floor(data.j));
 			var e = this.errorLayer.getValue(merger, Math.floor(data.i), Math.floor(data.j));

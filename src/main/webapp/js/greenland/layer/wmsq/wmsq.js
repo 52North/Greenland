@@ -37,8 +37,7 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		};
 
 		// Obtain urls as specified in capabilities
-		if (options.capabilities && options.capabilities.capability
-				&& options.capabilities.capability.request) {
+		if (options.capabilities && options.capabilities.capability && options.capabilities.capability.request) {
 			var req = options.capabilities.capability.request;
 			if (req.getmap)
 				this.urls.getMap = req.getmap.href;
@@ -152,14 +151,20 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		var newParams = params || {};
 		// WMS 1.3 introduced axis order
 		var reverseAxisOrder = this.reverseAxisOrder();
-		newParams.BBOX = this.encodeBBOX ? bounds.toBBOX(null, reverseAxisOrder) : bounds
-				.toArray(reverseAxisOrder);
+		newParams.BBOX = this.encodeBBOX ? bounds.toBBOX(null, reverseAxisOrder) : bounds.toArray(reverseAxisOrder);
 		newParams.WIDTH = imageSize.w;
 		newParams.HEIGHT = imageSize.h;
 
 		var requestString = this.getFullRequestString(newParams);
 
 		return requestString;
+	},
+	
+	handleChangeBase : function() {
+		if (this.map.projection != null) {
+			this.projection = this.map.projection;
+			this.redraw();
+		}
 	},
 
 	setMap : function(map) {
@@ -168,7 +173,8 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		}
 		OpenLayers.Layer.WMS.prototype.setMap.apply(this, arguments);
 		this.map.events.register('changetime', this, this.handleChangeTime);
-
+		this.map.events.register('changebaselayer', this, this.handleChangeBase);
+		
 		this.visualization.setMap(map);
 
 		this.updateTimeExtents();
@@ -183,6 +189,8 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 	removeMap : function(map) {
 		this.map.events.unregister('changetime', this, this.handleChangeTime);
+		this.map.events.unregister('changebaselayer', this, this.handleChangeBase);
+		
 		OpenLayers.Layer.WMS.prototype.removeMap.apply(this, arguments);
 
 		this.visualization.removeMap(map);
@@ -292,15 +300,14 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		}
 
 		var result = '', layer, value;
-		var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages,
-				data.tile);
+		var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages, data.tile);
 		for ( var i = 0; i < this.visualization.layerOptions.length; i++) {
 			if (i != 0) {
 				result += '\n';
 			}
 			layer = this.visualization.layerOptions[i];
 			value = layer.getValue(merger, Math.floor(data.i), Math.floor(data.j));
-			result += layer.name + ': ' + value != null ? value.toFixed(2) : 'No Value';
+			result += layer.name + ': ' + (value != null ? value.toFixed(2) : 'No Value');
 		}
 
 		return result;
@@ -500,10 +507,8 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 
 			// Monitor loading state
 			OpenLayers.Event.stopObservingElement(image);
-			OpenLayers.Event.observe(image, "load", OpenLayers.Function.bind(this.onLayerImageLoad,
-					imageInfo));
-			OpenLayers.Event.observe(image, "error", OpenLayers.Function.bind(this.onLayerImageError,
-					imageInfo));
+			OpenLayers.Event.observe(image, "load", OpenLayers.Function.bind(this.onLayerImageLoad, imageInfo));
+			OpenLayers.Event.observe(image, "error", OpenLayers.Function.bind(this.onLayerImageError, imageInfo));
 
 			layerUrl = this.layer.getURL(this.bounds, this.layerParams[i]);
 			if (image.getAttribute("src") == layerUrl && image.complete === true) {
@@ -547,8 +552,7 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 	initImage : function() {
 		var img = this.getImage();
 
-		if (!this.forceRedraw && this.bounds.equals(this.previousBounds)
-				&& img.getAttribute('src') != '') {
+		if (!this.forceRedraw && this.bounds.equals(this.previousBounds) && img.getAttribute('src') != '') {
 			// Do not recalculate image if bounds did not change and not forced to
 			// redraw
 			this.onImageLoad();
@@ -574,6 +578,10 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 			this.layer.visualization.fillCanvas(canvas, merger, ctx, this);
 		}
 
+		if (this.layer.visualization.drawOverlay) {
+			this.layer.visualization.drawOverlay(canvas, merger, ctx, this);
+		}
+
 		// Set result
 		img.src = ctx.canvas.toDataURL();
 		this.previousBounds = this.bounds.clone();
@@ -585,54 +593,6 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 	redraw : function() {
 		this.forceRedraw = true;
 	}
-
-// // see
-// // http://www.had2know.com/technology/hsi-rgb-color-converter-equations.html
-// hsiToRgb : function(h, s, i) {
-// var cos = function(d) {
-// return Math.cos(d / 180 * Math.PI);
-// };
-// var r = 0, g = 0, b = 0;
-// if (h == 0) {
-// r = i + 2 * i * s;
-// g = b = i - i * s;
-// } else if (h < 120) {
-// r = i + i * s * cos(h) / cos(60 - h);
-// g = i + i * s * (1 - cos(h) / cos(60 - h));
-// b = i - i * s;
-// } else if (h == 120) {
-// r = b = i - i * s;
-// g = i + 2 * i * s;
-// } else if (h < 240) {
-// r = i - i * s;
-// g = i + i * s * cos(h - 120) / cos(180 - h);
-// b = i + i * s * (1 - cos(h - 120) / cos(180 - h));
-// } else if (h == 240) {
-// r = g = i - i * s;
-// b = i + s * i * s;
-// } else {
-// r = i + i * s * (1 - cos(h - 240) / cos(300 - h));
-// g = i - i * s;
-// b = i + i * s * cos(h - 240) / cos(300 - h);
-// }
-// return [ r, g, b ];
-// },
-//
-// // see
-// // http://www.had2know.com/technology/hsi-rgb-color-converter-equations.html
-// rgbToHsi : function(r, g, b) {
-// var i = (r + g + b) / 3;
-// var m = Math.min(Math.min(r, g), b);
-// var s = m > 0 ? 1 - m / i : 0;
-// var h;
-// h = Math.acos((r - g / 2 - b / 2) / Math.sqrt(r * r + g * g + b * b - r * g -
-// r * b - g * b))
-// * 180 / Math.PI;
-// if (b > g)
-// h = 360 - h;
-//
-// return [ h, s, i ];
-// }
 });
 
 /**

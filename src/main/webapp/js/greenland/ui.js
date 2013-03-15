@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Takes option descriptions as received from the visualization service or
  * specified on feature layers and creates ExtJs controls of them. Supports type
@@ -175,7 +174,7 @@ function createParameterControls(options, onChange, legend) {
 			}
 		} else if (option.type == 'boolean') {
 			var checkbox = new Ext.form.Checkbox({
-				value : option.value != null ? option.value : false,
+				checked : option.value != null ? option.value : false,
 				listeners : {
 					check : function(comp, checked) {
 						if (this.disabled || this.ownerCt.disabled)
@@ -300,14 +299,25 @@ function createParameterControls(options, onChange, legend) {
 		} else if (option.type == 'selectone') {
 
 			var itemStore = new Ext.data.ArrayStore({
-				expandData : true,
-				fields : [ 'value' ],
+				fields : [ 'value', 'name' ],
 				sortInfo : {
-					field : 'value',
+					field : 'name',
 					direction : 'ASC'
 				}
 			});
-			itemStore.loadData(option.items);
+
+			var storeData = [], storeRec;
+			for ( var k = 0, lenK = option.items.length; k < lenK; k++) {
+				storeRec = [ option.items[k] ];
+				if (option.hasOwnProperty('toString')) {
+					storeRec.push(option.toString(storeRec[0]));
+				} else {
+					storeRec.push(storeRec[0]);
+				}
+				storeData.push(storeRec);
+			}
+
+			itemStore.loadData(storeData);
 
 			var combobox = new Ext.form.ComboBox({
 				value : option.value != null ? option.value : '',
@@ -316,7 +326,7 @@ function createParameterControls(options, onChange, legend) {
 				mode : 'local',
 				store : itemStore,
 				valueField : 'value',
-				displayField : 'value',
+				displayField : 'name',
 				fieldLabel : option.fieldLabel || key,
 				editable : false,
 				listeners : {
@@ -357,8 +367,7 @@ function createParameterControls(options, onChange, legend) {
 						// option.value = option.cachedValue || option.defaultValue ||
 						// option.minimum;
 						this.buddy.enable();
-						optionHandler.onChange(option.cachedValue || option.defaultValue || option.minimum,
-								this);
+						optionHandler.onChange(option.cachedValue || option.defaultValue || option.minimum, this);
 
 						// var setValueComp = this.buddy.setValue ? this.buddy :
 						// this.buddy.paramComp;
@@ -596,150 +605,143 @@ function createFeatureWindow(features, layer) {
 
 	// Create and show window. Special functions and event handling to show a
 	// indicator to mark the corresponding feature
-	var window = new Ext.Window(
-			{
-				layout : 'fit',
-				title : layer.getTitle() || '',
-				// title : feature.getHumanReadableObservedProperty(), // + ' - ' +
-				// feature.getFoiId(),
-				items : [ tabPanel ],
-				height : 400,
-				width : 550,
-				constrainHeader : true,
-				initDraggable : function() {
-					// Augment Ext.Window.DD for this window to fire drag event
-					Ext.Window.prototype.initDraggable.call(this);
-					this.dd.onDrag = Ext.Window.DD.prototype.onDrag.createSequence(function() {
-						this.win.fireEvent('drag');
-					});
-				},
-				// Marker to illustrate selected feature
-				featureArrow : new Ext.ux.VIS.FeatureArrow({
-					renderTo : document.body,
-					style : {
-						position : 'absolute',
-						pointerEvents : 'none'
-					},
-					symbolizers : [ {
-						fillColor : 'gray',
-						pointerEvents : 'none',
-						fillOpacity : 0.4,
-						strokeWidth : 0
-					} ],
-					hidden : features.length != 1
-				}),
-				// Function takes current window and feature position to update
-				// featureArrow
-				updateFeatureIndicator : function() {
-					if (features.length != 1)
-						return;
-					var feature = features[0];
-
-					if (feature.onScreen()) {
-						var winPos;
-						if (this.activeGhost) {
-							// Use "ghost" Element for window position if
-							// existing, since getPosition() is not working
-							// while dragging windows
-							winPos = [ this.activeGhost.getLeft(), this.activeGhost.getTop() ];
-						} else {
-							winPos = this.getPosition();
-						}
-						var centroid = feature.geometry.getCentroid();
-						var viewportpx = feature.layer.map.getPixelFromLonLat(new OpenLayers.LonLat(centroid.x,
-								centroid.y));
-						var viewportEl = Ext.get(feature.layer.map.viewPortDiv);
-						var featurePos = [ viewportpx.x + viewportEl.getLeft(),
-								viewportpx.y + viewportEl.getTop() ];
-
-						this.featureArrow.setEndPosition(featurePos[0], featurePos[1]);
-
-						var topOffset = winPos[1] - featurePos[1];
-						var bottomOffset = featurePos[1] - (winPos[1] + this.getHeight());
-						var leftOffset = winPos[0] - featurePos[0];
-						var rightOffset = featurePos[0] - (winPos[0] + this.getWidth());
-
-						if (topOffset > 0) {
-							this.featureArrow.setOrientation('horizontal');
-							this.featureArrow.setStartWidth(this.getWidth());
-							this.featureArrow.setStartPosition(winPos[0], winPos[1]);
-
-							this.featureArrow.updateFeature();
-							this.featureArrow.show();
-
-							this.featureArrow.setPagePosition(winPos[0] - Math.max(0, leftOffset), winPos[1]
-									- topOffset);
-						} else if (bottomOffset > 0) {
-							this.featureArrow.setOrientation('horizontal');
-							this.featureArrow.setStartWidth(this.getWidth());
-							this.featureArrow.setStartPosition(winPos[0], winPos[1] + this.getHeight());
-
-							this.featureArrow.updateFeature();
-							this.featureArrow.show();
-
-							this.featureArrow.setPagePosition(winPos[0] - Math.max(0, leftOffset), winPos[1]
-									+ this.getHeight());
-						} else if (leftOffset > 0) {
-							this.featureArrow.setOrientation('vertical');
-							this.featureArrow.setStartWidth(this.getHeight());
-							this.featureArrow.setStartPosition(winPos[0], winPos[1]);
-
-							this.featureArrow.updateFeature();
-							this.featureArrow.show();
-
-							this.featureArrow.setPagePosition(winPos[0] - Math.max(0, leftOffset), winPos[1]
-									- Math.max(0, topOffset));
-						} else if (rightOffset > 0) {
-							this.featureArrow.setOrientation('vertical');
-							this.featureArrow.setStartWidth(this.getHeight());
-							this.featureArrow.setStartPosition(winPos[0] + this.getWidth(), winPos[1]);
-
-							this.featureArrow.updateFeature();
-							this.featureArrow.show();
-
-							this.featureArrow.setPagePosition(winPos[0] + this.getWidth(), winPos[1]
-									- Math.max(0, topOffset));
-						} else {
-							this.featureArrow.hide();
-							return;
-						}
-
-					} else {
-						this.featureArrow.hide();
-					}
-				},
-				// register listeners to update featureArrow
-				listeners : {
-					move : function() {
-						this.updateFeatureIndicator();
-					},
-					resize : function() {
-						this.updateFeatureIndicator();
-					},
-					drag : function() {
-						this.updateFeatureIndicator();
-					},
-					destroy : function() {
-						this.featureArrow.destroy();
-					},
-					show : function() {
-						this.updateFeatureIndicator();
-						layer.map.events.register('move', this, this.updateFeatureIndicator);
-					},
-					hide : function() {
-						this.featureArrow.hide();
-						if (layer) {
-							layer.map.events.unregister('move', this, this.updateFeatureIndicator);
-						}
-					},
-					activate : function() {
-						this.featureArrow.el.setStyle('z-index', this.el.getZIndex() - 1);
-					},
-					deactivate : function() {
-						this.featureArrow.el.setStyle('z-index', this.el.getZIndex() - 1);
-					}
-				}
+	var window = new Ext.Window({
+		layout : 'fit',
+		title : layer.getTitle() || '',
+		// title : feature.getHumanReadableObservedProperty(), // + ' - ' +
+		// feature.getFoiId(),
+		items : [ tabPanel ],
+		height : 400,
+		width : 550,
+		constrainHeader : true,
+		initDraggable : function() {
+			// Augment Ext.Window.DD for this window to fire drag event
+			Ext.Window.prototype.initDraggable.call(this);
+			this.dd.onDrag = Ext.Window.DD.prototype.onDrag.createSequence(function() {
+				this.win.fireEvent('drag');
 			});
+		},
+		// Marker to illustrate selected feature
+		featureArrow : new Ext.ux.VIS.FeatureArrow({
+			renderTo : document.body,
+			style : {
+				position : 'absolute',
+				pointerEvents : 'none'
+			},
+			symbolizers : [ {
+				fillColor : 'gray',
+				pointerEvents : 'none',
+				fillOpacity : 0.4,
+				strokeWidth : 0
+			} ],
+			hidden : features.length != 1
+		}),
+		// Function takes current window and feature position to update
+		// featureArrow
+		updateFeatureIndicator : function() {
+			if (features.length != 1)
+				return;
+			var feature = features[0];
+
+			if (feature.onScreen()) {
+				var winPos;
+				if (this.activeGhost) {
+					// Use "ghost" Element for window position if
+					// existing, since getPosition() is not working
+					// while dragging windows
+					winPos = [ this.activeGhost.getLeft(), this.activeGhost.getTop() ];
+				} else {
+					winPos = this.getPosition();
+				}
+				var centroid = feature.geometry.getCentroid();
+				var viewportpx = feature.layer.map.getPixelFromLonLat(new OpenLayers.LonLat(centroid.x, centroid.y));
+				var viewportEl = Ext.get(feature.layer.map.viewPortDiv);
+				var featurePos = [ viewportpx.x + viewportEl.getLeft(), viewportpx.y + viewportEl.getTop() ];
+
+				this.featureArrow.setEndPosition(featurePos[0], featurePos[1]);
+
+				var topOffset = winPos[1] - featurePos[1];
+				var bottomOffset = featurePos[1] - (winPos[1] + this.getHeight());
+				var leftOffset = winPos[0] - featurePos[0];
+				var rightOffset = featurePos[0] - (winPos[0] + this.getWidth());
+
+				if (topOffset > 0) {
+					this.featureArrow.setOrientation('horizontal');
+					this.featureArrow.setStartWidth(this.getWidth());
+					this.featureArrow.setStartPosition(winPos[0], winPos[1]);
+
+					this.featureArrow.updateFeature();
+					this.featureArrow.show();
+
+					this.featureArrow.setPagePosition(winPos[0] - Math.max(0, leftOffset), winPos[1] - topOffset);
+				} else if (bottomOffset > 0) {
+					this.featureArrow.setOrientation('horizontal');
+					this.featureArrow.setStartWidth(this.getWidth());
+					this.featureArrow.setStartPosition(winPos[0], winPos[1] + this.getHeight());
+
+					this.featureArrow.updateFeature();
+					this.featureArrow.show();
+
+					this.featureArrow.setPagePosition(winPos[0] - Math.max(0, leftOffset), winPos[1] + this.getHeight());
+				} else if (leftOffset > 0) {
+					this.featureArrow.setOrientation('vertical');
+					this.featureArrow.setStartWidth(this.getHeight());
+					this.featureArrow.setStartPosition(winPos[0], winPos[1]);
+
+					this.featureArrow.updateFeature();
+					this.featureArrow.show();
+
+					this.featureArrow.setPagePosition(winPos[0] - Math.max(0, leftOffset), winPos[1] - Math.max(0, topOffset));
+				} else if (rightOffset > 0) {
+					this.featureArrow.setOrientation('vertical');
+					this.featureArrow.setStartWidth(this.getHeight());
+					this.featureArrow.setStartPosition(winPos[0] + this.getWidth(), winPos[1]);
+
+					this.featureArrow.updateFeature();
+					this.featureArrow.show();
+
+					this.featureArrow.setPagePosition(winPos[0] + this.getWidth(), winPos[1] - Math.max(0, topOffset));
+				} else {
+					this.featureArrow.hide();
+					return;
+				}
+
+			} else {
+				this.featureArrow.hide();
+			}
+		},
+		// register listeners to update featureArrow
+		listeners : {
+			move : function() {
+				this.updateFeatureIndicator();
+			},
+			resize : function() {
+				this.updateFeatureIndicator();
+			},
+			drag : function() {
+				this.updateFeatureIndicator();
+			},
+			destroy : function() {
+				this.featureArrow.destroy();
+			},
+			show : function() {
+				this.updateFeatureIndicator();
+				layer.map.events.register('move', this, this.updateFeatureIndicator);
+			},
+			hide : function() {
+				this.featureArrow.hide();
+				if (layer) {
+					layer.map.events.unregister('move', this, this.updateFeatureIndicator);
+				}
+			},
+			activate : function() {
+				this.featureArrow.el.setStyle('z-index', this.el.getZIndex() - 1);
+			},
+			deactivate : function() {
+				this.featureArrow.el.setStyle('z-index', this.el.getZIndex() - 1);
+			}
+		}
+	});
 
 	window.show();
 
@@ -755,9 +757,39 @@ function showLayerSettings(layer) {
 	// Get visualization parameters
 	var params = layer.visualization.createParameters();
 
+	// Regroup parameter objects based on their individual group attributes
+	var i = 0, newParams, paramSet, groups;
+	while (i < params.length) {
+
+		paramSet = params[i];
+		groups = {};
+		for ( var param in paramSet) {
+			if (paramSet[param].length) {
+				continue;
+			}
+			paramGroup = paramSet[param].group || paramSet.group || 'Symbology';
+			if (groups[paramGroup] == null) {
+				groups[paramGroup] = {
+					group : paramGroup
+				};
+			}
+			groups[paramGroup][param] = paramSet[param];
+		}
+
+		newParams = [];
+		for ( var group in groups) {
+			newParams.push(groups[group]);
+		}
+
+		params.splice(i, 1);
+		Array.prototype.unshift.apply(params, newParams);
+		i += newParams.length;
+	}
+	params.reverse();
+
+	
 	var optionsGroupMap = {};
 	var group, controls;
-
 	for ( var i = 0; i < params.length; i++) {
 		controls = createParameterControls(params[i], null);
 		if (controls.length != 0) {
@@ -892,39 +924,37 @@ function showMapSettings(map) {
 				});
 			}
 		},
-		buttons : [
-				{
-					text : 'OK',
-					handler : function() {
-						var projCode = 'EPSG:' + srsNumberField.getValue();
-						loadingMask.show();
-						VIS.getProjection(projCode, function(projection) {
-							loadingMask.hide();
-							map.reprojecting = true;
-							var oldCenter = map.getCenter(), oldProj = map.getProjectionObject();
-							map.projection = projection;
-							map.maxExtent = new OpenLayers.Bounds(
-									OpenLayers.Projection.defaults[projCode].maxExtent);
+		buttons : [ {
+			text : 'OK',
+			handler : function() {
+				var projCode = 'EPSG:' + srsNumberField.getValue();
+				loadingMask.show();
+				VIS.getProjection(projCode, function(projection) {
+					loadingMask.hide();
+					map.reprojecting = true;
+					var oldCenter = map.getCenter(), oldProj = map.getProjectionObject();
+					map.projection = projection;
+					map.maxExtent = new OpenLayers.Bounds(OpenLayers.Projection.defaults[projCode].maxExtent);
 
-							var baseLayer = new OpenLayers.Layer('None', {
-								isBaseLayer : true,
-								projection : projection
-							});
+					var baseLayer = new OpenLayers.Layer('None', {
+						isBaseLayer : true,
+						projection : projection
+					});
 
-							map.addLayers([ baseLayer ]);
+					map.addLayers([ baseLayer ]);
 
-							map.setBaseLayer(baseLayer);
-							map.setCenter(oldCenter.transform(oldProj, projection));
-							map.reprojecting = false;
-							window.close();
-						});
-					}
-				}, {
-					text : 'Cancel',
-					handler : function() {
-						window.close();
-					}
-				} ]
+					map.setBaseLayer(baseLayer);
+					map.setCenter(oldCenter.transform(oldProj, projection));
+					map.reprojecting = false;
+					window.close();
+				});
+			}
+		}, {
+			text : 'Cancel',
+			handler : function() {
+				window.close();
+			}
+		} ]
 	});
 
 	window.show();

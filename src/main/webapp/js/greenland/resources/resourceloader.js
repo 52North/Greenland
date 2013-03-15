@@ -18,7 +18,7 @@
  */
 VIS.ResourceLoader = {
 
-	permalinkVersion : 2,
+	permalinkVersion : 3,
 
 	/**
 	 * Transforms object with attributes at least url, mime (and vissUrl) stepwise
@@ -97,7 +97,8 @@ VIS.ResourceLoader = {
 				layerConfig[layerKey] = {
 					name : visualization.name,
 					min : visualization.min,
-					max : visualization.max
+					max : visualization.max,
+					uom : visualization.uom
 				};
 
 				if (visualization.transformFuncString) {
@@ -179,9 +180,19 @@ VIS.ResourceLoader = {
 		param = param.replace(/!/g, '{').replace(/\*/g, '}').replace(/'/g, '"');
 		var count = 0;
 
+	
+
+		var perma = new OpenLayers.Format.JSON().read(param);
+
+		if (!perma.version || perma.version > this.permalinkVersion) {
+			callback.call(this, new Error('The permalink is not supported by this version of Greenland'),
+					0, 0, 0);
+			return;
+		}
+
 		var callbackIntercept = function(result) {
 			count++;
-			var settingsParcel = new VIS.SettingsParcel(this.s ? this.s : '');
+			var settingsParcel = new VIS.SettingsParcel(this.s ? this.s : '', perma.version);
 			var mapIndex = settingsParcel.readInt();
 
 			if (result instanceof OpenLayers.Layer && result.restore) {
@@ -189,19 +200,10 @@ VIS.ResourceLoader = {
 			}
 			callback.call(this, result, mapIndex, count, layers.length);
 		};
-
-		var perma = new OpenLayers.Format.JSON().read(param);
-
-		if (!perma.version || perma.version != this.permalinkVersion) {
-			callback.call(this, new Error('The permalink is not suported by this version of Greenland'),
-					0, 0, 0);
-			return;
-		}
-
+		
 		var layers = perma.layers ? perma.layers : perma;
 
 		var restoreLayers = function() {
-
 			for ( var i = 0; i < layers.length; i++) {
 				o = layers[i];
 				VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function
@@ -728,7 +730,7 @@ VIS.ResourceLoader = {
 								loaderId : visualizers[i].id,
 								visualizer : visualizers[i], // include
 								// visualizer info as sent by VISS
-								iconCls : 'icon-raster',
+								iconCls : 'icon-raster-visualization',
 								leaf : true,
 								resourceLoader : 'viss_layer'
 							}));
@@ -805,7 +807,7 @@ VIS.ResourceLoader = {
 			var commonLayerOptions = OpenLayers.Util.applyDefaults({
 				type : 'ncwms_layer',
 				resourceLoader : 'ncwms_layer',
-				iconCls : 'icon-raster',
+				iconCls : 'icon-raster-visualization',
 				leaf : true,
 				wmsLayer : wmsLayer
 			}, resourceOptions);

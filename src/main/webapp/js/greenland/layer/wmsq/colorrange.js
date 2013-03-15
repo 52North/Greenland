@@ -85,7 +85,8 @@ OpenLayers.Layer.VIS.WMSQ.ColorRange = OpenLayers.Class(OpenLayers.Layer.VIS.WMS
 			legendInfos : this.legendInfos,
 			styler : this.valueLayer.styler,
 			events : this.events,
-			legendSymbolType : 'Polygon'
+			legendSymbolType : 'Polygon',
+			uom: this.valueLayer.uom
 		});
 
 		OpenLayers.Layer.VIS.WMSQ.Visualization.prototype.update.call(this);

@@ -7,6 +7,7 @@
 .icon-graticule { background: url('graticule.png') no-repeat !important; }
 .icon-vector { background: url('vector.png') no-repeat !important; }
 .icon-raster { background: url('raster.png') no-repeat !important; }
+.icon-raster-visualization { background: url('raster_vis.png') no-repeat !important; }
 .icon-serverraster { background: url('server_raster.png') no-repeat !important; }
 .icon-servermap { background: url('server_map.png') no-repeat !important; }
 .icon-barchart { background: url('chart_bar.png') no-repeat !important; }

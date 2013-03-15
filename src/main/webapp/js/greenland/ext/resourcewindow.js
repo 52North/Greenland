@@ -127,7 +127,8 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 					}
 
 				}
-			}
+			},
+			tools : [ VIS.createHelpToolDef('resource_tree') ]
 		});
 
 		var windowItems = [];
@@ -168,8 +169,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 				text : 'Advanced...',
 				handler : function() {
 					// Show window to specify a request as datasource
-					this.showAdvancedNewResourceWindow(resourcesNode, textFieldURL.getValue(), comboBoxType
-							.getValue());
+					this.showAdvancedNewResourceWindow(resourcesNode, textFieldURL.getValue(), comboBoxType.getValue());
 				},
 				scope : this
 			});
@@ -181,7 +181,8 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 				labelWidth : 50,
 				padding : 5,
 				items : [ textFieldURL, comboBoxType ],
-				bbar : [ buttonAdvancedResource, '->', buttonNewResource ]
+				bbar : [ buttonAdvancedResource, '->', buttonNewResource ],
+				tools : [ VIS.createHelpToolDef('add_resource') ]
 			});
 
 			windowItems.push({
@@ -269,11 +270,10 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 
 		if (attributes.resourceLoader == 'ncwms_layer' && attributes.requiredLayers) {
 			// (nc)WMS-Q resource -> layer assignment step first
-			previousHandler = this.assignLayersForResource.createDelegate(this, [ attributes,
-					function(attributes) {
-						this.resourceWizard.showLoadMask();
-						VIS.ResourceLoader.loadResourceOptions(attributes, loadResourceOptionsCallback, this);
-					} ]);
+			previousHandler = this.assignLayersForResource.createDelegate(this, [ attributes, function(attributes) {
+				this.resourceWizard.showLoadMask();
+				VIS.ResourceLoader.loadResourceOptions(attributes, loadResourceOptionsCallback, this);
+			} ]);
 			previousHandler();
 		} else {
 			// any other resource -> directly load resource
@@ -295,8 +295,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		// handlerAddToMap);
 
 		var handlerSelectMap = function() {
-			this.selectMap(layer, this.showParameters.createDelegate(this, [ layer, previousHandler,
-					allowImmediately ]));
+			this.selectMap(layer, this.showParameters.createDelegate(this, [ layer, previousHandler, allowImmediately ]));
 		};
 		this.resourceWizard.updateButtons(previousHandler, handlerSelectMap);
 
@@ -417,11 +416,8 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		var createLayerComboBox = function() {
 			var data = [];
 			for ( var i = 0; i < attributes.wmsLayer.nestedLayers.length; i++) {
-				data
-						.push([
-								attributes.wmsLayer.nestedLayers[i].name,
-								attributes.wmsLayer.nestedLayers[i].title
-										|| attributes.wmsLayer.nestedLayers[i].name ]);
+				data.push([ attributes.wmsLayer.nestedLayers[i].name,
+						attributes.wmsLayer.nestedLayers[i].title || attributes.wmsLayer.nestedLayers[i].name ]);
 			}
 
 			return new Ext.form.ComboBox({
@@ -468,15 +464,12 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		};
 
 		// Performs a GetMetadata request (ncWMS extension) to get min/max
-		// values
-		// for
-		// a specific WMS layer
+		// values for a specific WMS layer
 		// Callback receives object with min and max
 		var getScaleRange = function(name, callback) {
 			var url = attributes.url;
 			// Use GetMetadata URL as specified in capabilities
-			if (attributes.capabilities && attributes.capabilities.capability
-					&& attributes.capabilities.capability.request
+			if (attributes.capabilities && attributes.capabilities.capability && attributes.capabilities.capability.request
 					&& attributes.capabilities.capability.request.getmetadata) {
 				url = attributes.capabilities.capability.request.getmetadata.href || url;
 			}
@@ -493,7 +486,8 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 					var details = new OpenLayers.Format.JSON().read(resp.responseText);
 					callback({
 						min : Math.floor(details.scaleRange[0]),
-						max : Math.ceil(details.scaleRange[1])
+						max : Math.ceil(details.scaleRange[1]),
+						uom : details.units || ''
 					});
 				},
 				failure : function(resp) {
@@ -545,8 +539,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 					layerItems.push({
 						xtype : 'label',
 						fieldLabel : '',
-						text : 'Automatic assignment based on uncertainty keyword "'
-								+ autoMatchedLayers[key].usedKeyword + '"'
+						text : 'Automatic assignment based on uncertainty keyword "' + autoMatchedLayers[key].usedKeyword + '"'
 					});
 				}
 
@@ -573,6 +566,13 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 					allowBlank : false,
 					anchor : '100%',
 					value : autoMatchedLayers[key].max
+				}));
+				
+				layerItems.push(layers[key].uom = new Ext.form.TextField({
+					fieldLabel : 'Unit',
+					allowBlank : true,
+					anchor : '100%',
+					value : autoMatchedLayers[key].uom
 				}));
 
 				if (autoMatchedLayers[key].name) {
@@ -615,11 +615,12 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 								layers : layers[key],
 								handler : function() {
 									this.setDisabled(true);
-									getScaleRange(this.layers.name.getValue ? this.layers.name.getValue()
-											: this.layers.name, function(scale) {
+									getScaleRange(this.layers.name.getValue ? this.layers.name.getValue() : this.layers.name, function(
+											scale) {
 										if (!(scale instanceof Error)) {
 											this.layers.min.setValue(scale.min);
 											this.layers.max.setValue(scale.max);
+											this.layers.uom.setValue(scale.uom);
 										}
 										this.setDisabled(false);
 									}.createDelegate(this));
@@ -695,8 +696,8 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 			for ( var layerKey in layers) {
 				layerConfig[layerKey] = {};
 				for ( var key in layers[layerKey]) {
-					layerConfig[layerKey][key] = layers[layerKey][key].getValue ? layers[layerKey][key]
-							.getValue() : layers[layerKey][key];
+					layerConfig[layerKey][key] = layers[layerKey][key].getValue ? layers[layerKey][key].getValue()
+							: layers[layerKey][key];
 				}
 			}
 
@@ -880,18 +881,11 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 			store : new Ext.data.ArrayStore({
 				id : 0,
 				fields : [ 'name', 'mime' ],
-				data : [
-						[ 'NetCDF (*.nc)', 'application/netcdf' ],
-						[ 'GeoTIFF (*.tiff)', 'image/geotiff' ],
-						[ 'ncWMS(-Q) Resource', 'ncwms' ],
-						[ 'WMS Resource', 'wms' ],
-						[ 'O&M2 Raster', 'application/vnd.ogc.om+xml' ],
-						[ '', null ],
-						[ 'O&M Vector (*.xml)', 'application/xml' ],
-						[ 'O&M2 Vector(*.xml)', 'application/x-om-u+xml' ],
-						[ 'JSOM (*.json)', 'application/x-om-u+json' ],
-						[ 'Uncertainty Collection',
-								'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ] ]
+				data : [ [ 'NetCDF (*.nc)', 'application/netcdf' ], [ 'GeoTIFF (*.tiff)', 'image/geotiff' ],
+						[ 'ncWMS(-Q) Resource', 'ncwms' ], [ 'WMS Resource', 'wms' ],
+						[ 'O&M2 Raster', 'application/vnd.ogc.om+xml' ], [ '', null ], [ 'O&M Vector (*.xml)', 'application/xml' ],
+						[ 'O&M2 Vector(*.xml)', 'application/x-om-u+xml' ], [ 'JSOM (*.json)', 'application/x-om-u+json' ],
+						[ 'Uncertainty Collection', 'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ] ]
 			}),
 			valueField : 'mime',
 			displayField : 'name',
