@@ -134,10 +134,8 @@ VIS.ResourceLoader = {
 		var permaObjects = [];
 		for ( var i = 0, layer; i < layers.length; i++) {
 			layer = layers[i];
-			if (layer instanceof OpenLayers.Layer.VIS.Vector
-					|| layer instanceof OpenLayers.Layer.VIS.Raster
-					|| layer instanceof OpenLayers.Layer.VIS.WMSQ
-					|| layer instanceof OpenLayers.Layer.VIS.WMS) {
+			if (layer instanceof OpenLayers.Layer.VIS.Vector || layer instanceof OpenLayers.Layer.VIS.Raster
+					|| layer instanceof OpenLayers.Layer.VIS.WMSQ || layer instanceof OpenLayers.Layer.VIS.WMS) {
 				permaObjects.push(VIS.ResourceLoader.getPermalinkObject(layer));
 			}
 		}
@@ -180,13 +178,10 @@ VIS.ResourceLoader = {
 		param = param.replace(/!/g, '{').replace(/\*/g, '}').replace(/'/g, '"');
 		var count = 0;
 
-	
-
 		var perma = new OpenLayers.Format.JSON().read(param);
 
 		if (!perma.version || perma.version > this.permalinkVersion) {
-			callback.call(this, new Error('The permalink is not supported by this version of Greenland'),
-					0, 0, 0);
+			callback.call(this, new Error('The permalink is not supported by this version of Greenland'), 0, 0, 0);
 			return;
 		}
 
@@ -200,14 +195,13 @@ VIS.ResourceLoader = {
 			}
 			callback.call(this, result, mapIndex, count, layers.length);
 		};
-		
+
 		var layers = perma.layers ? perma.layers : perma;
 
 		var restoreLayers = function() {
 			for ( var i = 0; i < layers.length; i++) {
 				o = layers[i];
-				VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function
-						.bind(callbackIntercept, o));
+				VIS.ResourceLoader.loadResourcePath(o.r, o.p, OpenLayers.Function.bind(callbackIntercept, o));
 			}
 
 		};
@@ -251,8 +245,7 @@ VIS.ResourceLoader = {
 					while (current < end) {
 						for ( var i = 1; i <= funcMapping.length; i++) {
 							if (match[i]) {
-								current['set' + funcMapping[i - 1]](current['get' + funcMapping[i - 1]]()
-										+ parseInt(match[i]));
+								current['set' + funcMapping[i - 1]](current['get' + funcMapping[i - 1]]() + parseInt(match[i]));
 							}
 						}
 						instances.push(new Date(current.getTime()));
@@ -324,12 +317,207 @@ VIS.ResourceLoader = {
 					iconCls : 'icon-servermap' // WMS
 				};
 				break;
+			case 'threddscatalog':
+				// THREDDS data server catalog
+				rootOptions = {
+					resourceLoader : 'thredds_catalog',
+					text : 'THREDDS Catalog ' + resourceOptions.url,
+					iconCls : 'icon-database'
+				};
+				break;
 			default:
 				callback(new Error('mime not supported'));
 				return;
 			}
 
 			callback(OpenLayers.Util.extend(rootOptions, resourceOptions));
+
+		},
+
+		/**
+		 * Appends TDS urls according to
+		 * http://www.unidata.ucar.edu/projects/THREDDS/tech/catalog/v1.0.2/InvCatalogSpec.html#constructingURLs
+		 * 
+		 * @param url
+		 * @param path
+		 * @returns
+		 */
+		appendThreddsUrls : function(url, path) {
+			if (path[0] == "/") {
+				return url.split("/").slice(0, 3).join("/") + path;
+			} else if (path.indexOf('://') != -1) {
+				return path;
+			} else {
+				return url.split("/").slice(0, -1).join("/") + "/" + path;
+			}
+		},
+
+		/**
+		 * Creates level for each entry in catalog
+		 */
+		thredds_catalog : function(resourceOptions, callback) {
+			var resourceUrl = resourceOptions.url;
+
+			// Perform GET request on resourceUrl to parse collection data, inspect
+			// observed properties, etc.
+			OpenLayers.Request
+					.GET({
+						url : resourceUrl,
+						success : function(resp) {
+							if (resp.status == 0) {
+								callback(new Error(
+										'Server seems to not support cross-origin resource sharing (CORS) or is not available'));
+								return;
+							}
+							var format = new OpenLayers.Format.XML(), doc = null;
+							if (!resp.responseXML || !resp.responseXML.documentElement) {
+								doc = format.read(resp.responseText);
+							} else {
+								doc = resp.responseXML.documentElement;
+							}
+
+							// var name = format.getAttributeNS(doc, null, 'name');
+							var wmsServiceNames = {};
+
+							function inspectServiceNodes(node) {
+								var serviceNodes = node.getElementsByTagName('service');
+								var wmsBase = null;
+								for ( var i = 0; i < serviceNodes.length; i++) {
+									var serviceNode = serviceNodes.item(i);
+									var serviceType = serviceNode.getAttribute('serviceType');
+									var serviceName = serviceNode.getAttribute('name');
+									var serviceBase = serviceNode.getAttribute('base');
+
+									if (serviceType == 'Compound') {
+										var wmsBaseCompound = inspectServiceNodes(serviceNode);
+										if (wmsBaseCompound != null) {
+											wmsServiceNames[serviceName] = wmsBaseCompound;
+										}
+									} else if (serviceType == 'WMS') {
+										wmsServiceNames[serviceName] = serviceBase;
+										wmsBase = serviceBase;
+									}
+								}
+
+								return wmsBase;
+							}
+
+							inspectServiceNodes(doc);
+
+							var catalogOptions = [];
+							var nodes = doc.childNodes;
+							for ( var i = 0; i < nodes.length; i++) {
+								var node = nodes.item(i);
+								if (node.nodeName == 'catalogRef') {
+									var catalogTitle = node.getAttribute('xlink:title');
+									var catalogHref = node.getAttribute('xlink:href');
+									catalogOptions.push(OpenLayers.Util.applyDefaults({
+										text : catalogTitle,
+										// loaderId : catalogHref,
+										resourceLoader : 'thredds_catalog',
+										url : this.appendThreddsUrls(resourceUrl, catalogHref),
+										iconCls : 'icon-database'
+									}, resourceOptions));
+								} else if (node.nodeName == 'dataset') {
+									var datasetName = node.getAttribute('name');
+									var datasetUrlPath = node.getAttribute('urlPath');
+									if (!datasetUrlPath) {
+										// Collection
+										catalogOptions.push(OpenLayers.Util.applyDefaults({
+											text : datasetName,
+											// loaderId : catalogHref,
+											resourceLoader : 'thredds_dataset_collection',
+											datasetNode : node,
+											wmsServiceNames : wmsServiceNames,
+											iconCls : 'icon-database'
+										}, resourceOptions));
+									}
+								}
+							}
+
+							callback(catalogOptions);
+						}.createDelegate(this),
+						failure : function(resp) {
+							// Error handling
+							callback(new Error(resp.responseText));
+						}
+					});
+		},
+
+		/**
+		 * Creates level for a dataset collection within a tds catalog
+		 */
+		thredds_dataset_collection : function(resourceOptions, callback) {
+			var datasetNode = resourceOptions.datasetNode;
+			var wmsServiceNames = resourceOptions.wmsServiceNames;
+			var resourceUrl = resourceOptions.url;
+			var format = new OpenLayers.Format.XML();
+
+			var catalogOptions = [];
+
+			var nodes = datasetNode.childNodes;
+			for ( var i = 0; i < nodes.length; i++) {
+				var node = nodes.item(i);
+				if (node.nodeName == 'catalogRef') {
+					var catalogTitle = node.getAttribute('xlink:title');
+					var catalogHref = node.getAttribute('xlink:href');
+					catalogOptions.push(OpenLayers.Util.applyDefaults({
+						text : catalogTitle,
+						// loaderId : catalogHref,
+						resourceLoader : 'thredds_catalog',
+						url : this.appendThreddsUrls(resourceUrl, catalogHref),
+						iconCls : 'icon-database'
+					}, resourceOptions));
+				} else if (node.nodeName == 'dataset') {
+					var datasetName = node.getAttribute('name');
+					var datasetUrlPath = node.getAttribute('urlPath');
+					if (!datasetUrlPath) {
+						// Collection
+						catalogOptions.push(OpenLayers.Util.applyDefaults({
+							text : datasetName,
+							// loaderId : catalogHref,
+							resourceLoader : 'thredds_dataset_collection',
+							datasetNode : node,
+							iconCls : 'icon-database'
+						}, resourceOptions));
+					} else {
+
+						var serviceNameNodes = node.getElementsByTagName('serviceName');
+						var wmsBase = null;
+						for ( var j = 0; j < serviceNameNodes.length; j++) {
+							wmsBase = wmsServiceNames[format.getChildValue(serviceNameNodes.item(j))];
+							if (wmsBase != null)
+								break;
+						}
+
+						if (wmsBase == null) {
+							var temp = datasetNode.getElementsByTagName('metadata');
+							if (temp.length != 0)
+								temp = temp[0].getElementsByTagName('serviceName');
+							if (temp.length != 0) {
+								wmsBase = wmsServiceNames[format.getChildValue(temp[0])];
+							}
+						}
+
+						if (wmsBase != null) {
+							// is a WMS Dataset -> attach new clean ncwms mime node
+							catalogOptions.push({
+								mime : 'ncwms',
+								text : datasetName,
+								// loaderId : catalogHref,
+								resourceLoader : 'ncwms_root',
+								url : this.appendThreddsUrls(this.appendThreddsUrls(resourceUrl, wmsBase), datasetUrlPath),
+								iconCls : 'icon-serverraster'
+							});
+						}
+					}
+				}
+			}
+			if (catalogOptions.length == 0) {
+				callback(new Error('No WMS resource'));
+			} else {
+				callback(catalogOptions);
+			}
 
 		},
 
@@ -645,8 +833,8 @@ VIS.ResourceLoader = {
 
 			// Add nodes based on the collected node options
 			for ( var i = 0; i < vectorLayerOptions.length; i++) {
-				vectorLayerOptions[i] = OpenLayers.Util.extend(OpenLayers.Util.extend({},
-						commonLayerOptions), vectorLayerOptions[i]);
+				vectorLayerOptions[i] = OpenLayers.Util.extend(OpenLayers.Util.extend({}, commonLayerOptions),
+						vectorLayerOptions[i]);
 				vectorLayerOptions[i].loaderId = '' + i;
 			}
 
@@ -678,17 +866,16 @@ VIS.ResourceLoader = {
 					var dataSetOptions = [];
 					for ( var i = 0, len = dataSets.length; i < len; i++) {
 						// Add node for each data set
-						dataSetOptions.push(OpenLayers.Util.extend(OpenLayers.Util.extend({}, resourceOptions),
-								{
-									text : dataSets[i].phenomenon || dataSets[i].id,
-									// use phenomenon if available
-									resourceLoader : 'viss_dataset',
-									loaderId : dataSets[i].id,
-									dataSet : dataSets[i],
-									// include data set information as sent by VISS
-									iconCls : 'icon-raster',
-									leaf : false
-								}));
+						dataSetOptions.push(OpenLayers.Util.extend(OpenLayers.Util.extend({}, resourceOptions), {
+							text : dataSets[i].phenomenon || dataSets[i].id,
+							// use phenomenon if available
+							resourceLoader : 'viss_dataset',
+							loaderId : dataSets[i].id,
+							dataSet : dataSets[i],
+							// include data set information as sent by VISS
+							iconCls : 'icon-raster',
+							leaf : false
+						}));
 					}
 					callback(dataSetOptions);
 				});
@@ -724,16 +911,15 @@ VIS.ResourceLoader = {
 				var visualizerOptions = [];
 				for ( var i = 0, len = visualizers.length; i < len; i++) {
 					// add node for each data set
-					visualizerOptions.push(OpenLayers.Util.extend(
-							OpenLayers.Util.extend({}, resourceOptions), {
-								text : visualizers[i].id,
-								loaderId : visualizers[i].id,
-								visualizer : visualizers[i], // include
-								// visualizer info as sent by VISS
-								iconCls : 'icon-raster-visualization',
-								leaf : true,
-								resourceLoader : 'viss_layer'
-							}));
+					visualizerOptions.push(OpenLayers.Util.extend(OpenLayers.Util.extend({}, resourceOptions), {
+						text : visualizers[i].id,
+						loaderId : visualizers[i].id,
+						visualizer : visualizers[i], // include
+						// visualizer info as sent by VISS
+						iconCls : 'icon-raster-visualization',
+						leaf : true,
+						resourceLoader : 'viss_layer'
+					}));
 				}
 				callback(visualizerOptions);
 			});
@@ -817,8 +1003,7 @@ VIS.ResourceLoader = {
 
 			// Special ncWMS visualizations
 			var visualizations = [ [ OpenLayers.Layer.VIS.WMSQ.ColorRange, 'Color Range' ],
-					[ OpenLayers.Layer.VIS.WMSQ.Whitening, 'Whitening' ],
-					[ OpenLayers.Layer.VIS.WMSQ.Contour, 'Isolines' ],
+					[ OpenLayers.Layer.VIS.WMSQ.Whitening, 'Whitening' ], [ OpenLayers.Layer.VIS.WMSQ.Contour, 'Isolines' ],
 					[ OpenLayers.Layer.VIS.WMSQ.Glyphs, 'Glyphs' ],
 					[ OpenLayers.Layer.VIS.WMSQ.ExceedanceProbability, 'Exceedance Probability' ],
 					[ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval, 'Confidence Interval' ] ];
@@ -862,8 +1047,7 @@ VIS.ResourceLoader = {
 			// Get capabilities
 			OpenLayers.Request
 					.GET({
-						url : (wmsCapabilitiesProxy && resourceOptions.noProxy !== true) ? (wmsCapabilitiesProxy
-								+ '?URL=' + resourceOptions.url)
+						url : (wmsCapabilitiesProxy && resourceOptions.noProxy !== true) ? (wmsCapabilitiesProxy + '?URL=' + resourceOptions.url)
 								: resourceOptions.url,
 						params : {
 							SERVICE : 'WMS',
@@ -890,8 +1074,7 @@ VIS.ResourceLoader = {
 									} else {
 										// try to load again without proxy, if proxy loading failed
 										resourceOptions.noProxy = true;
-										VIS.ResourceLoader.resourceLoader.wms_root
-												.call(this, resourceOptions, callback);
+										VIS.ResourceLoader.resourceLoader.wms_root.call(this, resourceOptions, callback);
 									}
 								} else {
 									callback(new Error('Invalid capabilities response'));
@@ -1016,23 +1199,21 @@ VIS.ResourceLoader = {
 			// }
 			// }
 
-			var layer = new resourceOptions.layerClass('Test', resourceOptions.url, OpenLayers.Util
-					.extend({
-						transparent : true,
-						styles : 'boxfill/greyscale',
-						version : resourceOptions.capabilities.version,
-					}, resourceOptions.getParamOptions ? resourceOptions.getParamOptions() : {}),
-					OpenLayers.Util.extend({
-						opacity : 0.8,
-						// projection : layerProjection,
-						resourceOptions : {
-							mime : resourceOptions.mime,
-							url : resourceOptions.url
-						},
-						wmsLayer : resourceOptions.wmsLayer,
-						supportedSrs : resourceOptions.wmsLayer.srs || resourceOptions.wmsLayer.crs,
-						capabilities : resourceOptions.capabilities
-					}, layerOptions));
+			var layer = new resourceOptions.layerClass('Test', resourceOptions.url, OpenLayers.Util.extend({
+				transparent : true,
+				styles : 'boxfill/greyscale',
+				version : resourceOptions.capabilities.version,
+			}, resourceOptions.getParamOptions ? resourceOptions.getParamOptions() : {}), OpenLayers.Util.extend({
+				opacity : 0.8,
+				// projection : layerProjection,
+				resourceOptions : {
+					mime : resourceOptions.mime,
+					url : resourceOptions.url
+				},
+				wmsLayer : resourceOptions.wmsLayer,
+				supportedSrs : resourceOptions.wmsLayer.srs || resourceOptions.wmsLayer.crs,
+				capabilities : resourceOptions.capabilities
+			}, layerOptions));
 
 			callback(layer);
 		},

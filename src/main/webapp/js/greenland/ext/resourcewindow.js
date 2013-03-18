@@ -885,7 +885,8 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 						[ 'ncWMS(-Q) Resource', 'ncwms' ], [ 'WMS Resource', 'wms' ],
 						[ 'O&M2 Raster', 'application/vnd.ogc.om+xml' ], [ '', null ], [ 'O&M Vector (*.xml)', 'application/xml' ],
 						[ 'O&M2 Vector(*.xml)', 'application/x-om-u+xml' ], [ 'JSOM (*.json)', 'application/x-om-u+json' ],
-						[ 'Uncertainty Collection', 'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ] ]
+						[ 'Uncertainty Collection', 'application/vnd.org.uncertweb.viss.uncertainty-collection+json' ],
+						[ 'THREDDS Data Server Catalog', 'threddscatalog' ] ]
 			}),
 			valueField : 'mime',
 			displayField : 'name',
