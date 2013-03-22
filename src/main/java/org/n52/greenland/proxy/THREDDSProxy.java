@@ -45,7 +45,7 @@ public class THREDDSProxy extends HttpServlet {
 			throw new IllegalArgumentException("No url specified");
 		}
 
-		URL url = new URL(serverUrl + "?" + request.getQueryString());
+		URL url = new URL(serverUrl);
 		URLConnection connection = url.openConnection();
 		connection.setReadTimeout(30000);
 		connection.setConnectTimeout(30000);

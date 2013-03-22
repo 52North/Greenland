@@ -356,14 +356,15 @@ VIS.ResourceLoader = {
 		 * Creates level for each entry in catalog
 		 */
 		thredds_catalog : function(resourceOptions, callback) {
-			var resourceUrl = (threddsProxy && resourceOptions.noProxy !== true) ? (threddsProxy + '?URL=' + resourceOptions.url)
+			var resourceUrl = resourceOptions.url;
+			var queryUrl = (threddsProxy && resourceOptions.noProxy !== true) ? (threddsProxy + '?URL=' + resourceOptions.url)
 					: resourceOptions.url;
 
 			// Perform GET request on resourceUrl to parse collection data, inspect
 			// observed properties, etc.
 			OpenLayers.Request
 					.GET({
-						url : resourceUrl,
+						url : queryUrl,
 						success : function(resp) {
 							if (resp.status == 0) {
 								callback(new Error(
