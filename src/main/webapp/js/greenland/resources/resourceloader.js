@@ -356,7 +356,8 @@ VIS.ResourceLoader = {
 		 * Creates level for each entry in catalog
 		 */
 		thredds_catalog : function(resourceOptions, callback) {
-			var resourceUrl = resourceOptions.url;
+			var resourceUrl = (threddsProxy && resourceOptions.noProxy !== true) ? (threddsProxy + '?URL=' + resourceOptions.url)
+					: resourceOptions.url;
 
 			// Perform GET request on resourceUrl to parse collection data, inspect
 			// observed properties, etc.

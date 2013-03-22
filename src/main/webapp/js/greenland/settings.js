@@ -20,6 +20,7 @@ var omConversionServiceUrl = "http://giv-uw.uni-muenster.de:8080/omcs";
 var vissUrl = "http://giv-uw.uni-muenster.de:8080/viss";
 
 var wmsCapabilitiesProxy = "wmsproxy";
+var threddsProxy = "threddsproxy";
 
 // Resources to show by default
 var defaultResources = [
@@ -64,6 +65,11 @@ var defaultResources = [
 }, {
 	url : 'http://giv-uw.uni-muenster.de/data/om/MS_points_PM10.xml',
 	mime : 'application/x-om-u+xml'
+},
+
+{
+	url : 'http://motherlode.ucar.edu:8080/thredds/topcatalog.xml',
+	mime : 'threddscatalog'
 }
 
 ];

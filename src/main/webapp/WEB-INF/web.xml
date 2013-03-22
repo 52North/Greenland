@@ -8,9 +8,17 @@
 		<servlet-name>CapabilitiesProxy</servlet-name>
 		<servlet-class>org.n52.greenland.proxy.CapabilitiesProxy</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>THREDDSProxy</servlet-name>
+		<servlet-class>org.n52.greenland.proxy.THREDDSProxy</servlet-class>
+	</servlet>
 	<servlet-mapping>
 		<servlet-name>CapabilitiesProxy</servlet-name>
 		<url-pattern>/wmsproxy</url-pattern>
+	</servlet-mapping>
+		<servlet-mapping>
+		<servlet-name>THREDDSProxy</servlet-name>
+		<url-pattern>/threddsproxy</url-pattern>
 	</servlet-mapping>
 
 	<jsp-config>
