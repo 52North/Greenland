@@ -198,7 +198,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 			// Does not include adding custom resources
 
 			resourcesTree.expandAll();
-			windowItems.push(layerTree);
+//			windowItems.push(layerTree);
 		}
 
 		windowItems.push(this.resourceWizard.panel);
