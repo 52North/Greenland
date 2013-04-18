@@ -84,6 +84,8 @@ VIS.createPropertyArray = function(array, properties) {
 VIS.mapComponents = [];
 VIS.syncViewports = true;
 
+VIS.contextPath = '';
+
 Ext
 		.onReady(function() {
 			// Executed when Ext framework is ready, i.e. website is loaded
@@ -91,8 +93,7 @@ Ext
 			Ext.BLANK_IMAGE_URL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP' + // 
 			'///yH5BAEAAAAALAAAAAABAAEAQAIBRAA7';
 			if (Ext.isIE6 || Ext.isIE7) {
-				Ext.BLANK_IMAGE_URL = 'js/ExtJs/resources/images/default/s.gif';
-				// TODO will not work in portlet
+				Ext.BLANK_IMAGE_URL = VIS.contextPath + 'js/ExtJs/resources/images/default/s.gif';
 			}
 
 			Ext.QuickTips.init();
@@ -519,8 +520,8 @@ Ext
 				// Mouse marker, to show the position of the mouse in other map views
 				var mouseMarkerLayer = new OpenLayers.Layer.Markers("MouseMarker");
 				map.addLayer(mouseMarkerLayer);
-				var mouseMarker = new OpenLayers.Marker(map.getCenter(), new OpenLayers.Icon('images/cross.png',
-						new OpenLayers.Size(20, 20), new OpenLayers.Pixel(-10, -10)));
+				var mouseMarker = new OpenLayers.Marker(map.getCenter(), new OpenLayers.Icon(VIS.contextPath
+						+ 'images/cross.png', new OpenLayers.Size(20, 20), new OpenLayers.Pixel(-10, -10)));
 				mouseMarkerLayer.addMarker(mouseMarker);
 
 				// Layer showing the extent of the map with which the user is currently

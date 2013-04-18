@@ -60,6 +60,13 @@
 <script type="text/javascript"
 	src="<%=request.getContextPath()%>/js/greenland/greenland.min.js"></script>
 
+<script type="text/javascript">
+	VIS.contextPath = "<%=request.getContextPath()%>/";
+	wmsCapabilitiesProxy = "<%=request.getContextPath()%>/wmsproxy";
+	threddsProxy = "<%=request.getContextPath()%>/threddsproxy";
+		
+</script>
+
 
 <div id="greenlandDiv" style="width: 100%; height: 600px;"></div>
 
