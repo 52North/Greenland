@@ -31,7 +31,7 @@
 }
 
 
-ol.x-tab-strip, ul.x-tab-strip, dl.x-tab-strip, blockquote.x-tab-strip, ul.x-tree-node-ct, ul.x-menu-list {
+ol.x-tab-strip, ul.x-tab-strip, dl.x-tab-strip, blockquote.x-tab-strip, ul.x-tree-node-ct, ul.x-tree-root-ct, ul.x-menu-list {
 	margin: 0;
 }
 
@@ -41,4 +41,13 @@ li.x-tree-node {
 
 ul.x-tree-root-ct {
 	list-style: none;
+}
+
+input.x-form-field {
+	padding : 0px !important;
+}
+
+div.x-panel {
+	color: black;
+	font-weight : normal;
 }
