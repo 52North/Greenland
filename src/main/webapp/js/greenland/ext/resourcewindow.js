@@ -945,7 +945,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		});
 
 		var addResourcePanel = new Ext.form.FormPanel({
-			title : 'Add Resource',
+			title : 'Add New Resource',
 			region : 'south',
 			height : 150,
 			labelWidth : 50,
@@ -956,7 +956,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 
 		// Show window
 		advWindow = new Ext.Window({
-			title : 'Add new Resource',
+			title : 'Add Resource',
 			layout : 'fit',
 			items : [ addResourcePanel ],
 			height : 300,

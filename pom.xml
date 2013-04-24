@@ -127,7 +127,7 @@
 	</dependencies>
 
 	<build>
-	    <finalName>greenland</finalName>
+		<finalName>greenland</finalName>
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -162,7 +162,7 @@
 							<filtering>true</filtering>
 						</resource>
 						<resource>
-							<directory>${build.sourceDirectory}</directory>
+							<directory>${project.build.sourceDirectory}</directory>
 							<targetPath>sources</targetPath>
 						</resource>
 					</webResources>
@@ -396,7 +396,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
+				<version>1.2</version>
 				<executions>
 					<execution>
 						<phase>validate</phase>
@@ -416,6 +416,25 @@
 						<item>timestamp</item>
 					</items>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/standalone.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
