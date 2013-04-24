@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.n52.greenland</groupId>
+	<groupId>org.n52.geostatistics</groupId>
 	<artifactId>greenland</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
@@ -31,6 +31,7 @@
 	</developers>
 	<scm>
 		<connection>scm:svn:https://svn.52north.org/svn/geostatistics/main/greenland/trunk</connection>
+		<url>https://svn.52north.org/svn/geostatistics/main/greenland/trunk</url>
 	</scm>
 
 	<licenses>
@@ -41,11 +42,6 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
-
-	<properties>
-		<!-- Goal for license plugin -->
-		<license.goal>check</license.goal>
-	</properties>
 
 	<profiles>
 		<profile>
@@ -348,7 +344,7 @@
 						<!-- Ext -->
 						<phase>test</phase>
 						<goals>
-							<goal>${license.goal}</goal>
+							<goal>check</goal>
 						</goals>
 
 						<configuration>
@@ -372,7 +368,7 @@
 						<!-- Apache -->
 						<phase>test</phase>
 						<goals>
-							<goal>${license.goal}</goal>
+							<goal>check</goal>
 						</goals>
 
 						<configuration>
@@ -438,4 +434,8 @@
 			</plugin>
 		</plugins>
 	</build>
+	<issueManagement>
+		<system>Bugzilla</system>
+		<url>https://bugzilla.52north.org/</url>
+	</issueManagement>
 </project>
