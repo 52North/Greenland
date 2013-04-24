@@ -43,6 +43,10 @@
 		</license>
 	</licenses>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<profiles>
 		<profile>
 			<!-- Profile for updating license headers -->
