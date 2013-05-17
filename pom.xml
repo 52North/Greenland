@@ -301,9 +301,10 @@
 								<jsSourceFile>legend.js</jsSourceFile>
 								<!-- Component for adding resources -->
 								<jsSourceFile>resourcewindow.js</jsSourceFile>
-								<!-- Component for showing lyaer/visualization settings -->
+								<!-- Component for showing layer/visualization settings -->
 								<jsSourceFile>layersettingswindow.js</jsSourceFile>
-								
+								<!-- Component for showing feature details -->
+								<jsSourceFile>featurewindow.js</jsSourceFile>
 
 							</jsSourceFiles>
 

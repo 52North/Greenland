@@ -256,7 +256,11 @@ Ext
 
 				for ( var key in layerFeatureMap) {
 					var entry = layerFeatureMap[key];
-					createFeatureWindow(entry.features, entry.layer);
+					new Ext.ux.VIS.FeatureWindow({
+						features : entry.features,
+						layer : entry.layer,
+						constrainHeader : true
+					}).show();
 				}
 
 			}
