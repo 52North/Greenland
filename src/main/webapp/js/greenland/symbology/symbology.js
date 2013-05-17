@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 52°North Initiative for Geospatial Open Source Software GmbH
+ * Copyright 2012 52Â°North Initiative for Geospatial Open Source Software GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ OpenLayers.VIS.Symbology.Base = OpenLayers.Class({
 	 * Returns an array of parameter config objects. Used by the layer settings
 	 * dialog to allow the user to change visualization parameters
 	 * 
-	 * See createParameterControls (ui.js) for config objects.
+	 * See VIS.createParameterControls (ui.js) for config objects.
 	 * 
 	 * @returns {Array}
 	 */

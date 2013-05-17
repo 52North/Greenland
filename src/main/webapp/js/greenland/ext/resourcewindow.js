@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 52°North Initiative for Geospatial Open Source Software GmbH
+ * Copyright 2012 52Â°North Initiative for Geospatial Open Source Software GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,7 +302,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		var panel = this.resourceWizard.panel;
 
 		// Create parameter controls
-		var paramItems = createParameterControls(layer.getParameterOptions());
+		var paramItems = VIS.createParameterControls(layer.getParameterOptions());
 		if (paramItems.length != 0) {
 			panel.add({
 				xtype : 'fieldset',

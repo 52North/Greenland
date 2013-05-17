@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 52°North Initiative for Geospatial Open Source Software GmbH
+ * Copyright 2012 52Â°North Initiative for Geospatial Open Source Software GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ OpenLayers.VIS.Styler.Chooser = OpenLayers.Class(OpenLayers.VIS.Styler.Base, {
 				if (item != comboBoxStyler)
 					panelCurrentStyler.remove(item);
 			});
-			panelCurrentStyler.add(createParameterControls(this.stylers[this.currentStylerIndex]
+			panelCurrentStyler.add(VIS.createParameterControls(this.stylers[this.currentStylerIndex]
 					.createParameters(), null));
 			panelCurrentStyler.doLayout();
 		};

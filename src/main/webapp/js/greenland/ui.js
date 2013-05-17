@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 52°North Initiative for Geospatial Open Source Software GmbH
+ * Copyright 2012 52Â°North Initiative for Geospatial Open Source Software GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+if (typeof VIS == 'undefined')
+	VIS = {};
 
 /**
  * Takes option descriptions as received from the visualization service or
@@ -23,7 +25,7 @@
  * @param onChange
  * @returns {Array}
  */
-function createParameterControls(options, onChange, legend) {
+VIS.createParameterControls = function(options, onChange, legend) {
 
 	var addOptionItems = function(key, option, paramItems) {
 		var optionHandler = {
@@ -284,7 +286,7 @@ function createParameterControls(options, onChange, legend) {
 				var changeButton = new Ext.Button({
 					text : 'Select...',
 					handler : function() {
-						showSelectManyWindow(optionHandler);
+						VIS.showSelectManyWindow(optionHandler);
 					},
 					scope : this
 				});
@@ -425,14 +427,14 @@ function createParameterControls(options, onChange, legend) {
 		addOptionItems(key, options[key], paramItems);
 	}
 	return paramItems;
-}
+};
 
 /**
  * Shows a window for selectmany parameter options
  * 
  * @param optionHandler
  */
-function showSelectManyWindow(optionHandler) {
+VIS.showSelectManyWindow = function(optionHandler) {
 	// TODO Find alternative for Ext.ux.form.ItemSelector, no resizing
 	// capabilities
 
@@ -747,102 +749,6 @@ function createFeatureWindow(features, layer) {
 
 }
 
-/**
- * Shows a window to control the layer settings of a VIS layer. Requests the
- * visualization parameters from the layer and displays them in a window.
- * 
- * @param layer
- */
-function showLayerSettings(layer) {
-	// Get visualization parameters
-	var params = layer.visualization.createParameters();
-
-	// Regroup parameter objects based on their individual group attributes
-	var i = 0, newParams, paramSet, groups;
-	while (i < params.length) {
-
-		paramSet = params[i];
-		groups = {};
-		for ( var param in paramSet) {
-			if (paramSet[param].length) {
-				continue;
-			}
-			paramGroup = paramSet[param].group || paramSet.group || 'Symbology';
-			if (groups[paramGroup] == null) {
-				groups[paramGroup] = {
-					group : paramGroup
-				};
-			}
-			groups[paramGroup][param] = paramSet[param];
-		}
-
-		newParams = [];
-		for ( var group in groups) {
-			newParams.push(groups[group]);
-		}
-
-		params.splice(i, 1);
-		Array.prototype.unshift.apply(params, newParams);
-		i += newParams.length;
-	}
-	params.reverse();
-
-	
-	var optionsGroupMap = {};
-	var group, controls;
-	for ( var i = 0; i < params.length; i++) {
-		controls = createParameterControls(params[i], null);
-		if (controls.length != 0) {
-			group = params[i].group || 'Symbology';
-
-			if (!optionsGroupMap[group]) {
-				optionsGroupMap[group] = [];
-			}
-
-			// Convert parameter descriptions into ExtJs controls
-			optionsGroupMap[group] = optionsGroupMap[group].concat(controls);
-		}
-	}
-
-	var tabs = [];
-	for ( var key in optionsGroupMap) {
-		tabs.push(new Ext.Panel({
-			autoScroll : true,
-			padding : 10,
-			layout : 'form',
-			title : key,
-			items : optionsGroupMap[key],
-			defaults : {
-				anchor : '100%'
-			}
-		}));
-	}
-
-	var window = null;
-	var handleLayerRemoved = function(evt) {
-		window.close();
-	};
-
-	window = new Ext.Window({
-		layout : 'fit',
-		title : 'Layer Settings - ' + layer.getTitle() || '',
-		items : [ new Ext.TabPanel({
-			activeTab : 0,
-			items : tabs
-		}) ],
-		height : 400,
-		width : 350,
-		listeners : {
-			close : function() {
-				layer.events.unregister('removed', this, handleLayerRemoved);
-			}
-		},
-		constrainHeader : true
-	});
-
-	layer.events.register('removed', this, handleLayerRemoved);
-	window.show();
-}
 
 function showMapSettings(map) {
 

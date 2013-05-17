@@ -45,6 +45,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<license.goal>check</license.goal>
 	</properties>
 
 	<profiles>
@@ -300,6 +301,9 @@
 								<jsSourceFile>legend.js</jsSourceFile>
 								<!-- Component for adding resources -->
 								<jsSourceFile>resourcewindow.js</jsSourceFile>
+								<!-- Component for showing lyaer/visualization settings -->
+								<jsSourceFile>layersettingswindow.js</jsSourceFile>
+								
 
 							</jsSourceFiles>
 
@@ -348,7 +352,7 @@
 						<!-- Ext -->
 						<phase>test</phase>
 						<goals>
-							<goal>check</goal>
+							<goal>${license.goal}</goal>
 						</goals>
 
 						<configuration>
@@ -372,7 +376,7 @@
 						<!-- Apache -->
 						<phase>test</phase>
 						<goals>
-							<goal>check</goal>
+							<goal>${license.goal}</goal>
 						</goals>
 
 						<configuration>
