@@ -37,19 +37,20 @@ public class CapabilitiesProxy extends HttpServlet {
 	 *      response)
 	 */
 	@Override
-    protected void doGet(HttpServletRequest request,
+	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 
 		if (!"GetCapabilities"
 				.equalsIgnoreCase(request.getParameter("REQUEST"))) {
-			throw new IllegalArgumentException("Only serving GetCapabilities request");
+			throw new IllegalArgumentException(
+					"Only serving GetCapabilities request");
 		}
 		if (!"WMS".equalsIgnoreCase(request.getParameter("SERVICE"))) {
 			throw new IllegalArgumentException("Only serving WMS");
 		}
 
 		String serverUrl = request.getParameter("URL");
-		if (serverUrl == null || serverUrl.isEmpty()) {
+		if (serverUrl == null || serverUrl.length() == 0) {
 			throw new IllegalArgumentException("No url specified");
 		}
 

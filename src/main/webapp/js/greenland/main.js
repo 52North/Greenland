@@ -463,6 +463,9 @@ Ext
 			function createMapComponents(options) {
 				options = options || {};
 
+				if (VIS.OpenLayersThemeDir) {
+					options.theme = VIS.OpenLayersThemeDir;
+				}
 				// Base layers
 				var proj3857 = new OpenLayers.Projection('EPSG:3857');
 				var baseLayers = [ new OpenLayers.Layer.OSM.Mapnik('OpenStreetMap Mapnik', {
@@ -1030,6 +1033,7 @@ Ext
 
 			// Toolbar creation
 			var toolbar = new Ext.Toolbar({
+				enableOverflow : true,
 				height : 73, // needs fixed height
 				// autoHeight:true,
 				region : 'north',
@@ -1181,7 +1185,12 @@ Ext
 						handler : function() {
 							window.open(VIS.ResourceLoader.getPermalink(VIS.getAllLayers(), true));
 						}
-					} ]
+					} ],
+					// Override so that toolbar overflow handling will treat this panel as
+					// a buttongroup and place its items in the overflow menu
+					isXType : function(type) {
+						return type == 'buttongroup' || Ext.Panel.prototype.isXType.call(this, type);
+					}
 
 				} ]
 			});
@@ -1200,20 +1209,40 @@ Ext
 					height : 100,
 					layout : 'border',
 					items : [ centerPanel, toolbar, bottomPanel ],
-					plugins : [ 'fittoparent' ]
+					plugins : [ 'fittoparent' ],
+					listeners : {
+						afterrender : {
+							// Force an additional toolbar layout pass after first render pass
+							// to ensure creation of overflow menus
+							single : true,
+							fn : function() {
+								toolbar.doLayout();
+							}
+						}
+					}
 				});
 			} else {
 				// If not, use the full body viewport
 				VIS.viewport = new Ext.Viewport({
 					layout : 'border',
-					items : [ centerPanel, toolbar, bottomPanel ]
+					items : [ centerPanel, toolbar, bottomPanel ],
+					listeners : {
+						afterrender : {
+							// Force an additional toolbar layout pass after first render pass
+							// to ensure creation of overflow menus
+							single : true,
+							fn : function() {
+								toolbar.doLayout();
+							}
+						}
+					}
 				});
 			}
 
 			// Check for get parameters
 			VIS.checkForResourceRequest(function(newResource) {
 				// Add new resource info at te beginning of default resources
-				defaultResources.unshift(newResource);
+				VIS.defaultResources.unshift(newResource);
 				VIS.showResourceWindow([ newResource ], true);
 			});
 
@@ -1332,8 +1361,7 @@ VIS.checkForResourceRequest = function(callback) {
 		parameters.url = parameters.url.join(',');
 
 	var newResource = {
-		resourceId : nextResourceId++,
-		vissUrl : vissUrl
+		resourceId : VIS.nextResourceId++
 	};
 
 	if (parameters.url) {
@@ -1342,8 +1370,7 @@ VIS.checkForResourceRequest = function(callback) {
 				url : parameters.request,
 				success : function(resp) {
 					var newResource = {
-						resourceId : nextResourceId++,
-						vissUrl : vissUrl,
+						resourceId : VIS.nextResourceId++,
 						url : parameters.url,
 						request : resp.responseText,
 						mime : parameters.mime

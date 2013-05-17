@@ -292,7 +292,7 @@ VIS.ResourceLoader = {
 			case 'image/geotiff':
 			case 'application/vnd.org.uncertweb.viss.uncertainty-collection+json':
 				// VISS raster data
-				var resource = new OpenLayers.VIS.Resource(resourceOptions.vissUrl, resourceOptions);
+				var resource = new OpenLayers.VIS.Resource(VIS.vissUrl, resourceOptions);
 				rootOptions = {
 					resource : resource,
 					resourceLoader : 'viss_root',
@@ -357,7 +357,7 @@ VIS.ResourceLoader = {
 		 */
 		thredds_catalog : function(resourceOptions, callback) {
 			var resourceUrl = resourceOptions.url;
-			var queryUrl = (threddsProxy && resourceOptions.noProxy !== true) ? (threddsProxy + '?URL=' + resourceOptions.url)
+			var queryUrl = (VIS.threddsProxy && resourceOptions.noProxy !== true) ? (VIS.threddsProxy + '?URL=' + resourceOptions.url)
 					: resourceOptions.url;
 
 			// Perform GET request on resourceUrl to parse collection data, inspect
@@ -375,12 +375,16 @@ VIS.ResourceLoader = {
 							if (!resp.responseXML || !resp.responseXML.documentElement) {
 								doc = format.read(resp.responseText);
 							} else {
-								doc = resp.responseXML.documentElement;
+								doc = resp.responseXML;
 							}
+
+							doc = doc.documentElement;
 
 							// var name = format.getAttributeNS(doc, null, 'name');
 							var wmsServiceNames = {};
 
+							// Parses service section to find service types offering WMS and
+							// do get the base url for these services
 							function inspectServiceNodes(node) {
 								var serviceNodes = node.getElementsByTagName('service');
 								var wmsBase = null;
@@ -541,7 +545,7 @@ VIS.ResourceLoader = {
 			case 'application/x-om-u+xml':
 				formatClass = OpenLayers.SOS.Format.JSOM;
 				// Change url to use OM2->JSOM conversion service
-				resourceUrl = OpenLayers.Util.urlAppend(omConversionServiceUrl, 'url=' + resourceUrl
+				resourceUrl = OpenLayers.Util.urlAppend(VIS.omConversionServiceUrl, 'url=' + resourceUrl
 						+ '&from=application/xml&to=application/json');
 				break;
 			default:
@@ -1049,7 +1053,7 @@ VIS.ResourceLoader = {
 			// Get capabilities
 			OpenLayers.Request
 					.GET({
-						url : (wmsCapabilitiesProxy && resourceOptions.noProxy !== true) ? (wmsCapabilitiesProxy + '?URL=' + resourceOptions.url)
+						url : (VIS.wmsCapabilitiesProxy && resourceOptions.noProxy !== true) ? (VIS.wmsCapabilitiesProxy + '?URL=' + resourceOptions.url)
 								: resourceOptions.url,
 						params : {
 							SERVICE : 'WMS',
@@ -1236,8 +1240,7 @@ VIS.ResourceLoader = {
 					className : 'olLayerGridSingleTile', // disable fade effects
 					resourceOptions : {
 						mime : resourceOptions.mime,
-						url : resourceOptions.url,
-						vissUrl : vissUrl
+						url : resourceOptions.url
 					}
 				});
 

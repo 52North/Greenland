@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 // OM conversion service url
-var omConversionServiceUrl = "http://giv-uw.uni-muenster.de:8080/omcs";
+if (typeof VIS == 'undefined')
+	VIS = {};
+
+VIS.omConversionServiceUrl = "http://giv-uw.uni-muenster.de:8080/omcs";
 
 // url of visualization service to use
-var vissUrl = "http://giv-uw.uni-muenster.de:8080/viss";
+VIS.vissUrl = "http://giv-uw.uni-muenster.de:8080/viss";
 
-var wmsCapabilitiesProxy = "wmsproxy";
-var threddsProxy = "threddsproxy";
+VIS.wmsCapabilitiesProxy = "wmsproxy";
+VIS.threddsProxy = "threddsproxy";
 
 // Resources to show by default
-var defaultResources = [
+VIS.defaultResources = [
 // ncWMS
 {
 	url : 'http://geoviqua.dev.52north.org/WMSQAdapter/local/wms',
@@ -38,18 +41,15 @@ var defaultResources = [
 
 // VISS
 {
-	vissUrl : vissUrl,
 	url : 'http://giv-uw.uni-muenster.de/data/netcdf/biotemp-t.nc',
 	mime : 'application/netcdf'
 }, {
-	vissUrl : vissUrl,
 	url : 'http://giv-uw.uni-muenster.de/data/netcdf/biotemp.nc',
 	mime : 'application/netcdf'
 },
 
 // Client vector
 {
-	vissUrl : vissUrl,
 	url : 'http://giv-uw.uni-muenster.de/vis/v2/data/json/uncertainty-collection.json',
 	mime : 'application/vnd.org.uncertweb.viss.uncertainty-collection+json'
 }, {
@@ -76,4 +76,4 @@ var defaultResources = [
 
 // Id for user-defined resources, for internal use, connects between
 // defaultResource map and Ext.ux.VIS.ResourceNodesContainer
-var nextResourceId = 0;
+VIS.nextResourceId = 0;

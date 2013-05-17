@@ -62,8 +62,9 @@
 
 <script type="text/javascript">
 	VIS.contextPath = "<%=request.getContextPath()%>/";
-	wmsCapabilitiesProxy = "<%=request.getContextPath()%>/wmsproxy";
-	threddsProxy = "<%=request.getContextPath()%>/threddsproxy";
+	VIS.wmsCapabilitiesProxy = "<%=request.getContextPath()%>/wmsproxy";
+	VIS.threddsProxy = "<%=request.getContextPath()%>/threddsproxy";
+	VIS.OpenLayersThemeDir = "<%=request.getContextPath()%>/js/OpenLayers/theme/default/style.css";
 		
 </script>
 

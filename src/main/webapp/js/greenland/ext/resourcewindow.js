@@ -42,7 +42,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		Ext.ux.VIS.ResourceWindow.superclass.initComponent.call(this);
 		this.initResourceWizard();
 
-		this.resources = this.resources || defaultResources;
+		this.resources = this.resources || VIS.defaultResources;
 		var resourcesNode = new Ext.ux.VIS.ResourceNodesContainer();
 		resourcesNode.addResources(this.resources);
 
@@ -107,10 +107,10 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 							text : 'Remove',
 							handler : function() {
 								resourcesNode.removeResource(node.attributes.resourceId);
-								for ( var i = 0; i < defaultResources.length; i++) {
-									if (defaultResources[i].resourceId != null
-											&& defaultResources[i].resourceId == node.attributes.resourceId) {
-										defaultResources.splice(i, 1);
+								for ( var i = 0; i < VIS.defaultResources.length; i++) {
+									if (VIS.defaultResources[i].resourceId != null
+											&& VIS.defaultResources[i].resourceId == node.attributes.resourceId) {
+										VIS.defaultResources.splice(i, 1);
 										break;
 									}
 								}
@@ -151,13 +151,12 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 					if (comboBoxType.getValue().length > 0 && textFieldURL.getValue().length > 0) {
 						// Add new resource
 						var newResource = {
-							resourceId : nextResourceId++,
-							vissUrl : vissUrl,
+							resourceId : VIS.nextResourceId++,
 							url : textFieldURL.getValue(),
 							mime : comboBoxType.getValue()
 						};
 						resourcesNode.addResource(newResource);
-						defaultResources.push(newResource);
+						VIS.defaultResources.push(newResource);
 
 						comboBoxType.reset();
 						textFieldURL.reset();
@@ -931,14 +930,13 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 				if (comboBoxType.getValue().length > 0
 						&& (textFieldURL.getValue().length > 0 || textAreaRequest.getValue().length > 0)) {
 					var newResource = {
-						resourceId : nextResourceId++,
-						vissUrl : vissUrl,
+						resourceId : VIS.nextResourceId++,
 						url : textFieldURL.getValue(),
 						mime : comboBoxType.getValue(),
 						request : textAreaRequest.getValue()
 					};
 					layerList.addResource(newResource);
-					defaultResources.push(newResource);
+					VIS.defaultResources.push(newResource);
 					advWindow.close();
 				}
 			}

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class THREDDSProxy
+ * Servlet implementation class VIS.threddsProxy
  */
 public class THREDDSProxy extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -41,7 +41,7 @@ public class THREDDSProxy extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		String serverUrl = request.getParameter("URL");
-		if (serverUrl == null || serverUrl.isEmpty()) {
+		if (serverUrl == null || serverUrl.length() == 0) {
 			throw new IllegalArgumentException("No url specified");
 		}
 
