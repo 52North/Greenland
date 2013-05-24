@@ -978,6 +978,7 @@ VIS.ResourceLoader = {
 										leaf : false,
 										capabilities : capabilities
 									}, resourceOptions));
+
 								}
 								callback(layerOptions);
 							}
@@ -1041,6 +1042,24 @@ VIS.ResourceLoader = {
 			for ( var i = 0; i < layerOptions.length; i++) {
 				layerOptions[i] = OpenLayers.Util.applyDefaults(layerOptions[i], commonLayerOptions);
 				layerOptions[i].loaderId = '' + i;
+			}
+
+			if (wmsLayer.nestedLayers) {
+				// Handle nested layers, they can again have nested quality layers ->
+				// add dataset node for every nested layer with nested layers
+				for ( var i = 0; i < wmsLayer.nestedLayers.length; i++) {
+					var nestedLayer = wmsLayer.nestedLayers[i];
+					if (nestedLayer.nestedLayers && nestedLayer.nestedLayers.length != 0) {
+						layerOptions.push(OpenLayers.Util.applyDefaults({
+							text : nestedLayer.title,
+							loaderId : nestedLayer.name || nestedLayer.title,
+							resourceLoader : 'ncwms_dataset',
+							wmsLayer : nestedLayer,
+							iconCls : 'icon-raster',
+							leaf : false
+						}, resourceOptions));
+					}
+				}
 			}
 
 			callback(layerOptions);

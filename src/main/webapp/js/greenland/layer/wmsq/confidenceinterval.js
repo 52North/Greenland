@@ -51,7 +51,7 @@ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer
 					for ( var j = 0; j < sx; j++) {
 						meant = this.meanLayer.getValue(merger, x + j, y + i);
 						sdt = this.sdLayer.getValue(merger, x + j, y + i);
-						if (meant == null || sdt == null) {
+						if (meant == null || sdt == null || sdt < 0) {
 							continue;
 						}
 						mean += meant;
@@ -78,8 +78,7 @@ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer
 
 		for ( var layerKey in this.requiredLayers[options.requiredLayersType].layers) {
 			options[layerKey].styler = {
-				bounds : [ new OpenLayers.VIS.Styler.Continuous(),
-						new OpenLayers.VIS.Styler.EqualIntervals() ]
+				bounds : [ new OpenLayers.VIS.Styler.Continuous(), new OpenLayers.VIS.Styler.EqualIntervals() ]
 			};
 			options.layerOptions.push(options[layerKey]);
 		}
