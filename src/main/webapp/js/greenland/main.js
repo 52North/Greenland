@@ -1338,7 +1338,9 @@ VIS.checkForPermalink = function() {
 				messages += '<br/>';
 			messages += Ext.util.Format.htmlEncode(result.message);
 		} else {
-			VIS.mapComponents[Math.min(Math.max(0, mapIndex), VIS.mapComponents.length)].mapPanel.map.addLayers([ result ]);
+			// assumes that there is always at least one map viewport
+			VIS.mapComponents[Math.min(Math.max(0, mapIndex), VIS.mapComponents.length - 1)].mapPanel.map
+					.addLayers([ result ]);
 			// TODO add viewport if required
 		}
 		if (currentNumber >= length) {
