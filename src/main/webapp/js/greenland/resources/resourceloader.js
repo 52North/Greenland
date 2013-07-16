@@ -178,8 +178,12 @@ VIS.ResourceLoader = {
 		param = param.replace(/!/g, '{').replace(/\*/g, '}').replace(/'/g, '"');
 		var count = 0;
 
-		var perma = new OpenLayers.Format.JSON().read(param);
-
+		try {
+			var perma = new OpenLayers.Format.JSON().read(param);
+		} catch (e) {
+			callback.call(this, new Error('The permalink is incomplete'), 0, 0, 0);
+			return;
+		}
 		if (!perma.version || perma.version > this.permalinkVersion) {
 			callback.call(this, new Error('The permalink is not supported by this version of Greenland'), 0, 0, 0);
 			return;
@@ -947,12 +951,16 @@ VIS.ResourceLoader = {
 						success : function(resp) {
 							var respStatus = resp.status;
 							resp = resp.responseXML || resp.responseText;
-
-							var capabilities = new OpenLayers.Format.WMSCapabilities({
-								version : '1.3.0',
-								profile : 'ncWMS'
-							}).read(resp);
-
+							var capabilities;
+							try {
+								capabilities = new OpenLayers.Format.WMSCapabilities({
+									version : '1.3.0',
+									profile : 'ncWMS'
+								}).read(resp);
+							} catch (e) {
+								callback(new Error(e));
+								return;
+							}
 							if (!capabilities.capability) {
 								if (respStatus == 0) {
 									callback(new Error(
