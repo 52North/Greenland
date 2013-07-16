@@ -370,8 +370,7 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		if (service.contactInformation) {
 			var cI = service.contactInformation;
 			var fieldset = new Ext.form.FieldSet({
-				fieldLabel : 'Contact Information',
-				border : false,
+				title : 'Contact Information',
 				labelWidth : 50
 			});
 			panel.add(fieldset);

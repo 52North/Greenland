@@ -20,7 +20,8 @@
 OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ.Visualization, {
 	requiredLayers : {
 		// Each configuration has a distirbutionClass field and a
-		// getConfidenceInterval function. These will be used to fill the pixel
+		// getConfidenceInterval function. These will be used to fill the
+		// pixel
 		// array. The returned value should represent a pixel rect with
 		// dimensions sx*sy
 		normal : {
@@ -157,7 +158,8 @@ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer
 
 	update : function() {
 		// Use OpenLayers.VIS.Symbology.Vector.updateLegend for setting
-		// legendInfos by providing special context using this layer's styler
+		// legendInfos by providing special context using this layer's
+		// styler
 		// objects
 		if (!this.legendInfos)
 			this.legendInfos = [];
@@ -234,6 +236,12 @@ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval = OpenLayers.Class(OpenLayers.Layer
 
 	getTitle : function() {
 		return 'Confidence Inteval ' + this.layerOptions[0].name;
+	},
+
+	getHelpHtml : function() {
+		return 'The lower left triangle shows the lower bounds of the confidence interval, '
+				+ 'the upper right the upper bounds. Therefore more contrasting cells contain '
+				+ 'less certain values';
 	}
 
 });

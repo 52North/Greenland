@@ -36,6 +36,11 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 			createParameters : function() {
 				var parameters = [ this.opacityStyler.createParameters() ];
 				var serviceVersion = this.layer.capabilities.version || '1.1.1';
+				var capUrl = OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util.getParameterString({
+					'REQUEST' : 'GetCapabilities',
+					'SERVICE' : 'WMS',
+					'VERSION' : serviceVersion
+				}));
 				parameters.push({
 					service : {
 						comp : new Ext.form.FieldSet({
@@ -53,13 +58,9 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 								text : this.layer.url,
 								fieldLabel : 'URL'
 							}, {
-								xtype : 'label',
-								text : OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util.getParameterString({
-									'REQUEST' : 'GetCapabilities',
-									'SERVICE' : 'WMS',
-									'VERSION' : serviceVersion
-								})),
-								fieldLabel : 'GetCapabilities URL'
+								xtype : 'displayfield',
+								value : '<a href="' + capUrl + '" target="_blank">' + capUrl + '</a>',
+								fieldLabel : 'GetCapabilities URL' 
 							} ]
 						}),
 						label : false
@@ -68,10 +69,7 @@ OpenLayers.Layer.VIS.WMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
 				});
 				parameters.push({
 					service : {
-						comp : new Ext.form.FieldSet({
-							title : 'Metadata',
-							items : [ OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel.call(this.layer) ]
-						}),
+						comp : OpenLayers.Layer.VIS.WMSQ.prototype.createServiceMetadataPanel.call(this.layer),
 						label : false
 					},
 					group : 'Source'

@@ -120,10 +120,14 @@ Ext.ux.VIS.Legend = Ext.extend(Ext.Panel, {
 				anchor : '100%',
 				visualization : visualization
 			});
-			var items = [ legendScaleBar, new Ext.form.Label({
-				fieldLabel : 'Description',
-				text : visualization.description
-			}) ];
+			var items = [ legendScaleBar ];
+
+			if (visualization.description && visualization.description.length != 0) {
+				items.push(new Ext.form.Label({
+					fieldLabel : 'Description',
+					text : visualization.description
+				}));
+			}
 
 			var updateTask = new Ext.util.DelayedTask(function() {
 				layer.updateVisualization();
@@ -189,6 +193,10 @@ Ext.ux.VIS.Legend = Ext.extend(Ext.Panel, {
 						layer.map.zoomToExtent(layer.getDataExtent());
 					}
 				});
+			}
+			if (visualization.getHelpHtml) {
+				// Add help tool if supported by layer/visualization
+				tools.push(VIS.createHelpToolDef(visualization.getHelpHtml));
 			}
 			tools.push({
 				id : 'gear',

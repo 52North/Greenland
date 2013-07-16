@@ -22,10 +22,14 @@ VIS.helpTopics = {
 			+ 'Highest level shows the resources, followed by their data sets as well as available visualizations on the lowest level.',
 	time : 'Allows to set the time instance to visualize. The time slider will work once time-enabled resources are added to a map. Animation works only with vector data.',
 	visualizations : 'This panel allows to drag and drop resource visualizations or layers between and within different maps.'
-}
+};
 
 VIS.getHelp = function(topic, callback, scope) {
-	callback.call(scope || this, VIS.helpTopics[topic] || '<No Information>');
+	if (Ext.isFunction(topic)) {
+		callback.call(scope || this, topic() || '<No Information>');
+	} else {
+		callback.call(scope || this, VIS.helpTopics[topic] || '<No Information>');
+	}
 };
 
 VIS.helpToolTip = null;
@@ -75,4 +79,4 @@ VIS.createHelpToolDef = function(topic, anchor) {
 		},
 		scope : this
 	};
-}
+};

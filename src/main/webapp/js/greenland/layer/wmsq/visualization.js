@@ -64,7 +64,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				scope : this,
 				required : true,
 				group : 'Data Overlay',
-				minVersion: 3
+				minVersion : 3
 			},
 			overlay_spacing : {
 				fieldLabel : 'Aggregation Spacing',
@@ -80,7 +80,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				scope : this,
 				required : true,
 				group : 'Data Overlay',
-				minVersion: 3
+				minVersion : 3
 			},
 			overlay_layer : {
 				fieldLabel : 'Layer',
@@ -99,7 +99,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				scope : this,
 				required : true,
 				group : 'Data Overlay',
-				minVersion: 3
+				minVersion : 3
 			},
 			overlay_lines : {
 				fieldLabel : 'Show Grid Lines',
@@ -113,7 +113,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				scope : this,
 				required : true,
 				group : 'Data Overlay',
-				minVersion: 3
+				minVersion : 3
 			},
 			overlay_opacity : {
 				fieldLabel : 'Opacity',
@@ -129,7 +129,7 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 				scope : this,
 				required : true,
 				group : 'Data Overlay',
-				minVersion: 3
+				minVersion : 3
 			}
 		});
 
@@ -339,6 +339,11 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 		}
 
 		var serviceVersion = this.layer.capabilities.version || '1.1.1';
+		var capUrl = OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util.getParameterString({
+			'REQUEST' : 'GetCapabilities',
+			'SERVICE' : 'WMS',
+			'VERSION' : serviceVersion
+		}));
 		options.push({
 			service : {
 				comp : new Ext.form.FieldSet({
@@ -356,12 +361,8 @@ OpenLayers.Layer.VIS.WMSQ.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbol
 						text : this.layer.url,
 						fieldLabel : 'URL'
 					}, {
-						xtype : 'label',
-						text : OpenLayers.Util.urlAppend(this.layer.url, OpenLayers.Util.getParameterString({
-							'REQUEST' : 'GetCapabilities',
-							'SERVICE' : 'WMS',
-							'VERSION' : serviceVersion
-						})),
+						xtype : 'displayfield',
+						value : '<a href="' + capUrl + '" target="_blank">' + capUrl + '</a>',
 						fieldLabel : 'GetCapabilities URL'
 					} ]
 				}),

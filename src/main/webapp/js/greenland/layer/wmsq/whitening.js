@@ -217,7 +217,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 					// Text
 					ctx.textBaseline = 'hanging';
 					ctx.fillText('Value', 0, legendHeight - 5);
-					if (self.valueLayer.uom.length != 0) {
+					if (self.valueLayer.uom && self.valueLayer.uom.length != 0) {
 						ctx.fillText('(' + self.valueLayer.uom + ')', 0, legendHeight + 5);
 					}
 					for ( var i = 0; i < legendWidth; i += legendWidth / 5) {
@@ -229,7 +229,7 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 					}
 
 					ctx.fillText('Error', 0, 0);
-					if (self.errorLayer.uom.length != 0) {
+					if (self.errorLayer.uom && self.errorLayer.uom.length != 0) {
 						ctx.fillText('(' + self.errorLayer.uom + ')', 0, 10);
 					}
 					ctx.textAlign = 'right';
