@@ -279,9 +279,11 @@ Ext
 				if (!syncPointers)
 					return;
 				var lonLat = evt.object.getLonLatFromViewPortPx(evt.xy);
-
+				var layerPx, viewportPx;
+				
 				for ( var i = 0, len = VIS.mapComponents.length; i < len; i++) {
 					var mouseMarker = VIS.mapComponents[i].mouseMarker;
+					var mouseMarkerLayer = VIS.mapComponents[i].mouseMarkerLayer;
 					if (evt.object == mouseMarker.map) {
 						continue;
 					}
@@ -291,7 +293,19 @@ Ext
 					}
 
 					if (mouseMarker.map.getExtent().containsLonLat(moveToLonLat)) {
-						mouseMarker.moveTo(mouseMarker.map.getLayerPxFromLonLat(moveToLonLat));
+						layerPx = mouseMarker.map.getLayerPxFromLonLat(moveToLonLat);
+						viewportPx = mouseMarker.map.getViewPortPxFromLonLat(moveToLonLat);
+						mouseMarker.moveTo(layerPx);
+						
+						if (!mouseMarkerLayer.getVisibility()) {
+							mouseMarkerLayer.setVisibility(true);
+						}
+
+						mouseMarker.map.events.triggerEvent('mousemarkermove', {
+							xy : viewportPx
+						});
+					} else {
+						mouseMarkerLayer.setVisibility(false);
 					}
 				}
 			};

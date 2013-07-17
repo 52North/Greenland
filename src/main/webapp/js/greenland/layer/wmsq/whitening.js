@@ -58,7 +58,11 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 	valueLayer : null,
 	errorLayer : null,
 
+	mergerLegend : null,
+	mergerLegendTile : null,
+
 	initialize : function(options) {
+		this.mergerLegend = new OpenLayers.Tile.Image.MultiImage.CanvasMerger();
 
 		options.valueLayer.styler = {
 
@@ -252,8 +256,9 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 			},
 
 			setCursorVisible : function(visible) {
-				if (this.cursor) {
+				if (this.cursor && this.cursor.visible != visible) {
 					this.cursor.setVisible(visible);
+					this.cursor.visible = visible;
 				}
 			}
 		});
@@ -267,15 +272,19 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 			var lonLat = map.getLonLatFromViewPortPx(e.xy);
 
 			var data = this.layer.getTileData(lonLat);
-			if (!data || !data.tile || data.tile.loadingMask != 0) {
+			if (!data || !data.tile || data.tile.loadingMask != 0 || !data.tile.layerImages
+					|| data.tile.layerImages.length == 0) {
 				panel.setCursorVisible(false);
 				return;
 			}
 
-			var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages, data.tile);
+			if (this.mergerLegendTile == null || this.mergerLegendTile.tile != data.tile) {
+				this.mergerLegendTile = this.mergerLegend.getMerger(data.tile.layerImages, data.tile);
+				this.mergerLegendTile.tile = data.tile;
+			}
 
-			var v = this.valueLayer.getValue(merger, Math.floor(data.i), Math.floor(data.j));
-			var e = this.errorLayer.getValue(merger, Math.floor(data.i), Math.floor(data.j));
+			var v = this.valueLayer.getValue(this.mergerLegendTile, Math.floor(data.i), Math.floor(data.j));
+			var e = this.errorLayer.getValue(this.mergerLegendTile, Math.floor(data.i), Math.floor(data.j));
 			if (v == null || e == null) {
 				panel.setCursorVisible(false);
 				return;
@@ -285,8 +294,10 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 		};
 
 		map.events.register('mousemove', this, cursorUpdateFunction);
+		map.events.register('mousemarkermove', this, cursorUpdateFunction);
 		panel.on('destroy', function() {
 			map.events.unregister('mousemove', this, cursorUpdateFunction);
+			map.events.unregister('mousemarkermove', this, cursorUpdateFunction);
 		}, this);
 
 		return panel;

@@ -300,7 +300,7 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		}
 
 		var result = '', layer, value;
-		var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(data.tile.layerImages, data.tile);
+		var merger = OpenLayers.Tile.Image.MultiImage.SharedCanvasMerger.getMerger(data.tile.layerImages, data.tile);
 		for ( var i = 0; i < this.visualization.layerOptions.length; i++) {
 			if (i != 0) {
 				result += '\n';
@@ -505,16 +505,17 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 				this.layerImages[i] = image;
 			}
 
-			// Monitor loading state
 			OpenLayers.Event.stopObservingElement(image);
-			OpenLayers.Event.observe(image, "load", OpenLayers.Function.bind(this.onLayerImageLoad, imageInfo));
-			OpenLayers.Event.observe(image, "error", OpenLayers.Function.bind(this.onLayerImageError, imageInfo));
 
 			layerUrl = this.layer.getURL(this.bounds, this.layerParams[i]);
-			if (image.getAttribute("src") == layerUrl && image.complete === true) {
+			if (image.src == layerUrl && image.complete === true) {
 				// Already loaded correct image
 				this.onLayerImageLoad.call(imageInfo);
 			} else {
+				// Monitor loading state
+				OpenLayers.Event.observe(image, "load", OpenLayers.Function.bind(this.onLayerImageLoad, imageInfo));
+				OpenLayers.Event.observe(image, "error", OpenLayers.Function.bind(this.onLayerImageError, imageInfo));
+
 				// Load image
 				image.src = layerUrl;
 			}
@@ -547,8 +548,8 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 	/**
 	 * Override to apply a custom transformation function for a completely loaded
 	 * tile by creating a canvas object with the dimension of this tile together
-	 * with a OpenLayers.Tile.Image.MultiImage.CanvasMerger of all images and
-	 * passing these to either fillPixelArray or fillCanvas of the layers
+	 * with a OpenLayers.Tile.Image.MultiImage.SharedCanvasMerger of all images
+	 * and passing these to either fillPixelArray or fillCanvas of the layers
 	 * visualization object
 	 */
 	initImage : function() {
@@ -563,7 +564,7 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 
 		// merger combines all images in a single canvas and provides functions to
 		// access their pixel values
-		var merger = OpenLayers.Tile.Image.MultiImage.CanvasMerger.getMerger(this.layerImages, this);
+		var merger = OpenLayers.Tile.Image.MultiImage.SharedCanvasMerger.getMerger(this.layerImages, this);
 
 		var canvas = document.createElement("canvas");
 		canvas.width = this.size.w;
@@ -617,11 +618,11 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 	}
 });
 
+
 /**
- * Singleton providing a single shared Canvas to maintain multiple images and
- * access their pixel values
+ * Canvas to maintain multiple images and access their pixel values
  */
-OpenLayers.Tile.Image.MultiImage.CanvasMerger = new function() {
+OpenLayers.Tile.Image.MultiImage.CanvasMerger = function() {
 	this.canvas = null;
 
 	/**
@@ -645,7 +646,7 @@ OpenLayers.Tile.Image.MultiImage.CanvasMerger = new function() {
 		var ctx = this.canvas.getContext("2d");
 		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-		// Draw all images on top of each other
+		// Draw all images in a column
 		for ( var i = 0; i < images.length; i++) {
 			ctx.drawImage(images[i], 0, i * imageH);
 		}
@@ -657,7 +658,9 @@ OpenLayers.Tile.Image.MultiImage.CanvasMerger = new function() {
 				// A non CORS-enabled image was loaded and "tainted" the merger canvas!
 				this.canvas = null;
 				// reset canvas so that it gets recreated on new call
-				throw 'A non CORS-enabled image was loaded';
+				throw new Error('A non CORS-enabled image was loaded');
+			} else {
+				throw e;
 			}
 		}
 
@@ -722,3 +725,9 @@ OpenLayers.Tile.Image.MultiImage.CanvasMerger = new function() {
 		this.canvas.height = h;
 	};
 };
+
+/**
+ * Providing a single shared Canvas to maintain multiple images and access their
+ * pixel values
+ */
+OpenLayers.Tile.Image.MultiImage.SharedCanvasMerger = new OpenLayers.Tile.Image.MultiImage.CanvasMerger();
