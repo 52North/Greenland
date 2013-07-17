@@ -159,7 +159,7 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
 		return requestString;
 	},
-	
+
 	handleChangeBase : function() {
 		if (this.map.projection != null) {
 			this.projection = this.map.projection;
@@ -174,7 +174,7 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		OpenLayers.Layer.WMS.prototype.setMap.apply(this, arguments);
 		this.map.events.register('changetime', this, this.handleChangeTime);
 		this.map.events.register('changebaselayer', this, this.handleChangeBase);
-		
+
 		this.visualization.setMap(map);
 
 		this.updateTimeExtents();
@@ -190,7 +190,7 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 	removeMap : function(map) {
 		this.map.events.unregister('changetime', this, this.handleChangeTime);
 		this.map.events.unregister('changebaselayer', this, this.handleChangeBase);
-		
+
 		OpenLayers.Layer.WMS.prototype.removeMap.apply(this, arguments);
 
 		this.visualization.removeMap(map);
@@ -471,7 +471,8 @@ OpenLayers.Layer.VIS.WMSQ = OpenLayers.Class(OpenLayers.Layer.WMS, {
 OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 	layerParams : null, // Set of parameters for each image
 	layerImages : null, // Image objects for each "sub"-tile
-	loadingMask : null, // Bitmask representing the loading state of each image
+	loadingMask : null, // Bitmask representing the loading state of each
+	// "sub"-image
 
 	forceRedraw : null, // Flag indicates that tile has to get recalculated
 
@@ -526,6 +527,9 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 	 * images are loaded for a tile
 	 */
 	onLayerImageLoad : function() {
+		if (this.tile.layerImages[this.layerId]) {
+			OpenLayers.Event.stopObservingElement(this.tile.layerImages[this.layerId]);
+		}
 		if (!this.bounds.equals(this.tile.bounds)) {
 			return;
 		}
@@ -533,7 +537,6 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 		if (this.tile.loadingMask == 0) {
 			// All images loaded
 			this.tile.initImage();
-
 		}
 	},
 
@@ -581,12 +584,32 @@ OpenLayers.Tile.Image.MultiImage = OpenLayers.Class(OpenLayers.Tile.Image, {
 			this.layer.visualization.drawOverlay(canvas, merger, ctx, this);
 		}
 
-		// Set result
-		img.src = ctx.canvas.toDataURL();
-		this.previousBounds = this.bounds.clone();
-		this.forceRedraw = false;
-		this.onImageLoad();
+		var imageDataUrl = ctx.canvas.toDataURL();
+		if (img.src == imageDataUrl) {
+			this.onImageLoad();
+		} else {
+			// Set result
+			OpenLayers.Event.stopObservingElement(img);
+			OpenLayers.Event.observe(img, "load", OpenLayers.Function.bind(this.onImageLoad, this));
+			OpenLayers.Event.observe(img, "error", OpenLayers.Function.bind(this.onImageError, this));
 
+			this.previousBounds = this.bounds.clone();
+			this.forceRedraw = false;
+			img.style.visibility = 'hidden';
+			img.style.opacity = 0;
+
+			// Trigger loading
+			img.src = imageDataUrl;
+		}
+	},
+
+	onImageError : function() {
+		var img = this.imgDiv;
+		if (img.src != null) {
+			OpenLayers.Element.addClass(img, "olImageLoadError");
+			this.events.triggerEvent("loaderror");
+			this.onImageLoad();
+		}
 	},
 
 	redraw : function() {
@@ -626,8 +649,9 @@ OpenLayers.Tile.Image.MultiImage.CanvasMerger = new function() {
 		for ( var i = 0; i < images.length; i++) {
 			ctx.drawImage(images[i], 0, i * imageH);
 		}
+		var cpa = null;
 		try {
-			var cpa = ctx.getImageData(0, 0, reqW, reqH).data; // Canvas pixel array
+			cpa = ctx.getImageData(0, 0, reqW, reqH).data; // Canvas pixel array
 		} catch (e) {
 			if (e instanceof DOMException && e.code == 18) {
 				// A non CORS-enabled image was loaded and "tainted" the merger canvas!

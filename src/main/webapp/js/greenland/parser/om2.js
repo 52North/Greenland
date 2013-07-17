@@ -21,7 +21,10 @@
  * for the full text of the license.
  *
  */
-// TODO Überflüssig
+
+
+// XXX currently unused, using conversion service xml->json
+
 OpenLayers.SOS = OpenLayers.SOS || {};
 OpenLayers.SOS.Format = OpenLayers.SOS.Format || {};
 
