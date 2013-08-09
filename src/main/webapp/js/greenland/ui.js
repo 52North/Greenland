@@ -32,6 +32,9 @@ VIS.createParameterControls = function(options, onChange, legend) {
 			option : option,
 			changeListener : [],
 			onChange : function(value, sender) {
+				if(this.option.value == value) {
+					return;
+				}
 				this.option.value = value;
 				for ( var i = 0; i < this.changeListener.length; i++) {
 					this.changeListener[i].call(this, sender);

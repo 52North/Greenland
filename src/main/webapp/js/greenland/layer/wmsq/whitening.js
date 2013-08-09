@@ -138,6 +138,9 @@ OpenLayers.Layer.VIS.WMSQ.Whitening = OpenLayers.Class(OpenLayers.Layer.VIS.WMSQ
 				cpa[y * w * 4 + x * 4 + 2] = rgb.b;
 				cpa[y * w * 4 + x * 4 + 3] = 255;
 			}
+		
+		// Assumes data got changed
+		this.mergerLegendTile = null;
 	},
 
 	getTitle : function() {

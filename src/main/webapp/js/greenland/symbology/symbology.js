@@ -33,7 +33,7 @@ OpenLayers.VIS.extendStyler = function(tar, src) {
 				tar[key] = [ tar[key], src[key] ];
 			}
 		} else {
-			tar[key] = src[key];
+			tar[key] = src[key];				
 		}
 	}
 
