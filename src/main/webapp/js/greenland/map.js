@@ -112,7 +112,7 @@ OpenLayers.VIS.Map = OpenLayers.Class(OpenLayers.Map, {
 		var extents = [];
 		for ( var i = 0, len = this.layers.length; i < len; i++) {
 			var layer = this.layers[i];
-			if (layer.getTimeExtents) {
+			if (layer.getTimeExtents && layer.getVisibility()) {
 				extents = extents.concat(layer.getTimeExtents());
 			}
 		}
