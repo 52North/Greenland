@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -54,7 +55,35 @@ public class CapabilitiesProxy extends HttpServlet {
 			throw new IllegalArgumentException("No url specified");
 		}
 
-		URL url = new URL(serverUrl + "?" + request.getQueryString());
+		// Quick approach to use a specific set of URL parameters using core
+		// HttpServletRequest methods to construct request URL.
+		StringBuilder urlString = new StringBuilder(serverUrl);
+		Enumeration parameterNames = request.getParameterNames();
+		char paramDelim = urlString.indexOf("?") != -1 ? '&' : '?';
+		while (parameterNames.hasMoreElements()) {
+			String parameterName = parameterNames.nextElement().toString();
+			if (!parameterName.equals("URL")) {
+				String[] parameterValues = request
+						.getParameterValues(parameterName);
+
+				for (String value : parameterValues) {
+					urlString.append(paramDelim);
+					urlString.append(parameterName);
+					if (parameterValues.length > 1) {
+						urlString.append("[]");
+					}
+					urlString.append('=');
+					urlString.append(value);
+
+					if (paramDelim == '?') {
+						paramDelim = '&';
+					}
+				}
+
+			}
+		}
+
+		URL url = new URL(urlString.toString());
 		URLConnection connection = url.openConnection();
 		connection.setReadTimeout(30000);
 		connection.setConnectTimeout(30000);
@@ -67,5 +96,4 @@ public class CapabilitiesProxy extends HttpServlet {
 			outputStream.write(buffer, 0, bytesRead);
 		}
 	}
-
 }
