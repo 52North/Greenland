@@ -32,5 +32,3 @@ Extensions are published under Apache 2.0, see http://www.sencha.com/legal/open-
 * Ext.ux.VIS.LegendScaleBar (scalebar.js), extend Ext.Panel, accepts visualisation as config option and dynamically updates legend
 * Ext.ux.VIS.ResourceNodesContainer (resourcetree.js) root of resource selection, addResource method adds a resource expecting an object with mime,url,(request), to be used in Ext.tree.TreePanel
 * Ext.ux.VIS.ResourceLoader (resourcetree.js) uses Ext.ux.VIS.ResourceNodesContainer, manages the loading of nodes - lazy loading of Greenland ressources and lokal OM data, provides access to all config options
-	
-
