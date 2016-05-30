@@ -43,7 +43,7 @@ OpenLayers.VIS.Resource = OpenLayers.Class({
 	/**
 	 * Creates a new resource from the specified url, mime and request parameters.
 	 * Returns the created resource response by a callback function
-	 * 
+	 *
 	 * @param callback
 	 *          decoded server response or Error object
 	 */
@@ -82,7 +82,7 @@ OpenLayers.VIS.Resource = OpenLayers.Class({
 
 	/**
 	 * Handles the server response to the createResource request
-	 * 
+	 *
 	 * @param resp
 	 *          server response
 	 * @param callback
@@ -97,7 +97,7 @@ OpenLayers.VIS.Resource = OpenLayers.Class({
 	/**
 	 * Gets the resource description, requests it if needed from the visualization
 	 * service
-	 * 
+	 *
 	 * @param callback
 	 */
 	getResource : function(callback) {
@@ -110,7 +110,7 @@ OpenLayers.VIS.Resource = OpenLayers.Class({
 
 	/**
 	 * Gets the datasets description for the managed resource
-	 * 
+	 *
 	 * @param callback
 	 *          function to take array of OpenLayers.VIS.DataSet objects
 	 */
@@ -131,7 +131,7 @@ OpenLayers.VIS.Resource = OpenLayers.Class({
 
 	/**
 	 * handles the response of the datasets server request
-	 * 
+	 *
 	 * @param resp
 	 * @param callback
 	 */
@@ -175,7 +175,7 @@ OpenLayers.VIS.DataSet = OpenLayers.Class({
 
 	/**
 	 * Gets the datasets description from the visualization service
-	 * 
+	 *
 	 * @param callback
 	 *          function to which the request result gets passed
 	 */
@@ -196,7 +196,7 @@ OpenLayers.VIS.DataSet = OpenLayers.Class({
 
 	/**
 	 * Handles the datasets request response from the service
-	 * 
+	 *
 	 * @param resp
 	 * @param callback
 	 */
@@ -208,7 +208,7 @@ OpenLayers.VIS.DataSet = OpenLayers.Class({
 	/**
 	 * Gets the visualizers for this datasource, if needed from visualization
 	 * service
-	 * 
+	 *
 	 * @param callback
 	 *          function to take array of OpenLayers.VIS.Visualizer objects
 	 */
@@ -264,7 +264,7 @@ OpenLayers.VIS.DataSet = OpenLayers.Class({
 
 	/**
 	 * Handles the response from the visualizers request
-	 * 
+	 *
 	 * @param resp
 	 * @param callback
 	 */
@@ -281,7 +281,7 @@ OpenLayers.VIS.DataSet = OpenLayers.Class({
 	/**
 	 * Gets the time extends encoded into the datasource description as array of
 	 * arrays containing the lower and upper bounds of of a time interval
-	 * 
+	 *
 	 * @param callback
 	 *          function getting the result of this operation passed
 	 */
@@ -343,7 +343,7 @@ OpenLayers.VIS.Visualizer = OpenLayers.Class({
 
 	/**
 	 * Queries for the corresponding visualization resource
-	 * 
+	 *
 	 * @param callback
 	 *          Function to handle the response
 	 */
@@ -360,7 +360,7 @@ OpenLayers.VIS.Visualizer = OpenLayers.Class({
 
 	/**
 	 * Handles the get visualization response
-	 * 
+	 *
 	 * @param resp
 	 * @param callback
 	 */
@@ -375,8 +375,18 @@ OpenLayers.VIS.Visualizer = OpenLayers.Class({
 				var option = v.options[key];
 
 				if (option.required !== false && key != 'time') {
-					// Required field -> zero or specified minimum
-					option.value = option.minimum ? option.minimum : 0;
+					if (option["default"]  !== undefined) {
+						option.value = option["default"];
+					} else if (option.type === "number" || option.type === "integer") {
+						// Required field -> zero or specified minimum
+						option.value = option.minimum ? option.minimum : 0;
+					} else if (option.type === "boolean") {
+						option.value = true;
+					} else if (option.type === "string") {
+						if (option["enum"] !== undefined) {
+							option.value = option["enum"][0];
+						} else option.value = "";
+					}
 				} else {
 					// Field not required -> null
 					option.value = null;
@@ -400,7 +410,7 @@ OpenLayers.VIS.Visualizer = OpenLayers.Class({
 /**
  * Class representing and providing symbology information for a VIS layer
  * visualization resource.
- * 
+ *
  * This implementation hides the fact that every change of visualization
  * parameters requires the creation of a new VISS visualization resource, that
  * means each object may manage multiple visualization resources.
@@ -456,7 +466,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 	/**
 	 * requests a new visualization with the current option values If using time,
 	 * the results are cached automatically and reused transparently.
-	 * 
+	 *
 	 * @param callback
 	 */
 	createVisualization : function(callback) {
@@ -538,7 +548,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 
 	/**
 	 * Function handling new visualization information from VIS
-	 * 
+	 *
 	 * @param v
 	 */
 	updateValues : function(v) {
@@ -617,7 +627,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 
 	/**
 	 * Creates or puts/reuses style resource automatically
-	 * 
+	 *
 	 * @param sld
 	 * @param callback
 	 */
@@ -631,7 +641,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 
 	/**
 	 * Create new sld resource
-	 * 
+	 *
 	 * @param callback
 	 */
 	createSld : function(sld, callback) {
@@ -661,7 +671,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 
 	/**
 	 * gets current sld / creates new if required
-	 * 
+	 *
 	 * @param callback
 	 */
 	// getSld : function(callback) {
@@ -691,7 +701,7 @@ OpenLayers.VIS.Visualization = OpenLayers.Class(OpenLayers.VIS.Symbology.Vector,
 
 	/**
 	 * Updates sld, i.e. performs put operation on style resource with new sld
-	 * 
+	 *
 	 * @param newSld
 	 * @param callback
 	 */

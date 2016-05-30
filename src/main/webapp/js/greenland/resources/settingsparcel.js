@@ -18,7 +18,7 @@
  * General class to hold instance state information. Offers various methods to
  * read and write from and to a saved state. This class is used for saving the
  * layer settings in permalinks.
- * 
+ *
  * It directly supports storing and restoring common UI definition objects.
  */
 VIS.SettingsParcel = function(value, version) {
@@ -34,17 +34,19 @@ VIS.SettingsParcel = function(value, version) {
 	// reader
 	this.readInt = function() {
 		var v = this.parcelStringValues[this.index++];
-		if (v == '')
+		if (v === '') {
 			return null;
-		else
+		} else {
 			return parseInt(v);
+		}
 	};
 	this.readFloat = function() {
 		var v = this.parcelStringValues[this.index++];
-		if (v == '')
+		if (v === '') {
 			return null;
-		else
+		} else {
 			return parseFloat(v);
+		}
 	};
 	this.readString = function() {
 		return this.parcelStringValues[this.index++];
@@ -77,7 +79,7 @@ VIS.SettingsParcel = function(value, version) {
 		return res;
 	};
 	this.readParameter = function(paramDef) {
-		if (paramDef.minVersion != null && paramDef.minVersion > this.version)
+		if (paramDef.minVersion !== null && paramDef.minVersion > this.version)
 			// Can not read parameters which were not set in the applied permalink
 			// version
 			return;
@@ -101,7 +103,7 @@ VIS.SettingsParcel = function(value, version) {
 			paramDef.value = this.readBoolean();
 			break;
 		case 'selectmany':
-			if (paramDef.items.length == 0)
+			if (paramDef.items.length === 0)
 				break;
 
 			if (typeof paramDef.items[0] === 'number') {
@@ -111,7 +113,7 @@ VIS.SettingsParcel = function(value, version) {
 			}
 			break;
 		case 'selectone':
-			if (paramDef.items.length == 0)
+			if (paramDef.items.length === 0)
 				break;
 
 			if (this.version <= 2) {
@@ -132,10 +134,10 @@ VIS.SettingsParcel = function(value, version) {
 
 	// writer
 	this.writeInt = function(value) {
-		this.parcelStringValues.push(value != null ? value : '');
+		this.parcelStringValues.push(value !== null ? value : '');
 	};
 	this.writeFloat = function(value) {
-		this.parcelStringValues.push(value != null ? value : '');
+		this.parcelStringValues.push(value !== null ? value : '');
 	};
 	this.writeString = function(value) {
 		this.parcelStringValues.push(value);
@@ -178,8 +180,9 @@ VIS.SettingsParcel = function(value, version) {
 			this.writeStringArray(paramDef.value);
 			break;
 		case 'selectone':
-			if (paramDef.items.length == 0)
+			if (paramDef.items.length === 0) {
 				break;
+			}
 			this.writeInt(paramDef.items.indexOf(paramDef.value));
 			break;
 		}

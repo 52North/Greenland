@@ -162,6 +162,7 @@
 								<jsSourceFile>styler/continuousBounds.js</jsSourceFile>
 								<jsSourceFile>styler/equalIntervalBounds.js</jsSourceFile>
 								<jsSourceFile>styler/exceedanceIntervalBounds.js</jsSourceFile>
+								<jsSourceFile>styler/irregularIntervalBounds.js</jsSourceFile>
 								<jsSourceFile>styler/label.js</jsSourceFile>
 								<jsSourceFile>styler/chooser.js</jsSourceFile>
 

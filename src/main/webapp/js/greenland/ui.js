@@ -21,7 +21,7 @@ if (typeof VIS == 'undefined')
  * Takes option descriptions as received from the visualization service or
  * specified on feature layers and creates ExtJs controls of them. Supports type
  * integer and number, optional parameters and min/max constraints
- * 
+ *
  * @param options
  * @param onChange
  * @returns {Array}
@@ -53,7 +53,7 @@ VIS.createParameterControls = function(options, onChange, legend) {
 		if (!option.type && option.comp) {
 			// option has its own component
 			var comp = option.comp;
-			if (comp.fieldLabel == null) {
+			if (comp.fieldLabel === null) {
 				comp.fieldLabel = option.fieldLabel || key;
 			}
 			// paramItems.push(comp);
@@ -66,9 +66,9 @@ VIS.createParameterControls = function(options, onChange, legend) {
 
 				var slider = new Ext.form.SliderField({
 					fieldLabel : option.fieldLabel || key,
-					value : option.value != null ? option.value : option.minimum,
-					minValue : option.type != 'integer' ? Math.round(option.minimum - 1) : option.minimum,
-					maxValue : option.type != 'integer' ? Math.round(option.maximum + 1) : option.maximum,
+					value : option.value !== null ? option.value : option.minimum,
+					minValue : option.type !== 'integer' ? Math.round(option.minimum - 1) : option.minimum,
+					maxValue : option.type !== 'integer' ? Math.round(option.maximum + 1) : option.maximum,
 					onChange : function(slider, value) {
 						// workaround for not working 'change' event...
 						Ext.form.SliderField.prototype.onChange.apply(this, arguments);
@@ -97,7 +97,7 @@ VIS.createParameterControls = function(options, onChange, legend) {
 				// paramItems.push(slider);
 
 				var field = new Ext.form.NumberField({
-					value : option.value != null ? option.value : option.minimum,
+					value : option.value !== null ? option.value : option.minimum,
 					listeners : {
 						valid : function(f) {
 							if (this.disabled || this.ownerCt.disabled)
@@ -349,7 +349,76 @@ VIS.createParameterControls = function(options, onChange, legend) {
 				}
 			});
 			paramComp = combobox;
+		} else if (option.type == 'string') {
+			if (option["enum"] !== undefined) {
 
+				var data = [];
+				for (var i = 0; i < option["enum"].length; ++i) {
+					data.push([option["enum"][i]])
+				}
+
+				var combobox = new Ext.form.ComboBox({
+					value : option.value != null ? option.value : '',
+					triggerAction : 'all',
+					lazyRender : true,
+					mode : 'local',
+					store : new Ext.data.ArrayStore({
+						id : 0,
+						fields : [ 'item' ],
+						data : data
+					}),
+					valueField : 'item',
+					displayField : 'item',
+					fieldLabel : key,
+					editable : false,
+					listeners: {
+						select: function(comp, select) {
+							if (this.disabled || this.ownerCt.disabled)
+								return;
+							optionHandler.onChange(select.data.item, this);
+						}
+					}
+				});
+				optionHandler.changeListener.push(function(sender) {
+					if (sender != combobox) {
+						combobox.setValue(this.option.value);
+					}
+				});
+				paramComp = combobox;
+			} else {
+				var textfield = new Ext.form.TextField({
+					value : option.value != null ? option.value : '',
+					disabled : option.value == null,
+					listeners : {
+						valid : function(f) {
+							if (this.disabled || this.ownerCt.disabled)
+								return;
+							optionHandler.onChange(this.getValue(), this);
+						}
+					},
+					flex : 1
+				});
+				optionHandler.changeListener.push(function(sender) {
+					if (sender != textfield) {
+						textfield.setValue(this.option.value);
+					}
+				});
+				var okbutton = new Ext.Button({
+					text : 'OK',
+					handler : function() {
+						textfield.validate();
+					}
+				});
+				paramComp = new Ext.Panel({
+					layout : 'hbox',
+					border : false,
+					paramComp : textfield,
+					items : [ textfield, okbutton ],
+					anchor : '100%',
+					fieldLabel : key,
+					disabled : option.value === null
+				});
+			}
 		} else {
 			return;
 		}
@@ -428,6 +497,9 @@ VIS.createParameterControls = function(options, onChange, legend) {
 
 	var paramItems = [];
 	for ( var key in options) {
+		if (key === 'time') {
+			continue;
+		}
 		addOptionItems(key, options[key], paramItems);
 	}
 	return paramItems;
@@ -435,7 +507,7 @@ VIS.createParameterControls = function(options, onChange, legend) {
 
 /**
  * Shows a window for selectmany parameter options
- * 
+ *
  * @param optionHandler
  */
 VIS.showSelectManyWindow = function(optionHandler) {

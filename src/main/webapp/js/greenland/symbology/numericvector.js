@@ -37,7 +37,7 @@ OpenLayers.VIS.Symbology.NumericVector = OpenLayers.Class(OpenLayers.VIS.Symbolo
 		var styler = {
 			// Array of stylers automatically transformed by base class
 			fillColor : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.Color({
-				predefinedColors : [ // 
+				predefinedColors : [ //
 				[ [ 120, 100, 100 ], [ 0, 100, 100 ] ], // Green-Red
 				[ [ 30, 20, 100 ], [ 0, 100, 100 ] ], // Orange-Red
 				[ [ 60, 20, 100 ], [ 120, 100, 80 ] ], // Yellow-Green
@@ -45,7 +45,7 @@ OpenLayers.VIS.Symbology.NumericVector = OpenLayers.Class(OpenLayers.VIS.Symbolo
 				],
 				title : 'Multi Hue'
 			}), new OpenLayers.VIS.Styler.Color({
-				predefinedColors : [ // 
+				predefinedColors : [ //
 				[ [ 0, 0, 100 ], [ 0, 100, 100 ] ], // Red
 				[ [ 30, 0, 100 ], [ 30, 100, 100 ] ], // Orange
 				[ [ 120, 0, 100 ], [ 120, 100, 80 ] ], // Green
@@ -67,7 +67,9 @@ OpenLayers.VIS.Symbology.NumericVector = OpenLayers.Class(OpenLayers.VIS.Symbolo
 			opacity : new OpenLayers.VIS.Styler.Opacity(),
 			label : new OpenLayers.VIS.Styler.Label(),
 			// Array of stylers automatically transformed by base class
-			bounds : VIS.createPropertyArray([ new OpenLayers.VIS.Styler.EqualIntervals(),
+			bounds : VIS.createPropertyArray([
+					new OpenLayers.VIS.Styler.EqualIntervals(),
+					new OpenLayers.VIS.Styler.IrregularIntervals(),
 					new OpenLayers.VIS.Styler.Continuous() ], {
 				fieldLabel : 'Value Bounds'
 			})
@@ -96,7 +98,7 @@ OpenLayers.VIS.Symbology.NumericVector = OpenLayers.Class(OpenLayers.VIS.Symbolo
 
 	/**
 	 * Used while adding features to track changes to value extent
-	 * 
+	 *
 	 * @param feature
 	 */
 	includeInValueExtent : function(feature) {

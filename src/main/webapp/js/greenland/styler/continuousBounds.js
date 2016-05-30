@@ -21,7 +21,7 @@ OpenLayers.VIS.Styler = OpenLayers.VIS.Styler || {};
  * Value bounds styler. Purpose is to map a given value (not necessarily
  * numeric) to a numeric interval represented as 2-dimensional array and to
  * provide min/max values.
- * 
+ *
  * Continuous styler maps every value x to an interval [x, x]. Min/max value may
  * be user defined or retrieved from corresponding symbology instance.
  */
@@ -40,14 +40,14 @@ OpenLayers.VIS.Styler.Continuous = OpenLayers.Class(OpenLayers.VIS.Styler.Base, 
 	},
 
 	getMinValue : function() {
-		if (this.minValue == null)
+		if (this.minValue === null)
 			return this.symbology.getMinValue ? this.symbology.getMinValue() : this.fixedMinValue;
 		else
 			return this.minValue;
 	},
 
 	getMaxValue : function() {
-		if (this.maxValue == null)
+		if (this.maxValue === null)
 			return this.symbology.getMaxValue ? this.symbology.getMaxValue() : this.fixedMaxValue;
 		else
 			return this.maxValue;
@@ -63,7 +63,7 @@ OpenLayers.VIS.Styler.Continuous = OpenLayers.Class(OpenLayers.VIS.Styler.Base, 
 
 	/**
 	 * Maps value to interval array
-	 * 
+	 *
 	 * @param val
 	 * @returns
 	 */

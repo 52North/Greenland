@@ -39,9 +39,9 @@ VIS.ResourceLoader = {
 		var resourceLoader = resourceOptions.resourceLoader || 'root';
 		try {
 			VIS.ResourceLoader.resourceLoader[resourceLoader](resourceOptions, function(result) {
-				r = result.length ? result : [ result ];
+				var i, r = result.length ? result : [ result ];
 				// Set loader path
-				for ( var i = 0; i < r.length; i++) {
+				for (i = 0; i < r.length; i++) {
 					if (resourceOptions.loaderIdPath && resourceOptions.loaderId) {
 						r[i].loaderIdPath = resourceOptions.loaderIdPath.concat(resourceOptions.loaderId);
 					} else {
@@ -49,7 +49,7 @@ VIS.ResourceLoader = {
 					}
 				}
 
-				if (path.length == 0 || result instanceof Error) {
+				if (path.length === 0 || result instanceof Error) {
 					// Final result or error
 					callback.call(scope, result);
 				} else {
@@ -61,7 +61,7 @@ VIS.ResourceLoader = {
 					} else {
 						// Search for element with specific loaderId corresponding to
 						// path
-						for ( var i = 0; i < r.length; i++) {
+						for (i = 0; i < r.length; i++) {
 							if (r[i].loaderId == path[0]) {
 								VIS.ResourceLoader.loadResourcePath(r[i], path.slice(1), callback, scope);
 								return;
@@ -342,7 +342,7 @@ VIS.ResourceLoader = {
 		/**
 		 * Appends TDS urls according to
 		 * http://www.unidata.ucar.edu/projects/THREDDS/tech/catalog/v1.0.2/InvCatalogSpec.html#constructingURLs
-		 * 
+		 *
 		 * @param url
 		 * @param path
 		 * @returns
@@ -497,14 +497,16 @@ VIS.ResourceLoader = {
 						var wmsBase = null;
 						for ( var j = 0; j < serviceNameNodes.length; j++) {
 							wmsBase = wmsServiceNames[format.getChildValue(serviceNameNodes.item(j))];
-							if (wmsBase != null)
+							if (wmsBase != null) {
 								break;
+							}
 						}
 
 						if (wmsBase == null) {
 							var temp = datasetNode.getElementsByTagName('metadata');
-							if (temp.length != 0)
+							if (temp.length != 0) {
 								temp = temp[0].getElementsByTagName('serviceName');
+							}
 							if (temp.length != 0) {
 								wmsBase = wmsServiceNames[format.getChildValue(temp[0])];
 							}
@@ -1004,6 +1006,7 @@ VIS.ResourceLoader = {
 		 * Loads level for a dataset of WMS
 		 */
 		ncwms_dataset : function(resourceOptions, callback) {
+			var i;
 			var wmsLayer = resourceOptions.wmsLayer;
 
 			var commonLayerOptions = OpenLayers.Util.applyDefaults({
@@ -1018,13 +1021,15 @@ VIS.ResourceLoader = {
 			var layerOptions = [];
 
 			// Special ncWMS visualizations
-			var visualizations = [ [ OpenLayers.Layer.VIS.WMSQ.ColorRange, 'Color Range' ],
-					[ OpenLayers.Layer.VIS.WMSQ.Whitening, 'Whitening' ], [ OpenLayers.Layer.VIS.WMSQ.Contour, 'Isolines' ],
+			var visualizations = [
+					[ OpenLayers.Layer.VIS.WMSQ.ColorRange, 'Color Range' ],
+					[ OpenLayers.Layer.VIS.WMSQ.Whitening, 'Whitening' ],
+					[ OpenLayers.Layer.VIS.WMSQ.Contour, 'Isolines' ],
 					[ OpenLayers.Layer.VIS.WMSQ.Glyphs, 'Glyphs' ],
 					[ OpenLayers.Layer.VIS.WMSQ.ExceedanceProbability, 'Exceedance Probability' ],
 					[ OpenLayers.Layer.VIS.WMSQ.ConfidenceInterval, 'Confidence Interval' ] ];
 
-			for ( var i = 0; i < visualizations.length; i++) {
+			for (i = 0; i < visualizations.length; i++) {
 				layerOptions.push({
 					text : visualizations[i][1],
 					layerClass : OpenLayers.Layer.VIS.WMSQ,
@@ -1048,7 +1053,7 @@ VIS.ResourceLoader = {
 				});
 			}
 
-			for ( var i = 0; i < layerOptions.length; i++) {
+			for (i = 0; i < layerOptions.length; i++) {
 				layerOptions[i] = OpenLayers.Util.applyDefaults(layerOptions[i], commonLayerOptions);
 				layerOptions[i].loaderId = '' + i;
 			}
@@ -1056,9 +1061,9 @@ VIS.ResourceLoader = {
 			if (wmsLayer.nestedLayers) {
 				// Handle nested layers, they can again have nested quality layers ->
 				// add dataset node for every nested layer with nested layers
-				for ( var i = 0; i < wmsLayer.nestedLayers.length; i++) {
+				for (i = 0; i < wmsLayer.nestedLayers.length; i++) {
 					var nestedLayer = wmsLayer.nestedLayers[i];
-					if (nestedLayer.nestedLayers && nestedLayer.nestedLayers.length != 0) {
+					if (nestedLayer.nestedLayers && nestedLayer.nestedLayers.length !== 0) {
 						layerOptions.push(OpenLayers.Util.applyDefaults({
 							text : nestedLayer.title,
 							loaderId : nestedLayer.name || nestedLayer.title,

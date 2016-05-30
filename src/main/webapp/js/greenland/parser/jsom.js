@@ -306,7 +306,7 @@ OpenLayers.SOS.Format.JSOM = OpenLayers.Class(OpenLayers.Format.JSON, {
 				} catch (e) {
 					throw "Unsupported uncertainty type";
 				}
-				if (value == null)
+				if (value === null)
 					throw "Unsupported uncertainty type";
 				return value;
 			}

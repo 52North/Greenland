@@ -49,14 +49,14 @@ Ext.ux.VIS.ResourceNodesContainer = Ext.extend(Ext.tree.AsyncTreeNode, {
 
 	removeResource : function(resourceId) {
 		var child = this.findChild('resourceId', resourceId);
-		if (child != null) {
+		if (child !== null) {
 			this.removeChild(child);
 		}
 	},
 
 	/**
 	 * Adds multiple resources to show.
-	 * 
+	 *
 	 * @param options
 	 */
 	addResources : function(options) {
@@ -77,8 +77,7 @@ Ext.ux.VIS.ResourceNodesContainer = Ext.extend(Ext.tree.AsyncTreeNode, {
 Ext.ux.VIS.ResourceLoader = Ext.extend(Ext.tree.TreeLoader, {
 	load : function(node, callback, scope) {
 		// every level of resource loading process gets wrapped into a node
-		if (this.fireEvent('beforeload', this, node, callback) !== false && node.leaf !== true
-				&& !node.isRoot) {
+		if (this.fireEvent('beforeload', this, node, callback) !== false && node.leaf !== true && !node.isRoot) {
 
 			var attributes = OpenLayers.Util.extend({}, node.attributes);
 			delete attributes.id;

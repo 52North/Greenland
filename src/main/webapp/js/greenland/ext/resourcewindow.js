@@ -102,7 +102,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 
 					// Manually added resources get a remove option in context
 					// menu
-					if (node.attributes.resourceId != null) {
+					if (node.attributes.resourceId !== null) {
 						menuItems.push({
 							text : 'Remove',
 							handler : function() {
@@ -211,36 +211,36 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 			panel : null,
 			loadMask : null,
 			updateButtons : function(previousHandler, nextHandler) {
-				if (nextHandler != null) {
+				if (nextHandler !== null) {
 					this.buttonNext.setText(nextHandler.text || 'Next');
 					this.buttonNext.handler = nextHandler;
 				} else {
 					this.buttonNext.setText('Next');
 					this.buttonNext.handler = null;
 				}
-				this.buttonNext.setDisabled(nextHandler == null);
+				this.buttonNext.setDisabled(nextHandler === null);
 
-				if (previousHandler != null) {
+				if (previousHandler !== null) {
 					this.buttonPrev.setText(previousHandler.text || 'Previous');
 					this.buttonPrev.handler = previousHandler;
 				} else {
 					this.buttonPrev.setText('Previous');
 					this.buttonPrev.handler = null;
 				}
-				this.buttonPrev.setDisabled(previousHandler == null);
+				this.buttonPrev.setDisabled(previousHandler === null);
 			},
 			reset : function() {
 				this.panel.removeAll();
 				this.updateButtons(null, null);
 			},
 			clear : function() {
-				if (this.loadMask != null) {
+				if (this.loadMask !== null) {
 					this.loadMask.hide();
 				}
 				this.panel.removeAll();
 			},
 			showLoadMask : function() {
-				if (this.loadMask != null) {
+				if (this.loadMask !== null) {
 					this.loadMask.show();
 				}
 			},
@@ -303,7 +303,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 
 		// Create parameter controls
 		var paramItems = VIS.createParameterControls(layer.getParameterOptions());
-		if (paramItems.length != 0) {
+		if (paramItems.length !== 0) {
 			panel.add({
 				xtype : 'fieldset',
 				title : 'Info',
@@ -566,7 +566,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 					anchor : '100%',
 					value : autoMatchedLayers[key].max
 				}));
-				
+
 				layerItems.push(layers[key].uom = new Ext.form.TextField({
 					fieldLabel : 'Unit',
 					allowBlank : true,
@@ -576,7 +576,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 
 				if (autoMatchedLayers[key].name) {
 					// Automatically matched layer
-					if (autoMatchedLayers[key].transformFunc != null) {
+					if (autoMatchedLayers[key].transformFunc !== null) {
 						// Transformation function set
 						layerItems.push({
 							xtype : 'label',
@@ -808,7 +808,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 			infoTexts.push('This resource has no projection information');
 		}
 
-		if (compatibleMap == null) {
+		if (compatibleMap === null) {
 			existingMapFieldSet.setDisabled(true);
 			infoTexts.push('This resource does not support the projections used by the current maps');
 		}
@@ -816,7 +816,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 		this.resourceWizard.clear();
 		var panel = this.resourceWizard.panel;
 
-		if (infoTexts.length != 0) {
+		if (infoTexts.length !== 0) {
 			panel.add({
 				xtype : 'fieldset',
 				title : 'Info',
@@ -834,13 +834,13 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 			if (!existingMapFieldSet.collapsed && compatibleMap) {
 				// add layer to map
 				compatibleMap.addLayers([ layer ]);
-			} else if (srsGrid != null && srsGrid.getSelectionModel().getSelected() != null) {
+			} else if (srsGrid !== null && srsGrid.getSelectionModel().getSelected() !== null) {
 				// Selection via srs grid
 				this.createNewMap(srsGrid.getSelectionModel().getSelected().data.code, function(map) {
 					map.addLayers([ layer ]);
 				});
 
-			} else if (srsNumberField != null && srsNumberField.getValue() != null) {
+			} else if (srsNumberField !== null && srsNumberField.getValue() !== null) {
 				// selection vie srs number field
 				this.createNewMap('EPSG:' + srsNumberField.getValue(), function(map) {
 					map.addLayers([ layer ]);
@@ -860,7 +860,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 	/**
 	 * Called to create and return a new map object using callback mechanism. Has
 	 * to be provided within the actual implementation/usage of resource window.
-	 * 
+	 *
 	 * @param projCode
 	 */
 	createNewMap : function(projCode, mapCallback) {
@@ -869,7 +869,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 
 	/**
 	 * Creates a combobox of supported resource types with mime as item value
-	 * 
+	 *
 	 * @returns {Ext.form.ComboBox}
 	 */
 	createInputTypeComboBox : function() {
@@ -899,7 +899,7 @@ Ext.ux.VIS.ResourceWindow = Ext.extend(Ext.Window, {
 	/**
 	 * Shows a windows to add a custom resource with advanced options, such as a
 	 * request string
-	 * 
+	 *
 	 * @param layerList
 	 *          layer list from resource window
 	 * @param url
