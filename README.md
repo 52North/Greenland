@@ -4,7 +4,7 @@ Greenland is a client-side tool to render quality-aware geospatial data, impleme
 
 ## License
 
-Greenland's source code is published under Apache Software License Version 2.0
+Greenland's source code is published under the GNU General Public License Version 3.
 
 ### Libraries
 
@@ -17,14 +17,14 @@ See NOTICE file.
 #### Javascript libraries
 
 * OpenLayers 2.12 - 2-clause BSD license
-* ExtJS 3.4 (http://docs.sencha.com/ext-js/3-4/) - GPL v3, see http://www.sencha.com/legal/open-source-faq/open-source-license-exception-for-applications/
+* ExtJS 3.4 (http://docs.sencha.com/ext-js/3-4/) - GPL v3, see http://www.sencha.com/legal/
 * GeoExt 1.0 (http://geoext.org/) - BSD license
 * Flot  - MIT license
 * jQuery - MIT license
 
 ## Extensions of standard GUI components
 
-Extensions are published under Apache 2.0, see http://www.sencha.com/legal/open-source-faq/open-source-license-exception-for-development/
+Extensions are published under the GNU General Public License Version 3.
 
 * Ext.ux.VIS.Slider (slider.js), extend Ext.slider.MultiSlider with snapValues for irregular ticks
 * Ext.ux.VIS.FlotPanel (flotpanel.js), extend Ext.Panel to display Flot plots including event handling

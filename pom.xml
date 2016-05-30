@@ -30,18 +30,18 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:svn:https://svn.52north.org/svn/geostatistics/main/greenland/trunk</connection>
-		<url>https://svn.52north.org/svn/geostatistics/main/greenland/trunk</url>
+		<connection>scm:git:https://github.com/52North/Greenland.git</connection>
+		<developerConnection>scm:git:https://github.com/52North/Greenland.git</developerConnection>
+		<url>https://github.com/52North/Greenland</url>
 	</scm>
 
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-			<comments>A business-friendly OSS license</comments>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>GPLv3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
 	<dependencies>
 		<dependency>
@@ -198,7 +198,7 @@
 								<jsSourceFile>color.js</jsSourceFile>
 								<!-- Extended OpenLayers.Map class for temporal data -->
 								<jsSourceFile>map.js</jsSourceFile>
-								<!-- Extension of OpenLayers SLD functionalities to use GeoServer 
+								<!-- Extension of OpenLayers SLD functionalities to use GeoServer
 									extensions and fix browser incompatibilities -->
 								<jsSourceFile>sld.js</jsSourceFile>
 								<!-- Most UI functions -->
@@ -241,7 +241,7 @@
 								<jsSourceFile>resourcetree.js</jsSourceFile>
 								<!-- Component for depiction of VIS-layer value extents and symbology -->
 								<jsSourceFile>legendscalebar.js</jsSourceFile>
-								<!-- Component handling the legends and settings of a map and its 
+								<!-- Component handling the legends and settings of a map and its
 									layers -->
 								<jsSourceFile>legend.js</jsSourceFile>
 								<!-- Component for adding resources -->
@@ -294,11 +294,11 @@
 
 				<executions>
 					<execution>
-						<id>extlicense</id>
 						<!-- Ext -->
-						<phase>test</phase>
+						<id>sencha-extensions</id>
+						<phase>initialize</phase>
 						<goals>
-							<goal>check</goal>
+							<goal>format</goal>
 						</goals>
 
 						<configuration>
@@ -317,12 +317,11 @@
 					</execution>
 
 					<execution>
-						<id>apachelicense</id>
-
-						<!-- Apache -->
-						<phase>test</phase>
+						<!-- GPLv3 -->
+						<id>default</id>
+						<phase>initialize</phase>
 						<goals>
-							<goal>check</goal>
+							<goal>format</goal>
 						</goals>
 
 						<configuration>
