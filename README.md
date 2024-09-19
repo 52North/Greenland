@@ -1,3 +1,7 @@
+# ARCHIVED
+
+This project is no longer maintained and will not receive any further updates. If you plan to continue using it, please be aware that future security issues will not be addressed.
+
 # Greenland
 
 Greenland is a client-side tool to render quality-aware geospatial data, implemented as OpenLayers-based webpage. It is based on work originally developed within the UncertWeb project known as "the visualization client". 
